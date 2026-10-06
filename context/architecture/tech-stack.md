@@ -62,4 +62,4 @@ _(Things that were on the table and lost. Each entry: what it was, why it lost. 
 - **A Playwright suite on the HTML.** The tests live in Godot only (ADR 0005).
 - **New sprite art during the port.** We keep the code-drawn look for now (ADR 0005).
 
-- Android listening follow-up: +6dB playback gain (bounded precomputed peaks retain headroom), explicit ON/OFF and a menu Test sound cue; audible phone validation remains pending.
+- Android listening follow-up: +6dB playback gain (bounded precomputed peaks retain headroom), explicit ON/OFF and a menu Test sound cue; user confirms audible phone output on 0.1.3; manual mute/listening and gameplay cue coverage remain pending.

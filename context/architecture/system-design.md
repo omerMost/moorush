@@ -46,4 +46,4 @@ Slice limits are explicit: daytime only, no combat/special customers, placeholde
 
 The `Moo` autoload owns a `MooAudio` child. `World` consumes the simulation’s event queue through it before clearing events, and menu/load actions schedule short cues. Six clips are synthesized once; eight players bound overlapping sounds. A menu CheckButton persists mute separately from save slots. `Paint` uses the bundled Baloo 2 variable FontFile through FontVariation weight 800; emoji retain system fallback. The font and OFL license ship in the APK.
 
-Sound menu exposes explicit ON/OFF and a Test sound celebration, disabled when muted; enabling plays confirmation. Voices use +6dB gain for short phone cues. Actual phone listening remains under investigation.
+Sound menu exposes explicit ON/OFF and a Test sound celebration, disabled when muted; enabling plays confirmation. Voices use +6dB gain for short phone cues. User confirms audible output on 0.1.3; full gameplay cue coverage and manual muted listening remain pending.

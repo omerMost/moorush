@@ -1,6 +1,6 @@
 # ADR 0007 — Precompute the prototype’s synthesized sounds
 
-**Status:** Provisional implementation choice, pending phone listening check
+**Status:** Provisional implementation choice; audible phone output confirmed on 0.1.3
 **Date:** 2026-10-07
 **Supersedes:** None
 
@@ -22,3 +22,6 @@ Startup owns synthesis; gameplay only schedules cached clips. Polyphony/memory a
 
 ## Phone follow-up
 User reported "Still silent" despite sound=true, speaker routing, full media volume and nonzero app PCM in Android logs. Add a menu Test sound cue, disabled while muted, and +6dB voice gain (sample peaks stay below full scale). These are provisional listening aids; the device root cause remains unproven. Enabling sound plays a confirmation coin cue.
+
+## Validation update
+User confirms 0.1.3: "yes now i can hear it" after the Test sound prompt. Audible output is now established. Earlier silence cause remains unproven; gameplay cue coverage and muted listening remain pending.

@@ -6,7 +6,7 @@ Active, actionable work. One bullet = one chunk you could pick up and finish in 
 
 _(Mid-flight or top-priority. Usually 1–3 items.)_
 
-- [ ] **Android device playtest:** APK installed/launched on the connected POCO on 2026-10-07. Smoothness and close/reopen progress confirmed by user. Remaining: phone listening/mute retest for 0.1.3 (user reports "Still silent"; mute persists correctly, explicit ON/OFF and Test sound controls plus +6dB gain installed), full layout review, background/suspend saves and sustained performance (older 0.1.1 logs drift from ~97 to ~43 FPS across ~8 minutes; cause not isolated); startup logs are clean of Godot script errors/crashes.
+- [ ] **Android device playtest:** APK installed/launched on the connected POCO on 2026-10-07. Smoothness and close/reopen progress confirmed by user. Audible output in 0.1.3 confirmed by user ("yes now i can hear it"). Remaining: user mute/listening check and gameplay cue coverage (setting persistence verified), full layout review, background/suspend saves and sustained performance (older 0.1.1 logs drift from ~97 to ~43 FPS across ~8 minutes; cause not isolated); startup logs are clean of Godot script errors/crashes.
 
 - [ ] **The fun core:** the 2-second loop versus the one big world. Decide with the user (`research/fun-additions.md`, item #2 is unbuilt). This stays separate from the port (ADR 0005, G1).
 - [ ] Replace the placeholder icon mark in `scripts/generate-icons.js` when the brand exists, re-run it
