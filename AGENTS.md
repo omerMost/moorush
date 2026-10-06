@@ -6,6 +6,8 @@ Author: Omer.
 
 ## Repo layout
 
+- `prototype/` — the playable game: a single-file HTML5 canvas game (`prototype/index.html`, v9) imported from the claude.ai artifact on 2026-10-06. Run it with the `prototype` config in `.claude/launch.json` (port 8090). Test hook: `window.__moo`.
+- `.claude/agents/` — this project's own agent team. `.claude/settings.json` sets `"agent": "root-orchestrator"`, so every session here runs as the **Moo Rush Root Orchestrator**. It plans the work, hands tasks to `gameplay-engineer`, `economy-designer` and `qa-playtester` (or opens sidebar sessions with chips), checks the results, and owns the vault. Subagents never write to `context/` and never commit.
 - `context/` — the project vault (state, decisions, sessions, backlog). Project-wide, not per-surface.
 - `scripts/generate-icons.js` — icon generator (committed on purpose; re-run after editing the mark).
 
@@ -57,7 +59,11 @@ If you're starting cold, read in this order. Stop when you have enough context f
 
 6. Keep notes terse — they exist so future-you can pick up cold.
 
-7. **At the end of every code-changing turn, suggest a commit message** for the user to run manually. Format: one conventional-commit subject line (`feat:` / `fix:` / `chore:` / `docs:`) followed by a short bullet list of what changed. The user commits themselves — do not run `git commit` unless explicitly asked.
+7. **Claude commits its own verified work and pushes `main` after every landing (ADR 0003).** Only after the checks pass and the vault is updated. Only its own files, staged by path, on its branch; a worktree merges into `main`, then pushes. It never commits, stashes, resets or merges over another session's uncommitted work. Force-pushing, rewriting history, deleting branches and merging PRs stay the user's call. Commit format: a conventional-commit subject (`feat:` / `fix:` / `chore:` / `docs:`) plus a short bullet list.
+
+8. **The AI builds and verifies everything (ADR 0002).** `check.sh` must be green before a commit. Bots play the game. Specs are numbers. Playtest findings go in `context/playtest-YYYY-MM-DD.md` in the user's words. Open questions become **decision cards** with IDs and options, and each session note carries a **Checks** section and a **Dialogue trace** with the user's words. Anything Claude decided alone is marked *provisional*.
+
+9. **Overnight runs (ADR 0004):** a north star in `context/runs/`, the branch `run/<slug>` with one commit per step, and a `context/morning-page-YYYY-MM-DD.md` for the user to review before merging.
 
 ## What "done" looks like for a feature
 

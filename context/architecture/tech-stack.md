@@ -11,30 +11,31 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Runtime / language
 
-<DESCRIBE>
+- Prototype: vanilla JavaScript, one HTML file (`prototype/index.html`), no build step.
+- Native app: **TBD**. The options are a Godot 4 port (like Blast Ranger), Capacitor wrapping the HTML, or something else. It needs an ADR.
 
 ## UI / presentation layer
 
-<DESCRIBE>
+- Canvas 2D with hand-drawn sprites plus emoji. DOM overlays for the HUD, menu and modal. The font is Baloo 2 from Google Fonts.
 
 ## Data layer
 
-<DESCRIBE>
+- Content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend.
 
 ## Auth / storage / persistence
 
-<DESCRIBE>
+- Saves: localStorage, with 3 slots, settings, and migration from v1 and older versions. Cloud: `window.claude` db/user, inside claude.ai only.
 
 ## External integrations
 
-<DESCRIBE>
+- None yet.
 
 ## Tooling (build, test, lint, CI)
 
-<DESCRIBE>
+- Test hook `window.__moo`. **No test suite is committed yet** (backlog). Local run: the `prototype` config in `.claude/launch.json` (port 8090).
 
 ## What we deliberately did NOT pick
 
 _(Things that were on the table and lost. Each entry: what it was, why it lost. Saves future-you from re-litigating.)_
 
-- <DESCRIBE>
+- _(Nothing decided yet.)_

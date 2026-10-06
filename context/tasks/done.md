@@ -6,4 +6,4 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
-_(no items yet)_
+- 2026-10-06 — Imported the game (v9) from the claude.ai artifact into `prototype/index.html`, plus the chat history (4 sessions) and the research (2 docs). Checked locally: the menu loads at Version 9 with no console errors.
