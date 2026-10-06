@@ -30,6 +30,7 @@ func _ready() -> void:
 	for i in VOICES:
 		var player := AudioStreamPlayer.new()
 		player.max_polyphony = 1
+		player.volume_db = 6.0  # Short cues need headroom on phone speakers.
 		add_child(player)
 		_players.append(player)
 

@@ -19,3 +19,6 @@ Sound preference lives in `user://moo-audio-settings.json`, outside the three ga
 
 ## Consequences
 Startup owns synthesis; gameplay only schedules cached clips. Polyphony/memory are bounded. Headless tests validate waveform duration/energy, muting/rate limits/persistence and drain playing clips before teardown. Phone tap/persistence is verified; poor control contrast/state was improved after the user reported a mute/listening problem. Actual audible phone output remains unresolved; automated sample checks do not establish listening quality.
+
+## Phone follow-up
+User reported "Still silent" despite sound=true, speaker routing, full media volume and nonzero app PCM in Android logs. Add a menu Test sound cue, disabled while muted, and +6dB voice gain (sample peaks stay below full scale). These are provisional listening aids; the device root cause remains unproven. Enabling sound plays a confirmation coin cue.

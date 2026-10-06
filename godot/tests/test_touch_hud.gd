@@ -61,10 +61,23 @@ func run() -> void:
 		print("  menu pointer click toggles sound: %s" % clicked)
 		ok = ok and clicked
 		sound.button_pressed = original
+		var preview = hud.menu_box.find_child("SoundPreview", false, false)
+		ok = ok and preview.disabled == not original
+		if original:
+			var before: int = moo.audio.played_count
+			tap = tap.duplicate()
+			tap.position = preview.get_global_rect().get_center()
+			tap.pressed = true
+			root.push_input(tap, true)
+			tap = tap.duplicate()
+			tap.pressed = false
+			root.push_input(tap, true)
+			ok = ok and moo.audio.played_count == before + 1
+			print("  preview pointer click schedules celebration: %s" % (moo.audio.played_count == before + 1))
 		print("  phone %s logical HUD=%s touch/menu checked" % [pixels, hud.size])
 	moo.sim.delete_slot(1)
 	if FileAccess.file_exists(moo.audio.settings_path): DirAccess.remove_absolute(moo.audio.settings_path)
-	await create_timer(0.2).timeout
+	await create_timer(0.75).timeout
 	moo.audio.stop_all()
 	print(("PASS" if ok else "FAIL") + " touch_hud")
 	quit(0 if ok else 1)
