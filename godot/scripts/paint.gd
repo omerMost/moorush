@@ -23,13 +23,14 @@ class ItemStamp extends Node2D:
 			"milk": Paint.sh_milk(self, 1.0)
 			"egg": Paint.sh_egg(self, 1.0)
 			"coin": Paint.sh_coin(self, 1.0)
+			"cheese": Paint.sh_cheese(self, 1.0)
 
 static func prime_items(parent: Node) -> void:
 	if item_baking or not item_textures.is_empty() or DisplayServer.get_name() == "headless":
 		return
 	item_baking = true
 	var views := {}
-	for kind in ["corn", "milk", "egg", "coin"]:
+	for kind in ["corn", "milk", "egg", "coin", "cheese"]:
 		var view := SubViewport.new()
 		view.size = Vector2i(192, 192)
 		view.transparent_bg = true
@@ -158,12 +159,13 @@ static func item(ci: CanvasItem, t: String, x: float, y: float, s: float = 1.0, 
 		ci.draw_texture_rect(item_textures[t], Rect2(x - 24 * s, y - 32 * s, 48 * s, 48 * s), false)
 		return
 	match t:
-		"corn", "milk", "egg", "coin":
+		"corn", "milk", "egg", "coin", "cheese":
 			ci.draw_set_transform(Vector2(x, y), 0.0, Vector2(s, s))
 			match t:
 				"corn": sh_corn(ci, alpha)
 				"milk": sh_milk(ci, alpha)
 				"egg": sh_egg(ci, alpha)
+				"cheese": sh_cheese(ci, alpha)
 				_: sh_coin(ci, alpha)
 			ci.draw_set_transform(Vector2.ZERO)
 		_:
@@ -188,6 +190,15 @@ static func sh_egg(ci: CanvasItem, a: float) -> void:
 	ell(ci, 0, -7, 6, 7.5, C("#fff5e1", a))
 	stroke_ell(ci, 0, -7, 6, 7.5, C("#d8c39c", a), 1)
 	ell(ci, -2, -10, 1.8, 2.6, Color(1, 1, 1, 0.9 * a))
+
+## A small cheese wedge, baked alongside the original procedural items.
+static func sh_cheese(ci: CanvasItem, a: float) -> void:
+	poly(ci, [Vector2(-10, -12), Vector2(10, -7), Vector2(10, 2), Vector2(-10, -3)], C("#e6a52b", a))
+	poly(ci, [Vector2(-10, -12), Vector2(-1, -20), Vector2(10, -7)], C("#ffe47a", a))
+	poly(ci, [Vector2(-10, -12), Vector2(10, -7), Vector2(10, -1), Vector2(-10, -6)], C("#f6c943", a))
+	for hole in [Vector2(-5, -8), Vector2(3, -6), Vector2(6, -2)]:
+		ell(ci, hole.x, hole.y, 1.8, 1.5, C("#c4861c", a))
+	ell(ci, -1, -14, 2, 1.1, C("#dfb540", a))
 
 static func sh_coin(ci: CanvasItem, a: float) -> void:
 	ell(ci, 0, -3, 8, 4, C("#c98a12", a))

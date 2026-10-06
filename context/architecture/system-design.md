@@ -30,20 +30,22 @@ save: snapshot() ⇄ localStorage slots (+ window.claude db when inside claude.a
 ## Why this shape
 It was built as a claude.ai artifact, which had to be a single page. The single solid boundary of land and clouds, and pathfinding instead of straight-line chasing, both fixed real stuck bugs (see `sessions/`). Don't regress them.
 
-## Native Chapter 1 slice (ADR 0005)
+## Native Chapters 1–2 (ADRs 0005, 0008)
 
-`godot/scripts/data.gd` holds Farm Kid content. `MooSim` (`sim.gd`, RefCounted) owns the real production/progression/navigation/save logic; the `Moo` autoload exposes it to UI and bots. `world_view.gd` advances and draws it with `Paint`; `hud.gd` handles the slot menu, joystick, keyboard and HUD. `main.tscn` wires these together. The view uses a logical 540×960 expanding portrait canvas.
+`godot/scripts/data.gd` holds Farm Kid and daytime Farmer content (corn → milk → cheese, plus eggs). Two persistent districts are built at their original adjacent coordinates; district-qualified module references keep conveyors/helpers local. `MooSim` (`sim.gd`, RefCounted) owns the real production/progression/navigation/save logic; the `Moo` autoload exposes it to UI and bots. `world_view.gd` advances and draws it with `Paint`; `hud.gd` handles the slot menu, joystick, keyboard and HUD. `main.tscn` wires these together. The view uses a logical 540×960 expanding portrait canvas.
 
-`check.sh` imports and boots the project, then runs headless gate, unattended-counter, save and touch HUD tests. Tests and the running autoload dispose in-flight callbacks when discarding a simulation, releasing callback reference cycles. Android exports through the committed preset. Optional `test_windowed_chapter1.gd` instantiates the real main scene and drives the guide bot while rendering milestone screenshots; it is separate from headless check.sh.
+`check.sh` imports and boots the project, then runs six headless suites: Chapter 1/2 bots, unattended counters, saves, touch HUD and audio. Tests and the running autoload dispose in-flight callbacks when discarding a simulation, releasing callback reference cycles. Android exports through the committed preset. Optional `test_windowed_chapter1.gd` instantiates the real main scene and drives the guide bot while rendering milestone screenshots; it is separate from headless check.sh.
 
-Slice limits are explicit: daytime only, no combat/special customers, placeholder shops and a completion flag instead of chapter 2. The HTML remains the frozen specification.
+Slice limits are explicit: daytime only, no combat/special customers, placeholder shops, deferred Farmer night taco module/pads, and a completion flag at the bakery gate until Chapter 3. Old Chapter 1 completion migrates to Farmer ownership; stock, upgrades, wallet and carried goods survive. Menu travel preserves progression and both farms keep producing. The navigation grid spans both districts and blocks land outside the revealed world. The HTML remains the frozen specification.
 
 ## Drawing cache (ADR 0006)
 
-`Paint.prime_items()` renders the four original procedural product/coin drawings into 4× transparent SubViewports once, copies them into ImageTextures and releases the temporary nodes. Opaque item draws use those textures; translucent items and headless tests retain the primitive path. Bounded local rounded/ellipse points and text sizes are reused; grass uses a retained point array and multiline batches. `HUD.process_priority=-10` samples input before World’s simulation update. Debug Android `Moo` reports five-second frame timing windows; explicit `--profile=300` measures World draw CPU on desktop.
+`Paint.prime_items()` renders the five procedural product/coin drawings including cheese into 4× transparent SubViewports once, copies them into ImageTextures and releases the temporary nodes. Opaque item draws use those textures; translucent items and headless tests retain the primitive path. Bounded local rounded/ellipse points and text sizes are reused; grass uses a retained point array and multiline batches. `HUD.process_priority=-10` samples input before World’s simulation update. Debug Android `Moo` reports five-second frame timing windows; explicit `--profile=300` measures World draw CPU on desktop.
 
 ## Sound and offline font (ADR 0007)
 
 The `Moo` autoload owns a `MooAudio` child. `World` consumes the simulation’s event queue through it before clearing events, and menu/load actions schedule short cues. Six clips are synthesized once; eight players bound overlapping sounds. A menu CheckButton persists mute separately from save slots. `Paint` uses the bundled Baloo 2 variable FontFile through FontVariation weight 800; emoji retain system fallback. The font and OFL license ship in the APK.
 
 Sound menu exposes explicit ON/OFF and a Test sound celebration, disabled when muted; enabling plays confirmation. Voices use +6dB gain for short phone cues. User confirms audible output on 0.1.3; full gameplay cue coverage and manual muted listening remain pending.
+
+`test_windowed_chapter2.gd` drives the real bot through dairy production and captures press/store/menu, then checks travel to the farm in isolated storage.

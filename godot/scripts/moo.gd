@@ -59,7 +59,7 @@ func start_slot(i: int) -> void:
 	if loaded:
 		audio.play("coin")
 	if not loaded:
-		sim.toast(MooData.stage0().intro, 5.0)
+		sim.toast(sim.stage.intro, 5.0)
 	paused = false
 	slot_started.emit(i)
 

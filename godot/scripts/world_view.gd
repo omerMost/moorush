@@ -165,8 +165,8 @@ func draw_module(m) -> void:
 			var c := MooSim.ctr(m.pad)
 			Paint.fill_rr(self, ox + 30, oy + 30, MooSim.CW - 60, MooSim.CHh - 60, 26, Color(1, 1, 1, 0.14))
 			Paint.text(self, "Next up", c.x, oy + 64, 17, Color(1, 1, 1, 0.85))
-			Paint.emoji_at(self, MooData.RANKS[1], c.x - 70, oy + 142 - 12 * 1.7, 24 * 1.7)
-			Paint.text(self, MooData.TITLES[1], c.x + 24, oy + 112, 28, Color.WHITE, Color(40 / 255.0, 25 / 255.0, 10 / 255.0, 0.5))
+			Paint.emoji_at(self, MooData.RANKS[m.d + 1], c.x - 70, oy + 142 - 12 * 1.7, 24 * 1.7)
+			Paint.text(self, MooData.TITLES[m.d + 1], c.x + 24, oy + 112, 28, Color.WHITE, Color(40 / 255.0, 25 / 255.0, 10 / 255.0, 0.5))
 
 func draw_corn_plant(x: float, y: float) -> void:
 	draw_line(Vector2(x, y + 6), Vector2(x, y - 18), C("#3f8f35"), 3)
@@ -307,6 +307,21 @@ func draw_hen(a) -> void:
 	Paint.poly(self, [Vector2(hx + f * 4, hy - 1), Vector2(hx + f * 9, hy + 1), Vector2(hx + f * 4, hy + 2.5)], C("#f0a030"))
 	Paint.circ(self, hx + f * 1.5, hy - 1, 1.2, C("#1d1d1d"))
 
+## Prototype drawUnit: stationary production machines bounce while working.
+func draw_unit(m, u) -> void:
+	var x: float = u.x
+	var y: float = u.y
+	var b: float = sin(u.anim * PI * 4) * 3 if u.anim > 0 else 0.0
+	Paint.ell(self, x, y, 26, 7, Color(0, 0, 0, 0.2))
+	Paint.fill_rr(self, x - 23, y - 30, 46, 30, 8, C("#3b3f4b"))
+	Paint.fill_rr(self, x - 23, y - 36 + b, 46, 30, 8, C(m.get("color", "#7d8796")))
+	Paint.fill_rr(self, x - 19, y - 33 + b, 38, 8, 4, Color(1, 1, 1, 0.25))
+	Paint.item(self, m.get("icon", "⚙️"), x, y - 8 + b, 0.9)
+	var pr := minf(1.0, u.timer / m.period)
+	if MooSim.avail(m.hopper) > 0 or pr < 1:
+		Paint.fill_rr(self, x - 18, y + 5, 36, 5, 2.5, Color(0, 0, 0, 0.35))
+		Paint.fill_rr(self, x - 18, y + 5, 36 * pr, 5, 2.5, C("#7ed957"))
+
 func draw_stack(e, cap: int) -> void:
 	var st = e.stack
 	var v: int = maxi(0, st.n - st.inc)
@@ -395,7 +410,10 @@ func _draw() -> void:
 			continue
 		if m.type == "machine":
 			for u in m.units:
-				ents.append([u.y, "cow" if m.kind == "cow" else "hen", u])
+				if m.kind == "station":
+					ents.append([u.y, "unit", {"m": m, "u": u}])
+				else:
+					ents.append([u.y, "cow" if m.kind == "cow" else "hen", u])
 		if m.type == "counter":
 			ents.append([m.bench.y + m.bench.h, "bench", m])
 			ents.append([m.bench.y - 5, "lamp", m])
@@ -412,6 +430,7 @@ func _draw() -> void:
 		match e[1]:
 			"cow": draw_cow(o)
 			"hen": draw_hen(o)
+			"unit": draw_unit(o.m, o.u)
 			"bench": draw_bench(o)
 			"lamp": draw_lamp(o)
 			"cust": draw_cust(o)

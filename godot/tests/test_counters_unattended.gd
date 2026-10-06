@@ -4,21 +4,21 @@ func _init() -> void:
 	var sim := MooSim.new(2)
 	sim.autosave = false
 	sim.S.money = 100000
-	for p in sim.pads:
+	for p in sim.pads.filter(func(p): return p.d == 0):
 		if p.fx != "gate" and p.fx != "price":
 			p.paid = p.cost
 			sim.apply_pad(p, true)
 	sim.compute_reveal()
 	sim.S.money = 0
 	var start := {}
-	for m in sim.mods:
+	for m in sim.live():
 		if m.type == "counter":
 			start[m.id] = m.sold
 	var t := 0.0
 	while t < 300.0:
 		sim.update(1.0 / 30.0); t += 1.0 / 30.0
 	var ok := true
-	for m in sim.mods:
+	for m in sim.live():
 		if m.type == "counter":
 			var sold: int = m.sold - start[m.id]
 			print("  %s sold %d unattended in 300s" % [m.name, sold])

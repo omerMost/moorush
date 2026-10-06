@@ -17,7 +17,7 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute(output)
 	var milestones := [90.0, 240.0]
 	var next := 0
-	while moo.sim.T < 900.0 and not moo.sim.S.done:
+	while moo.sim.T < 900.0 and moo.sim.S.ch == 0:
 		for i in 15:
 			bot.tick(1.0 / 30.0)
 			moo.sim.update(1.0 / 30.0)
@@ -30,7 +30,7 @@ func run() -> void:
 	await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png(output.path_join("playtest-complete.png"))
-	var ok: bool = moo.sim.S.done
-	print(("PASS" if ok else "FAIL") + " windowed_chapter1: gate=%s time=%.1fs" % [moo.sim.S.done, moo.sim.T])
+	var ok: bool = moo.sim.S.ch >= 1
+	print(("PASS" if ok else "FAIL") + " windowed_chapter1: gate=%s time=%.1fs" % [ok, moo.sim.T])
 	moo.sim.dispose()
 	quit(0 if ok else 1)

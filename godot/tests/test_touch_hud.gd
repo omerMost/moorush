@@ -75,6 +75,26 @@ func run() -> void:
 			ok = ok and moo.audio.played_count == before + 1
 			print("  preview pointer click schedules celebration: %s" % (moo.audio.played_count == before + 1))
 		print("  phone %s logical HUD=%s touch/menu checked" % [pixels, hud.size])
+	# Migrated dairy owner sees both travel controls; exercise pointer routing.
+	moo.sim.apply_state({"ver": 9, "ch": 0, "done": true})
+	hud.show_menu()
+	await process_frame
+	await process_frame
+	var row = hud.menu_box.find_child("TravelRow", false, false)
+	ok = ok and row != null and row.get_child_count() == 2
+	ok = ok and hud.menu.size.x <= hud.size.x and hud.menu.size.y <= hud.size.y
+	if row != null:
+		var travel = row.find_child("Travel1", false, false)
+		var tap := InputEventMouseButton.new()
+		tap.button_index = MOUSE_BUTTON_LEFT
+		tap.position = travel.get_global_rect().get_center()
+		tap.pressed = true
+		root.push_input(tap, true)
+		tap = tap.duplicate()
+		tap.pressed = false
+		root.push_input(tap, true)
+		ok = ok and not moo.paused and not hud.menu.visible and moo.sim.player.x > 1500
+		print("  dairy travel pointer and two-district menu checked: %s" % ok)
 	moo.sim.delete_slot(1)
 	if FileAccess.file_exists(moo.audio.settings_path): DirAccess.remove_absolute(moo.audio.settings_path)
 	await create_timer(0.75).timeout

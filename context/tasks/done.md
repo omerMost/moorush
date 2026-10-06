@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Daytime Farmer/Chapter 2 port: corn→milk→cheese, eggs, helpers, 12 new pads and bakery completion gate; two persistent districts/travel and old farm-save migration. Six suites and rendered dairy/farm tests pass, 0.2.0 installed; Chapter 2 phone gameplay feedback and night taco content remain queued.
+
 - 2026-10-07 — Android 0.1.3 audible sound confirmed by user: "yes now i can hear it" after Test sound prompt. Manual mute and gameplay cue coverage remain in device playtest.
 
 - 2026-10-07 — Chapter 1 sound and offline font: prototype harvest/drop/coin/warn/upgrade/gate tones, bounded cached playback and persistent mute; bundled Baloo 2 weight 800 with OFL license. Audio/UI/font tests added; phone listening check remains queued.

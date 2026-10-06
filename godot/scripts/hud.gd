@@ -69,11 +69,12 @@ func _draw() -> void:
 	Paint.circ(self, 30, 28, 11, Paint.C("#ffe58a"))
 	Paint.text(self, txt, 46 + (w - 54) / 2, 30, 21, Color.WHITE)
 	# rank pill
-	var rk := "Chapter 1 · Farm Kid"
+	var chapter := clampi(int(s.S.ch), 0, 1)
+	var rk := "Chapter %d · %s" % [chapter + 1, MooData.TITLES[chapter]]
 	var rw := Paint.text_width(rk, 15) + 48
 	var cx := size.x / 2
 	Paint.fill_rr(self, cx - rw / 2, 56, rw, 28, 14, ink)
-	Paint.emoji_at(self, "👦", cx - rw / 2 + 16, 70, 16)
+	Paint.emoji_at(self, MooData.RANKS[chapter], cx - rw / 2 + 16, 70, 16)
 	Paint.text(self, rk, cx + 10, 70, 15, Color.WHITE)
 	if s.saved_flash > 0:
 		Paint.text(self, "💾 Saved", 50, 64, 13, Color(1, 1, 1, minf(1.0, s.saved_flash * 2)), ink)
@@ -161,7 +162,7 @@ func show_menu() -> void:
 		menu_box.remove_child(c)
 		c.queue_free()
 	menu_box.add_child(lbl("Moo Rush", 40, "#e0702a"))
-	menu_box.add_child(lbl("Corn to Capitol · Chapter 1 · v0.1.3", 15))
+	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–2 · v0.2.0", 15))
 	var sound := CheckButton.new()
 	sound.name = "SoundToggle"
 	sound.text = "Sound effects: ON" if Moo.audio.enabled else "Sound effects: OFF"
@@ -186,7 +187,8 @@ func show_menu() -> void:
 		var d = s.read_slot(i)
 		var head := "Slot %d" % i + (" · playing" if i == s.cur_slot else "")
 		if d != null:
-			var info := "👦 Farm Kid · 🪙 %s%s" % [MooSim.fmt(d.get("money", 0)), " · ✅ dairy bought" if d.get("done", false) else ""]
+			var chapter := clampi(int(d.get("ch", 0)), 0, 1)
+			var info := "%s %s · 🪙 %s%s" % [MooData.RANKS[chapter], MooData.TITLES[chapter], MooSim.fmt(d.get("money", 0)), " · ✅ complete" if d.get("done", false) else ""]
 			menu_box.add_child(lbl(head + " — " + info, 15))
 			var row := HBoxContainer.new()
 			var play := btn("▶ Play", "#4caf50", func(): start(i))
@@ -199,6 +201,16 @@ func show_menu() -> void:
 		else:
 			menu_box.add_child(lbl(head + " — Empty", 15))
 			menu_box.add_child(btn("✨ New game here", "#f0a020", func(): start(i)))
+	if s.cur_slot > 0:
+		var travel_row := HBoxContainer.new()
+		travel_row.name = "TravelRow"
+		for district in range(0, mini(int(s.S.ch) + 1, 2)):
+			var travel := btn("Chapter %d · %s" % [district + 1, MooData.TITLES[district]], "#528948", func(): travel_to(district))
+			travel.name = "Travel%d" % district
+			travel.custom_minimum_size = Vector2(150, 44)
+			travel.add_theme_font_size_override("font_size", 14)
+			travel_row.add_child(travel)
+		menu_box.add_child(travel_row)
 	menu.visible = true
 	menu_btn.visible = false
 	await get_tree().process_frame
@@ -218,3 +230,10 @@ func delete(i: int) -> void:
 		del_arm = 0
 		Moo.sim.delete_slot(i)
 	show_menu()
+
+func travel_to(district: int) -> void:
+	if not Moo.sim.travel_to(district):
+		return
+	Moo.paused = false
+	menu.visible = false
+	menu_btn.visible = true

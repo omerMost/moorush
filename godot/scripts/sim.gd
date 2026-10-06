@@ -125,14 +125,15 @@ static func box(type: String, cap: int, rect: Dictionary) -> Dictionary:
 static func P(x: float, y: float, w: float = 90.0, h: float = 70.0) -> Dictionary:
 	return {"x": x, "y": y, "w": w, "h": h}
 
-func mod_by(id: String):
+func mod_by(id: String, district: int = -1):
+	if district < 0: district = int(S.get("ch", 0))
 	for m in mods:
-		if m.id == id:
+		if m.id == id and m.d == district:
 			return m
 	return null
 
 func active(m) -> bool:
-	return not m.locked and m.type != "gate" and not (m.type in ["garage", "armory", "bank"])
+	return m.d <= int(S.get("ch", 0)) and not m.locked and m.type != "gate" and not (m.type in ["garage", "armory", "bank"])
 
 func live() -> Array:
 	return mods.filter(func(m): return active(m))
@@ -218,7 +219,7 @@ func sync_units(m) -> void:
 func make_belt(m):
 	var src = null
 	for f in mods:
-		if f.type == "field" and f.item == m["in"] and f.r == m.r and absi(f.c - m.c) == 1:
+		if f.type == "field" and f.item == m["in"] and f.d == m.d and f.r == m.r and absi(f.c - m.c) == 1:
 			src = f
 	if src == null:
 		return null
@@ -253,7 +254,7 @@ func upd_belt(b, dt: float) -> void:
 func mk_helper(src, dst, i: int, belt) -> Dictionary:
 	var H := {"x": 0.0, "y": 0.0, "walk": 0.0, "face": 1, "moving": false, "stack": {"type": null, "n": 0, "inc": 0},
 		"state": "from", "t": 0.0, "look": MooData.HELPER_LOOKS[i % 3], "cap": 10, "path": null, "pathKey": "",
-		"field": null, "from": null, "to": null, "belt": null, "src_id": src.id, "dst_id": dst.id}
+		"field": null, "from": null, "to": null, "belt": null, "src_id": src.id, "dst_id": dst.id, "d": src.d}
 	if src.type == "field":
 		H.field = src
 		H.fromStand = ctr(src.rect)
@@ -276,48 +277,50 @@ func mk_helper(src, dst, i: int, belt) -> Dictionary:
 
 func pad_rect(p) -> Dictionary:
 	if p.fx == "unlock":
-		var t = mod_by(p.t)
+		var t = mod_by(p.t, p.d)
 		return {"x": t.ox + CW / 2 - 55, "y": t.oy + CHh / 2 - 40, "w": 110.0, "h": 84.0}
 	if p.fx == "gate":
-		return mod_by(p.m).pad
-	return mod_by(p.m).slots[p.s]
+		return mod_by(p.m, p.d).pad
+	return mod_by(p.m, p.d).slots[p.s]
 
 func build_world() -> void:
 	mods = []; pads = []; helpers = []; belts = []; leaving = []; flyers = []; cells = []; ground = []
 	floaters = []; sparks = []
-	for cfg in stage.mods:
-		mods.append(build_module(cfg, 0))
 	var k := 0
-	for p in stage.pads:
-		var pd: Dictionary = p.duplicate(true)
-		pd.merge({"d": 0, "k": k, "paid": 0, "cur": "coin"}, true)
-		pads.append(pd)
-		k += 1
-	for r in 3:
-		for c in 3:
-			var o := cell_xy(0, c, r)
-			cells.append({"d": 0, "c": c, "r": r, "x": o.x, "y": o.y, "w": CW, "h": CHh, "mod": null, "fog": 1.0, "on": false,
-				"seed": (0 * 27 + r * 9 + c) * 7919, "obs": []})
+	for district in range(2):
+		var content := MooData.stage_at(district)
+		for cfg in content.mods:
+			mods.append(build_module(cfg, district))
+		for p in content.pads:
+			var pd: Dictionary = p.duplicate(true)
+			pd.merge({"d": district, "k": k, "paid": 0, "cur": "coin"}, true)
+			pads.append(pd)
+			k += 1
+		for r in 3:
+			for c in 3:
+				var o := cell_xy(district, c, r)
+				cells.append({"d": district, "c": c, "r": r, "x": o.x, "y": o.y, "w": CW, "h": CHh, "mod": null, "fog": 1.0, "on": false,
+					"seed": (district * 27 + r * 9 + c) * 7919, "obs": []})
 	for m in mods:
 		for c in cells:
-			if c.c == m.c and c.r == m.r:
+			if c.d == m.d and c.c == m.c and c.r == m.r:
 				c.mod = m
 	for p in pads:
 		p.merge(pad_rect(p), true)
 	for m in mods:
 		sync_units(m)
-	var a = mod_by("A")
+	var a = mod_by("A", 0)
 	player = {"x": a.rect.x + a.rect.w / 2, "y": a.rect.y + a.rect.h + 30, "walk": 0.0, "face": 1, "moving": false,
 		"stack": {"type": null, "n": 0, "inc": 0}, "vx": 0.0, "pinned": 0.0, "say": null}
-	# nav grid covers the district plus a GAP margin (provisional: the prototype grids the whole map)
+	# Grid spans the two implemented districts and excludes the closed world.
 	var o0 := cell_xy(0, 0, 0)
 	NAV.ox = o0.x - GAP
 	NAV.oy = o0.y - GAP
-	NAV.nx = int(ceil((DW + 2 * GAP) / NAV.s))
+	NAV.nx = int(ceil((2 * DW + 3 * GAP) / NAV.s))
 	NAV.ny = int(ceil((DH + 2 * GAP) / NAV.s))
 
 func apply_pad(p, from_load: bool) -> void:
-	var m = mod_by(p.m) if p.has("m") else null
+	var m = mod_by(p.m, p.d) if p.has("m") else null
 	match p.fx:
 		"feed":
 			var b = make_belt(m)
@@ -331,26 +334,35 @@ func apply_pad(p, from_load: bool) -> void:
 		"price":
 			m.price = int(round(m.price * p.v))
 		"unlock":
-			var t = mod_by(p.t)
+			var t = mod_by(p.t, p.d)
 			t.locked = false
 			sync_units(t)
 		"helper":
-			helpers.append(mk_helper(mod_by(p.f), mod_by(p.t), helpers.size(), null))
+			helpers.append(mk_helper(mod_by(p.f, p.d), mod_by(p.t, p.d), helpers.size(), null))
 		"gate":
-			S.done = true
-			if not from_load:
-				toast("🏡 You bought the dairy! Chapter 1 complete!", 4.0)
-				events.append({"kind": "gate"})
+			if p.d == 0:
+				S.ch = maxi(S.ch, 1)
+				stage = MooData.stage_at(S.ch)
+				S.done = false
+				if not from_load:
+					compute_reveal()
+					travel_to(1)
+					toast("Chapter 2 · Farmer! " + stage.intro, 5.0)
+			else:
+				S.done = true
+				if not from_load: toast("🥖 Bakery bought! Chapter 2 complete — more chapters coming soon.", 5.0)
+			if not from_load: events.append({"kind": "gate"})
 
 func visible_pads() -> Array:
 	var out := []
-	var n := 0
+	var counts := {}
 	for p in pads:
-		if p.paid >= p.cost:
+		if p.d > S.ch or p.paid >= p.cost:
 			continue
+		var n := int(counts.get(p.d, 0))
 		if n < 3:
 			out.append(p)
-			n += 1
+			counts[p.d] = n + 1
 	return out
 
 func wallet() -> int:
@@ -362,15 +374,18 @@ func compute_reveal() -> void:
 	for c in cells:
 		var on := false
 		var m = c.mod
+		if c.d > S.ch:
+			c.on = false
+			continue
 		if m != null:
 			if m.type == "gate":
-				on = pads.any(func(p): return p.fx == "gate" and (p.paid >= p.cost or vp.has(p)))
+				on = pads.any(func(p): return p.d == c.d and p.fx == "gate" and (p.paid >= p.cost or vp.has(p)))
 			elif m.type in ["armory", "bank", "garage"]:
 				on = true
 			else:
-				on = not m.locked or vp.any(func(p): return p.fx == "unlock" and p.t == m.id)
+				on = not m.locked or vp.any(func(p): return p.d == c.d and p.fx == "unlock" and p.t == m.id)
 		else:
-			on = cells.any(func(k): return k.mod != null and active(k.mod) and absi(k.c - c.c) + absi(k.r - c.r) == 1)
+			on = cells.any(func(k): return k.d == c.d and k.mod != null and active(k.mod) and absi(k.c - c.c) + absi(k.r - c.r) == 1)
 		c.on = on
 	var x0 := 1e9; var y0 := 1e9; var x1 := -1e9; var y1 := -1e9
 	for c in cells:
@@ -553,7 +568,7 @@ func act() -> void:
 			if pd.fx != "gate":
 				toast("Unlocked: " + pd.name + "!", 2.4)
 			if pd.fx == "unlock":
-				var t = mod_by(pd.t)
+				var t = mod_by(pd.t, pd.d)
 				cam_focus = {"x": t.ox + CW / 2, "y": t.oy + CHh / 2, "t": 1.3}
 			shake_amt = 5.0
 
@@ -1113,7 +1128,7 @@ func build_nav() -> void:
 	blk.resize(NAV.nx * NAV.ny)
 	for gy in NAV.ny:
 		for gx in NAV.nx:
-			if blocked_at(nav_cx(gx), nav_cy(gy), 14):
+			if not walkable(nav_cx(gx), nav_cy(gy)) or blocked_at(nav_cx(gx), nav_cy(gy), 14):
 				blk[gy * NAV.nx + gx] = 1
 	NAV.blk = blk
 
@@ -1277,8 +1292,9 @@ func snapshot() -> Dictionary:
 		"hold": [st.type, maxi(0, st.n - st.inc)] if st.type != null else null}
 
 func fresh_state() -> void:
-	build_world()
+	stage = MooData.stage0()
 	S = {"ch": 0, "money": 0, "votes": 0, "cap": 8, "won": false, "done": false}
+	build_world()
 	T = 0.0; act_t = 0.0; save_t = 0.0; warn_t = 0.0; g_cache = null; g_mode = null
 	toasts = []; events = []; cam_focus = null
 	compute_reveal()
@@ -1288,10 +1304,11 @@ func fresh_state() -> void:
 
 func apply_state(d: Dictionary) -> void:
 	fresh_state()
-	S.ch = 0
+	S.ch = clampi(int(d.get("ch", 0)), 0, 1)
+	stage = MooData.stage_at(S.ch)
 	S.money = int(d.get("money", 0))
 	S.cap = maxi(int(d.get("cap", 8)), 8)
-	S.done = bool(d.get("done", false))
+	S.done = S.ch == 1 and bool(d.get("done", false))
 	var paid = d.get("paid")
 	if int(d.get("ver", 0)) >= 9 and paid is Array and paid.size() == pads.size():
 		for i in pads.size():
@@ -1305,9 +1322,17 @@ func apply_state(d: Dictionary) -> void:
 					p.paid = clampi(int(v), 0, p.cost)
 				else:
 					p.paid = p.cost if int(v) >= p.cost * 0.9 else mini(p.cost - 1, int(v))
+	elif paid is Array and paid.size() == MooData.stage0().pads.size():
+		for i in paid.size(): pads[i].paid = clampi(int(paid[i]), 0, pads[i].cost)
+	# Completion in the old slice meant buying the dairy, not finishing chapter 2.
+	if int(d.get("ch", 0)) == 0 and bool(d.get("done", false)):
+		for p in pads:
+			if p.d == 0 and p.fx == "gate": p.paid = p.cost
 	for p in pads:
 		if p.paid >= p.cost:
 			apply_pad(p, true)
+	S.done = S.ch == 1 and (bool(d.get("done", false)) and int(d.get("ch", 0)) == 1 or pads.any(func(p): return p.d == 1 and p.fx == "gate" and p.paid >= p.cost))
+	stage = MooData.stage_at(S.ch)
 	var bx = d.get("bx", {})
 	for m in mods:
 		var o = bx.get(m.key)
@@ -1341,6 +1366,17 @@ func apply_state(d: Dictionary) -> void:
 	if blocked_at(player.x, player.y, 6):
 		var f := nearest_free(nav_gx(player.x), nav_gy(player.y))
 		player.x = nav_cx(f.x); player.y = nav_cy(f.y)
+
+func travel_to(district: int) -> bool:
+	if district < 0 or district > S.ch or district > 1: return false
+	var a = mod_by("A", district)
+	player.x = a.rect.x + a.rect.w / 2
+	player.y = a.rect.y + a.rect.h + 30
+	player.pinned = 0.0
+	move_in = Vector2.ZERO; test_in = Vector2.ZERO
+	g_cache = null; g_mode = null; cam_focus = null
+	bounds = target_bounds.duplicate()
+	return true
 
 func slot_path(i: int) -> String:
 	return save_dir.path_join("moo-rush-slot-%d.json" % i)

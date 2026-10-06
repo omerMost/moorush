@@ -1,7 +1,7 @@
 class_name MooData
 extends RefCounted
 ## Chapter data copied from prototype/index.html (the frozen spec).
-## STAGES[0] = Farm Kid (L104-128), PM/TUNE price rescale (L301-307).
+## STAGES[0..1] = Farm Kid and Farmer, with PM/TUNE price rescale.
 ## Out of scope for the slice: the V (vehicle shop), W (armory) and K (bank)
 ## modules keep their cells (they shape the revealed world) but have no pads yet.
 
@@ -42,6 +42,47 @@ static func stage0() -> Dictionary:
 	_rescale(st, 0)
 	return st
 
+static func stage1() -> Dictionary:
+	var st := {
+		"title": "Farmer", "rank": "🧑‍🌾",
+		"intro": "The dairy is yours. Press milk into cheese — it sells for a lot more.",
+		"mods": [
+			{"id": "A", "c": 0, "r": 1, "type": "field", "item": "corn", "name": "Corn field"},
+			{"id": "B", "c": 1, "r": 1, "type": "machine", "name": "Dairy barn", "in": "corn", "out": "milk", "kind": "cow", "n": 3, "period": 4.0},
+			{"id": "C", "c": 1, "r": 0, "type": "machine", "name": "Cheese press", "in": "milk", "out": "cheese", "kind": "station", "icon": "⚙️", "color": "#d9a441", "n": 1, "period": 3.0},
+			{"id": "D", "c": 2, "r": 0, "type": "counter", "name": "Cheese shop", "item": "cheese", "price": 14},
+			{"id": "E", "c": 1, "r": 2, "type": "machine", "name": "Big coop", "in": "corn", "out": "egg", "kind": "hen", "n": 4, "period": 3.0, "locked": 1},
+			{"id": "F", "c": 0, "r": 2, "type": "counter", "name": "Egg stand", "item": "egg", "price": 8, "locked": 1},
+			{"id": "G", "c": 2, "r": 1, "type": "gate"},
+		],
+		"pads": [
+			{"m": "B", "s": 0, "fx": "feed", "cost": 150, "name": "Corn conveyor", "icon": "⚙️"},
+			{"m": "A", "s": 0, "fx": "cap", "v": 14, "cost": 200, "name": "Stronger arms", "icon": "💪"},
+			{"m": "C", "s": 0, "fx": "helper", "f": "B", "t": "C", "cost": 300, "name": "Dairy hand", "icon": "🧑‍🌾"},
+			{"m": "C", "s": 1, "fx": "more", "v": 1, "cost": 350, "name": "Second press", "icon": "⚙️"},
+			{"m": "B", "s": 1, "fx": "more", "v": 2, "cost": 450, "name": "+2 cows", "icon": "🐄"},
+			{"fx": "unlock", "t": "E", "cost": 450, "name": "Big coop", "icon": "🐔"},
+			{"fx": "unlock", "t": "F", "cost": 250, "name": "Egg stand", "icon": "🥚"},
+			{"m": "E", "s": 0, "fx": "helper", "f": "A", "t": "E", "cost": 350, "name": "Corn picker", "icon": "👨‍🌾"},
+			{"m": "D", "s": 0, "fx": "helper", "f": "C", "t": "D", "cost": 500, "name": "Shop clerk", "icon": "🧑‍💼"},
+			{"m": "F", "s": 0, "fx": "helper", "f": "E", "t": "F", "cost": 450, "name": "Egg runner", "icon": "🧑‍🌾"},
+			{"m": "D", "s": 1, "fx": "price", "v": 1.5, "cost": 600, "name": "Aged cheese", "icon": "✨"},
+			{"m": "G", "fx": "gate", "cost": 3000, "name": "Open a bakery", "icon": "🥖"},
+		],
+	}
+	# Night taco production is deferred with the day/night and combat systems.
+	_rescale(st, 1)
+	return st
+
+static func stage_at(index: int) -> Dictionary:
+	match index:
+		0:
+			return stage0()
+		1:
+			return stage1()
+		_:
+			return {}
+
 ## nice(): prototype L303 — round to 2 significant digits above 100.
 static func nice(v: float) -> int:
 	if v < 100.0:
@@ -64,6 +105,7 @@ const ITEMS := {
 	"milk": {"dx": 16, "dy": 13, "h": 15, "sh": 15, "e": "🥛"},
 	"egg": {"dx": 14, "dy": 11, "h": 9, "sh": 10, "e": "🥚"},
 	"coin": {"dx": 18, "dy": 10, "h": 4, "sh": 4, "e": "🪙"},
+	"cheese": {"dx": 20, "dy": 13, "h": 12, "sh": 14, "e": "🧀"},
 }
 
 const HAPPY_LINES := ["Moo-velous!", "Worth every coin!", "Yum yum!", "Best farm ever!", "I'll be back!", "5 stars!", "Delicious!", "My grandma loves this"]
