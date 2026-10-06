@@ -6,7 +6,7 @@ Active, actionable work. One bullet = one chunk you could pick up and finish in 
 
 _(Mid-flight or top-priority. Usually 1–3 items.)_
 
-- [ ] **Godot chapter-1 slice (ADR 0005).** Create the `godot/` project (4.7.x, GDScript) and port Farm Kid faithfully: the world cells, corn field, cow barn, milk stand, coop and egg stand, the chapter-1 pads (feed, cap, more, unlock, helper, price), helpers, the gate, the code-drawn look (`_draw()`), touch joystick and keys, the camera, the HUD and saves (3 isolated slots). Includes `check.sh` with a headless Godot bot that plays chapter 1 to the gate, plus the tests "every counter sells unattended" and "save round-trip".
+- [x] **Godot chapter-1 slice (ADR 0005).** DONE 2026-10-07-00-22 (see session note; STATE + architecture docs still owed).** Create the `godot/` project (4.7.x, GDScript) and port Farm Kid faithfully: the world cells, corn field, cow barn, milk stand, coop and egg stand, the chapter-1 pads (feed, cap, more, unlock, helper, price), helpers, the gate, the code-drawn look (`_draw()`), touch joystick and keys, the camera, the HUD and saves (3 isolated slots). Includes `check.sh` with a headless Godot bot that plays chapter 1 to the gate, plus the tests "every counter sells unattended" and "save round-trip".
 - [ ] **Android toolchain:** install JDK 17, the Android SDK and the Godot 4.7.2 export templates. Build a debug APK of the slice.
 - [ ] **The fun core:** the 2-second loop versus the one big world. Decide with the user (`research/fun-additions.md`, item #2 is unbuilt). This stays separate from the port (ADR 0005, G1).
 - [ ] Replace the placeholder icon mark in `scripts/generate-icons.js` when the brand exists, re-run it
