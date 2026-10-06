@@ -597,7 +597,7 @@ func pocket_cap(m) -> float:
 func upd_counter(m, dt: float) -> void:
 	m.spawn -= dt
 	if m.spawn <= 0 and m.q.size() < 6:
-		m.q.append(new_cust(m.ox - 30, m.oy + 330, m))
+		m.q.append(new_cust(m.ox - 8, m.oy + 330, m))
 		m.spawn = rnd(2.4, 4.2) * spawn_factor(m)
 	for i in m.q.size():
 		var c = m.q[i]
@@ -638,7 +638,7 @@ func upd_counter(m, dt: float) -> void:
 
 func customer_lost(c, m) -> void:
 	m.rep = maxf(1.0, m.rep - 0.5)
-	c.leave = {"x": m.ox - 60, "y": c.y}
+	c.leave = {"x": m.ox - 8, "y": c.y}
 	c.happy = 0.0
 	say(c, pick(MooData.LOST_LINES), 1.8)
 	leaving.append(c)
@@ -1067,7 +1067,7 @@ func refresh_obstacles() -> void:
 			for gy in range(maxi(0, nav_gy(c.y - 60)), mini(NAV.ny, nav_gy(c.y + c.h + 60) + 1)):
 				for gx in range(maxi(0, nav_gx(c.x - 60)), mini(NAV.nx, nav_gx(c.x + c.w + 60) + 1)):
 					NAV.blk[gy * NAV.nx + gx] = nav_blocked(gx, gy)
-					NAV.public_blk[gy * NAV.nx + gx] = field_blocked(nav_cx(gx), nav_cy(gy))
+					NAV.public_blk[gy * NAV.nx + gx] = public_blocked(nav_cx(gx), nav_cy(gy))
 	for h in helpers:
 		h.path = null
 	for m in mods:
@@ -1197,13 +1197,16 @@ func build_nav() -> void:
 	public_mask.resize(NAV.nx * NAV.ny)
 	for gy in NAV.ny:
 		for gx in NAV.nx:
-			public_mask[gy * NAV.nx + gx] = field_blocked(nav_cx(gx), nav_cy(gy))
+			public_mask[gy * NAV.nx + gx] = public_blocked(nav_cx(gx), nav_cy(gy))
 	NAV.public_blk = public_mask
 
-## Public foot traffic avoids crop beds; harvesting keeps the normal mask.
-func field_blocked(x: float, y: float) -> int:
+## Public foot traffic avoids crop beds and item holders; harvesting/pickup keep the normal mask.
+func public_blocked(x: float, y: float) -> int:
+	var point := {"x":x,"y":y}
 	for m in mods:
-		if m.type == "field" and active(m) and in_r({"x":x,"y":y}, m.rect, 18): return 1
+		if not active(m): continue
+		if m.type == "field" and in_r(point, m.rect, 18): return 1
+		if m.has("tray") and in_r(point, m.tray.rect, 25): return 1
 	return 0
 
 func nav_blocked(gx: int, gy: int) -> int:
@@ -1236,6 +1239,7 @@ func line_free(ax: float, ay: float, bx: float, by: float, avoid_fields: bool = 
 
 func find_path(ax: float, ay: float, bx: float, by: float, avoid_fields: bool = false):
 	var nx: int = NAV.nx
+	if avoid_fields and not nav_free(nav_gx(bx), nav_gy(by), true): return null
 	if line_free(ax, ay, bx, by, avoid_fields):
 		return [{"x": bx, "y": by}]
 	var s0 := nearest_free(nav_gx(ax), nav_gy(ay), avoid_fields)
@@ -1333,10 +1337,15 @@ func walk_to(h, tx: float, ty: float, sp: float, dt: float, avoid_fields: bool =
 	if h.pathKey != key or h.path == null:
 		var pth = find_path(h.x, h.y, tx, ty, avoid_fields)
 		if pth == null and avoid_fields:
+			h.path = []
+			h.pathKey = key
 			h.moving = false
 			return false
 		h.path = pth if pth != null else [{"x": tx, "y": ty}]
 		h.pathKey = key
+	if h.path.is_empty():
+		h.moving = false
+		return false
 	while h.path.size() > 1 and Vector2(h.path[0].x - h.x, h.path[0].y - h.y).length() < 4:
 		h.path.pop_front()
 	var wp = h.path[0]

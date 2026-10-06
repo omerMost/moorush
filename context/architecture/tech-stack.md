@@ -52,7 +52,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
   5. **Debug keystore:** `keytool -genkeypair -keystore "~/Library/Application Support/Godot/keystores/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"`.
   6. **Editor settings** (`~/Library/Application Support/Godot/editor_settings-4.7.tres`): `export/android/java_sdk_path` = the JAVA_HOME above, `export/android/android_sdk_path = "/Users/omer/Library/Android/sdk"`, `export/android/debug_keystore` = the keystore above, `debug_keystore_pass = "android"`. Close the Godot editor before you edit this file, because an open editor can write its own copy back over it.
   7. **Build:** the preset is `Android` with `gradle_build/use_gradle_build=false` and `arm64-v8a` only. From the repo root run `mkdir -p build`, then `godot --headless --path godot --export-debug "Android" "$PWD/build/moorush-debug.apk"` (an absolute output avoids Godot resolving it inside `godot/`). Godot runs `apksigner` itself. Check the result with `~/Library/Android/sdk/build-tools/36.1.0/aapt dump badging <apk>`; it prints a harmless `android:required` attribute warning. Output: minSdk 24, targetSdk 36.
-  - The committed preset is `godot/export_presets.cfg`, package `com.omer.moorush`, version 0.3.1. `scripts/generate-icons.js` also generates the native placeholder icon. No Internet permission.
+  - The committed preset is `godot/export_presets.cfg`, package `com.omer.moorush`, version 0.3.2. `scripts/generate-icons.js` also generates the native placeholder icon. No Internet permission.
   - Build outputs (`build/`, `*.apk`, `*.aab`, `*.idsig`, `.godot/`) are gitignored.
 
 ## What we deliberately did NOT pick
@@ -69,4 +69,6 @@ _(Things that were on the table and lost. Each entry: what it was, why it lost. 
 
 - Baker rendered smoke: `godot --path godot -s res://tests/test_windowed_chapter3.gd`; naturally reaches bread/pie production and captures ovens/orchard/three-district travel. Implemented district count drives world/navigation bounds (ADR 0010).
 
-- Map scenery: seeded procedural trees/ponds matching the HTML; solid circle/rectangle collisions, depth-sorted tree drawing. Customer path cache combines regular navigation with a crop exclusion mask (ADR 0011). `test_customer_routes.gd` adds real traffic/collision coverage, bringing check.sh to nine suites.
+- Map scenery: seeded procedural trees/ponds matching the HTML; solid circle/rectangle collisions, depth-sorted tree drawing. Customer path cache combines regular navigation with a crop/tray exclusion mask (ADR 0011). `test_customer_routes.gd` adds real traffic/collision coverage, bringing check.sh to nine suites.
+
+- Output tray styling: shallow light wood procedural crates, same pickup geometry. Native-rendered cheese option previews use code drawings; no new art dependency (C1).

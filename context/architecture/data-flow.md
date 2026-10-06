@@ -36,4 +36,6 @@ Menu travel moves the player to an unlocked district without resetting the caree
 
 Paid upgrades refresh obstacle geometry incrementally, rebuild affected navigation cells and invalidate helper paths only when needed. Confetti/sound/toast mark completion while the camera keeps following the player. Save writes and chapter travel retain their existing behavior.
 
-World rebuild regenerates scenery from cell seeds without consuming gameplay RNG or changing saves. Tree/pond geometry participates in collision and navigation. Customer queue/departure goals use cached paths with the public crop-exclusion mask; crops remain accessible for harvesting. Revealed trees draw at their depth alongside people.
+World rebuild regenerates scenery from cell seeds without consuming gameplay RNG or changing saves. Tree/pond geometry participates in collision and navigation. Customer queue/departure goals use cached paths with the public crop/tray-exclusion mask; crops remain accessible for harvesting. Revealed trees draw at their depth alongside people.
+
+Customers enter/exit at a clear counter boundary instead of inside the neighboring machine tray. Public navigation keeps them off item holders; player/helper pickup uses normal navigation and unchanged inventory geometry.

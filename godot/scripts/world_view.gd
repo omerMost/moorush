@@ -76,10 +76,24 @@ func drop_pad(r, ic: String) -> void:
 	Paint.dash_rr(self, r.x, r.y, r.w, r.h, Color(1, 1, 1, 0.9), 3, 9)
 	Paint.item(self, ic, r.x + r.w / 2, r.y + r.h / 2 + 14, 1.3, 0.55)
 
+## Light shallow wooden crate; item and pickup rectangles keep their dimensions.
+static func tray_base(ci: CanvasItem, r) -> void:
+	Paint.fill_rr(ci, r.x - 5, r.y - 2, r.w + 14, r.h + 14, 12, Color(0, 0, 0, 0.15))
+	Paint.fill_rr(ci, r.x - 7, r.y - 7, r.w + 14, r.h + 14, 12, Paint.C("#bf935e"))
+	Paint.fill_rr(ci, r.x, r.y, r.w, r.h, 7, Paint.C("#ecd1a7"))
+	var x: float = r.x + 46
+	while x < r.x + r.w - 5:
+		ci.draw_line(Vector2(x, r.y + 2), Vector2(x, r.y + r.h - 2), Paint.C("#d5b384"), 1.2)
+		x += 46
+	Paint.fill_rr(ci, r.x - 4, r.y - 5, r.w + 8, 4, 2, Paint.C("#ffe1af"))
+	Paint.fill_rr(ci, r.x - 4, r.y + r.h, r.w + 8, 4, 2, Paint.C("#d2a36a"))
+	Paint.stroke_rr(ci, r.x - 7, r.y - 7, r.w + 14, r.h + 14, 12, Paint.C("#9d7548"), 1.5)
+	for dx in [0.0, float(r.w)]:
+		for dy in [0.0, float(r.h)]:
+			Paint.circ(ci, r.x + dx, r.y + dy, 1.3, Paint.C("#9d7548"))
+
 func tray(b) -> void:
-	var r = b.rect
-	Paint.fill_rr(self, r.x - 7, r.y - 7, r.w + 14, r.h + 14, 14, C("#2f6fd6"))
-	Paint.fill_rr(self, r.x, r.y, r.w, r.h, 9, C("#3b3f4b"))
+	tray_base(self, b.rect)
 	draw_pile(b)
 
 func draw_pile(b, max_draw: int = 200) -> void:
