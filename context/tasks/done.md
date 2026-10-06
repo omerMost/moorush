@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — User confirms Android 0.2.1 resolves the reported upgrade completion glitch: "yes" after retest prompt.
+
 - 2026-10-07 — Upgrade completion patch: remove screen shake/temporary focus, refresh navigation only for changed geometry; all 22 incremental masks match full rebuilds, both bots pass, Android 0.2.1 installed. User visual comparison remains in device playtest.
 
 - 2026-10-07 — Daytime Farmer/Chapter 2 port: corn→milk→cheese, eggs, helpers, 12 new pads and bakery completion gate; two persistent districts/travel and old farm-save migration. Six suites and rendered dairy/farm tests pass, 0.2.0 installed; Chapter 2 phone gameplay feedback and night taco content remain queued.

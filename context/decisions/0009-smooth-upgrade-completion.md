@@ -1,6 +1,6 @@
 # ADR 0009 — Keep upgrade feedback local and update navigation incrementally
 
-**Status:** Provisional, pending Android visual comparison
+**Status:** Accepted following Android playtest (user: "yes", 2026-10-07)
 **Date:** 2026-10-07
 **Supersedes:** None; refines ADR 0008's navigation implementation
 
@@ -17,3 +17,6 @@ Keep confetti, sound, toast, fog reveal and save feedback; remove shake and temp
 
 ## Consequences
 Headless equivalence tests compare the incremental mask to a full rebuild after all 22 payments, reset and old save migration. Existing bots must still reach both gates. Local completion after the change is about 0.1–20ms for ordinary upgrades; opening the next district still does more work. Android subjective glitch confirmation remains pending, so the visual cause is not claimed conclusively.
+
+## Validation update
+User replied "yes" to the 0.2.1 upgrade-glitch resolution prompt. The reported visual issue is resolved on the phone; this does not isolate which original contributor the user noticed.

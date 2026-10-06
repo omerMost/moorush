@@ -53,4 +53,4 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 
 - Chapter 2 rendered bot verified natural cheese in press/store/held stacks and menu travel. Seven headless suites GREEN; tests use isolated save directories to avoid parallel-run collisions.
 
-- Upgrade completion patch (ADR 0009): removes upgrade shake/temporary focus and updates only changed navigation cells. Ordinary local completion ~0.1–20ms versus ~69–110ms full-grid baseline. Full-mask equivalence passes for all 22 upgrades/reset/migration; phone visual comparison pending.
+- Upgrade completion patch (ADR 0009): removes upgrade shake/temporary focus and updates only changed navigation cells. Ordinary local completion ~0.1–20ms versus ~69–110ms full-grid baseline. Full-mask equivalence passes for all 22 upgrades/reset/migration; user confirms the reported upgrade glitch is gone on 0.2.1 ("yes" after retest prompt).
