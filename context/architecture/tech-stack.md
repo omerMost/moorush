@@ -19,7 +19,11 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 - Frozen prototype: Canvas 2D, procedural sprites/emoji, DOM HUD and Baloo 2 from Google Fonts.
 - Native drawing cache (ADR 0006): four procedural 4× item textures baked at runtime, bounded curve/text caches and batched grass; no external sprite art or added dependencies.
-- Native: `Paint`/`world_view.gd` code drawing and `hud.gd` controls. Logical 540×960 canvas_items viewport, expand aspect, portrait; system text/emoji fonts pending Baloo bundle.
+- Native: `Paint`/`world_view.gd` code drawing and `hud.gd` controls. Logical 540×960 canvas_items viewport, expand aspect, portrait; bundled Baloo 2 variable font at weight 800 (OFL), OS emoji fallback.
+
+## Audio
+
+- `MooAudio` (`audio.gd`): prototype tone sequences baked into 44.1kHz mono AudioStreamWAV clips at startup; eight reusable voices and rate limits. Menu mute persists separately from saves (ADR 0007, provisional). No external audio assets/backend.
 
 ## Data layer
 
@@ -36,7 +40,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Tooling (build, test, lint, CI)
 
-- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, gate bot, unattended counters, populated saves and phone-sized touch HUD. Nonzero processes and engine errors fail. No HTML suite.
+- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, gate bot, unattended counters, populated saves and phone-sized touch HUD/font and audio waveform/settings/dispatch. Nonzero processes and engine errors fail. No HTML suite.
 - Optional rendered smoke test: `godot --path godot -s res://tests/test_windowed_chapter1.gd` (requires a display); runs the career through the main scene with 90s/240s/completion captures under `build/`, in isolated test storage.
 - Prototype: test hook `window.__moo`. Local run: the `prototype` config in `.claude/launch.json` (port 8090).
 - **Android export toolchain (installed 2026-10-07, proven by a probe APK).** To redo it on a fresh Mac:
@@ -47,7 +51,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
   5. **Debug keystore:** `keytool -genkeypair -keystore "~/Library/Application Support/Godot/keystores/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"`.
   6. **Editor settings** (`~/Library/Application Support/Godot/editor_settings-4.7.tres`): `export/android/java_sdk_path` = the JAVA_HOME above, `export/android/android_sdk_path = "/Users/omer/Library/Android/sdk"`, `export/android/debug_keystore` = the keystore above, `debug_keystore_pass = "android"`. Close the Godot editor before you edit this file, because an open editor can write its own copy back over it.
   7. **Build:** the preset is `Android` with `gradle_build/use_gradle_build=false` and `arm64-v8a` only. From the repo root run `mkdir -p build`, then `godot --headless --path godot --export-debug "Android" "$PWD/build/moorush-debug.apk"` (an absolute output avoids Godot resolving it inside `godot/`). Godot runs `apksigner` itself. Check the result with `~/Library/Android/sdk/build-tools/36.1.0/aapt dump badging <apk>`; it prints a harmless `android:required` attribute warning. Output: minSdk 24, targetSdk 36.
-  - The committed preset is `godot/export_presets.cfg`, package `com.omer.moorush`, version 0.1.1. `scripts/generate-icons.js` also generates the native placeholder icon. No Internet permission.
+  - The committed preset is `godot/export_presets.cfg`, package `com.omer.moorush`, version 0.1.2. `scripts/generate-icons.js` also generates the native placeholder icon. No Internet permission.
   - Build outputs (`build/`, `*.apk`, `*.aab`, `*.idsig`, `.godot/`) are gitignored.
 
 ## What we deliberately did NOT pick

@@ -24,7 +24,7 @@ run_check() {
 }
 run_check import --import
 run_check boot --quit-after 120
-for t in test_bot_chapter1 test_counters_unattended test_save_slots test_touch_hud; do
+for t in test_bot_chapter1 test_counters_unattended test_save_slots test_touch_hud test_audio; do
   run_check "$t" -s "res://tests/$t.gd"
 done
 printf 'check.sh: GREEN\n'

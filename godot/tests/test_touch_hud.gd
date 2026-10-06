@@ -1,6 +1,9 @@
 extends SceneTree
 ## Exercise touch input through the running scene at phone pixel sizes.
 func _initialize() -> void:
+	create_timer(10.0).timeout.connect(func():
+		print("FAIL asynchronous test timed out")
+		quit(1))
 	run.call_deferred()
 
 func run() -> void:
@@ -8,10 +11,15 @@ func run() -> void:
 	root.add_child(main)
 	await process_frame
 	var moo = root.get_node("Moo")
+	moo.audio.settings_path = "user://test-touch-audio-settings.json"
 	moo.sim.save_dir = "user://test_touch_hud"
 	moo.sim.delete_slot(1)
 	var hud = root.find_child("HUD", true, false)
 	var ok: bool = hud.process_priority < main.get_node("World").process_priority
+	Paint.fonts()
+	ok = ok and Paint.font.base_font.resource_path == "res://assets/fonts/Baloo2-Variable.ttf"
+	ok = ok and Paint.font.has_char("M".unicode_at(0))
+	print("  bundled Baloo 2 loaded: %s" % (Paint.font.base_font is FontFile))
 	print("  fresh HUD input precedes simulation: %s" % ok)
 	for pixels in [Vector2i(1080, 1920), Vector2i(1440, 2560)]:
 		root.size = pixels
@@ -37,8 +45,26 @@ func run() -> void:
 		ok = ok and moo.sim.move_in == Vector2.ZERO
 		hud.show_menu()
 		await process_frame
-		ok = ok and moo.paused and hud.menu.visible and hud.menu.size.x <= hud.size.x
+		ok = ok and moo.paused and hud.menu.visible and hud.menu.size.x <= hud.size.x and hud.menu.size.y <= hud.size.y
+		var sound = hud.menu_box.find_child("SoundToggle", false, false)
+		var original: bool = moo.audio.enabled
+		var tap := InputEventMouseButton.new()
+		tap.button_index = MOUSE_BUTTON_LEFT
+		tap.position = sound.get_global_rect().get_center()
+		tap.pressed = true
+		root.push_input(tap, true)
+		tap = tap.duplicate()
+		tap.pressed = false
+		root.push_input(tap, true)
+		await process_frame
+		var clicked: bool = moo.audio.enabled == not original
+		print("  menu pointer click toggles sound: %s" % clicked)
+		ok = ok and clicked
+		sound.button_pressed = original
 		print("  phone %s logical HUD=%s touch/menu checked" % [pixels, hud.size])
 	moo.sim.delete_slot(1)
+	if FileAccess.file_exists(moo.audio.settings_path): DirAccess.remove_absolute(moo.audio.settings_path)
+	await create_timer(0.2).timeout
+	moo.audio.stop_all()
 	print(("PASS" if ok else "FAIL") + " touch_hud")
 	quit(0 if ok else 1)

@@ -6,7 +6,7 @@ Active, actionable work. One bullet = one chunk you could pick up and finish in 
 
 _(Mid-flight or top-priority. Usually 1–3 items.)_
 
-- [ ] **Android device playtest:** APK installed/launched on the connected POCO on 2026-10-07. Smoothness and close/reopen progress confirmed by user. Remaining: full layout review, background/suspend saves and sustained performance; startup logs are clean of Godot script errors/crashes.
+- [ ] **Android device playtest:** APK installed/launched on the connected POCO on 2026-10-07. Smoothness and close/reopen progress confirmed by user. Remaining: phone listening/mute retest for 0.1.2 (user reports "cant hear anything and no sound off"; device tap persists mute, clearer ON/OFF control installed), full layout review, background/suspend saves and sustained performance (older 0.1.1 logs drift from ~97 to ~43 FPS across ~8 minutes; cause not isolated); startup logs are clean of Godot script errors/crashes.
 
 - [ ] **The fun core:** the 2-second loop versus the one big world. Decide with the user (`research/fun-additions.md`, item #2 is unbuilt). This stays separate from the port (ADR 0005, G1).
 - [ ] Replace the placeholder icon mark in `scripts/generate-icons.js` when the brand exists, re-run it
@@ -17,9 +17,7 @@ _(Approved, ready to pick up, not started yet.)_
 
 - [ ] Port the rest in verified steps after the slice: chapters 2–9, the harbor, vehicles, robbers, night and zombies (`findPath`/`NAV`), weapons, turrets, collectors, the fun layer (fever, events, bosses, hats, debate, prestige). Also the solid world boundary plus the unstick safety net
 - [ ] Give the specialist agents (`.claude/agents/*.md`) a Godot section. They're written for `prototype/index.html` today
-- [ ] Port Chapter 1 sound and validate audio on Android (slice currently silent).
 - [ ] Define native save import/migration coverage and whether to preserve in-flight goods/helper cargo; current slots are isolated but full old HTML import remains pending.
-- [ ] Bundle the Baloo 2 font in the Godot project (offline)
 - [ ] Godot tests for the two cases v9 never tested: the debate timer running out, and MOO FEVER exactly doubling prices (once those systems are ported)
 - [ ] Decide on the old public artifact link (republish it from the repo or retire it)
 

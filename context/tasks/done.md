@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Chapter 1 sound and offline font: prototype harvest/drop/coin/warn/upgrade/gate tones, bounded cached playback and persistent mute; bundled Baloo 2 weight 800 with OFL license. Audio/UI/font tests added; phone listening check remains queued.
+
 - 2026-10-07 — Android close/reopen save verification: user confirms "yes it saves" after force-stop and cold launch on POCO. Background/suspend lifecycle remains separately pending.
 
 - 2026-10-07 — Android smoothness validation: user says "yes much better" after v0.1.1; four five-second engine frame windows report 78.4–99.9 FPS on connected POCO. Long sustained performance and suspend/resume remain separate checks.

@@ -153,12 +153,28 @@ func btn(t: String, col: String, cb: Callable) -> Button:
 	return b
 
 func show_menu() -> void:
+	if not Moo.paused:
+		Moo.audio.play("drop")
 	Moo.open_menu()
 	joy = null
 	for c in menu_box.get_children():
+		menu_box.remove_child(c)
 		c.queue_free()
 	menu_box.add_child(lbl("Moo Rush", 40, "#e0702a"))
-	menu_box.add_child(lbl("Corn to Capitol · Chapter 1 · v0.1.1", 15))
+	menu_box.add_child(lbl("Corn to Capitol · Chapter 1 · v0.1.2", 15))
+	var sound := CheckButton.new()
+	sound.name = "SoundToggle"
+	sound.text = "Sound effects: ON" if Moo.audio.enabled else "Sound effects: OFF"
+	sound.button_pressed = Moo.audio.enabled
+	sound.add_theme_font_override("font", Paint.font)
+	sound.add_theme_font_size_override("font_size", 18)
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		sound.add_theme_color_override(color_name, Paint.C("#3a2412"))
+	sound.custom_minimum_size.y = 44
+	sound.toggled.connect(func(value):
+		Moo.audio.set_enabled(value)
+		sound.text = "Sound effects: ON" if value else "Sound effects: OFF")
+	menu_box.add_child(sound)
 	var s := Moo.sim
 	for i in range(1, MooSim.SLOTS + 1):
 		var d = s.read_slot(i)

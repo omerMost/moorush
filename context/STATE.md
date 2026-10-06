@@ -21,7 +21,7 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
   - We start with a chapter-1 (Farm Kid) slice that keeps the code-drawn look, and `check.sh` runs headless Godot bots.
   - The HTML prototype is now a frozen spec.
   - `godot/` is playable: Farm Kid production, 10 pads, helpers, fog/bounds, code-drawn world, camera, HUD, touch/keys and 3 isolated save slots.
-  - Signed debug APK: `build/moorush-debug.apk` (`com.omer.moorush`, 0.1.1, arm64, minSdk 24, targetSdk 36). Installed and launched on the user’s connected POCO device (model 2412DPC0AG); Vulkan/Mali-G720 startup succeeds. User confirms improved smoothness and progress restored after force-stop/cold reopen. Background/suspend lifecycle, full layout review and sustained performance remain pending.
+  - Signed debug APK: `build/moorush-debug.apk` (`com.omer.moorush`, 0.1.2, arm64, minSdk 24, targetSdk 36). Installed and launched on the user’s connected POCO device (model 2412DPC0AG); Vulkan/Mali-G720 startup succeeds. User confirms improved smoothness and progress restored after force-stop/cold reopen. Background/suspend lifecycle, full layout review and sustained performance remain pending.
 
 ## Surfaces / components / modules
 
@@ -43,10 +43,10 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 
 ## Known gaps (not bugs, just not done)
 
-- `./check.sh` imports/boots Godot and runs the gate bot (430.9 simulated seconds), unattended counters, populated save round-trips and touch HUD checks at 1080×1920 and 1440×2560. Process failures and engine errors fail the checks.
+- `./check.sh` imports/boots Godot and runs the gate bot (430.9 simulated seconds), unattended counters, populated save round-trips, audio waveform/mute/persistence checks and touch HUD/font checks at 1080×1920 and 1440×2560. Process failures and engine errors fail the checks.
 - Local rendered test: `godot --path godot -s res://tests/test_windowed_chapter1.gd`; milestone screenshots under `build/`. Native New Game/menu/Resume were exercised via desktop UI; brief keyboard/drag automation did not visibly confirm movement (headless touch/input checks pass).
-- Android smoothness improvement (ADR 0006): input sampled before simulation, cached procedural item textures/curves/text and batched grass; debug Android frame timing logs every 5s while playing. Local draw CPU mean 21.083→8.315ms; user confirms "yes much better"; four five-second Android engine windows report 78.4–99.9 FPS (frame p95 10.42–13.33ms). User confirms close/reopen saves; long-run thermal and background/suspend lifecycle checks remain pending.
+- Android smoothness improvement (ADR 0006): input sampled before simulation, cached procedural item textures/curves/text and batched grass; debug Android frame timing logs every 5s while playing. Local draw CPU mean 21.083→8.315ms; user confirms "yes much better"; four five-second Android engine windows report 78.4–99.9 FPS (frame p95 10.42–13.33ms). User confirms close/reopen saves; longer 0.1.1 logs drift from ~97 to ~43 FPS over ~8 minutes, with draw CPU increasing; heat versus scene load is not isolated. Sustained performance and background/suspend lifecycle checks remain pending.
 - **The core fun problem is open:** the "2-second loop" versus the "one big world" (`research/fun-additions.md`).
 - Untested: the debate when its timer runs out, and MOO FEVER exactly doubling prices.
-- Slice exclusions remain provisional: always daytime, no zombies/special customers/sound, shops marked coming soon, gate marks completion without chapter 2. Native fonts use system fallbacks; Baloo 2 remains to be bundled.
+- Slice exclusions remain provisional: always daytime, no zombies/special customers, shops marked coming soon, gate marks completion without chapter 2. Baloo 2 weight 800 is bundled offline with OFL license; emoji use OS fallback. Chapter 1 sound cues are synthesized once and played from a bounded pool, with a persistent menu toggle; phone listening validation remains unresolved: user reports "cant hear anything and no sound off". Device tap persists mute correctly; control now uses dark text and explicit ON/OFF labels, awaiting retest.
 - Native saves retain the prototype's omission of in-flight goods and helper cargo. Full legacy HTML save import is not implemented; current Godot slots are tested. No ads, analytics or store listing.

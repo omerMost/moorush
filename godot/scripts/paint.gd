@@ -3,7 +3,7 @@ extends RefCounted
 ## Canvas-2D-style drawing helpers on top of CanvasItem.draw_* so the
 ## prototype's ctx code (rr, ell, circ, text, sprites) ports line by line (ADR 0005 G2).
 
-static var font: SystemFont
+static var font: FontVariation
 static var emoji: SystemFont
 static var item_textures := {}
 static var item_baking := false
@@ -49,9 +49,9 @@ static func prime_items(parent: Node) -> void:
 
 static func fonts() -> void:
 	if font == null:
-		font = SystemFont.new()
-		font.font_names = PackedStringArray(["Baloo 2", "Arial Rounded MT Bold", "Helvetica Neue", "Arial"])
-		font.font_weight = 800
+		font = FontVariation.new()
+		font.base_font = load("res://assets/fonts/Baloo2-Variable.ttf")
+		font.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): 800}
 		emoji = SystemFont.new()
 		emoji.font_names = PackedStringArray(["Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji"])
 

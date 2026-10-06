@@ -4,6 +4,7 @@ extends Node
 ## Headless tests may also build their own MooSim directly (tests/).
 
 var sim: MooSim
+var audio: MooAudio
 var perf_times: Array[float] = []
 var perf_elapsed := 0.0
 var perf_draw_us := 0.0
@@ -14,6 +15,8 @@ signal slot_started(i: int)
 
 func _ready() -> void:
 	sim = MooSim.new()
+	audio = MooAudio.new()
+	add_child(audio)
 
 func _exit_tree() -> void:
 	if sim:
@@ -53,6 +56,8 @@ func set_no_clip(v: bool) -> void: sim.no_clip = v
 
 func start_slot(i: int) -> void:
 	var loaded := sim.start_slot(i)
+	if loaded:
+		audio.play("coin")
 	if not loaded:
 		sim.toast(MooData.stage0().intro, 5.0)
 	paused = false
