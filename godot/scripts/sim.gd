@@ -288,7 +288,7 @@ func build_world() -> void:
 	mods = []; pads = []; helpers = []; belts = []; leaving = []; flyers = []; cells = []; ground = []
 	floaters = []; sparks = []
 	var k := 0
-	for district in range(2):
+	for district in range(MooData.STAGE_COUNT):
 		var content := MooData.stage_at(district)
 		for cfg in content.mods:
 			mods.append(build_module(cfg, district))
@@ -313,12 +313,17 @@ func build_world() -> void:
 	var a = mod_by("A", 0)
 	player = {"x": a.rect.x + a.rect.w / 2, "y": a.rect.y + a.rect.h + 30, "walk": 0.0, "face": 1, "moving": false,
 		"stack": {"type": null, "n": 0, "inc": 0}, "vx": 0.0, "pinned": 0.0, "say": null}
-	# Grid spans the two implemented districts and excludes the closed world.
-	var o0 := cell_xy(0, 0, 0)
-	NAV.ox = o0.x - GAP
-	NAV.oy = o0.y - GAP
-	NAV.nx = int(ceil((2 * DW + 3 * GAP) / NAV.s))
-	NAV.ny = int(ceil((DH + 2 * GAP) / NAV.s))
+	# Grid spans every implemented district at its prototype map position.
+	var low := Vector2(INF, INF)
+	var high := Vector2(-INF, -INF)
+	for district in range(MooData.STAGE_COUNT):
+		var origin := cell_xy(district, 0, 0)
+		low = low.min(origin)
+		high = high.max(origin + Vector2(DW, DH))
+	NAV.ox = low.x - GAP
+	NAV.oy = low.y - GAP
+	NAV.nx = int(ceil((high.x - low.x + 2 * GAP) / NAV.s))
+	NAV.ny = int(ceil((high.y - low.y + 2 * GAP) / NAV.s))
 
 func apply_pad(p, from_load: bool) -> void:
 	var m = mod_by(p.m, p.d) if p.has("m") else null
@@ -341,17 +346,17 @@ func apply_pad(p, from_load: bool) -> void:
 		"helper":
 			helpers.append(mk_helper(mod_by(p.f, p.d), mod_by(p.t, p.d), helpers.size(), null))
 		"gate":
-			if p.d == 0:
-				S.ch = maxi(S.ch, 1)
+			if p.d < MooData.STAGE_COUNT - 1:
+				S.ch = maxi(S.ch, p.d + 1)
 				stage = MooData.stage_at(S.ch)
 				S.done = false
 				if not from_load:
 					compute_reveal()
-					travel_to(1)
-					toast("Chapter 2 · Farmer! " + stage.intro, 5.0)
+					travel_to(p.d + 1)
+					toast("Chapter %d · %s! %s" % [S.ch + 1, stage.title, stage.intro], 5.0)
 			else:
 				S.done = true
-				if not from_load: toast("🥖 Bakery bought! Chapter 2 complete — more chapters coming soon.", 5.0)
+				if not from_load: toast("🛒 Supermarket bought! Chapter 3 complete — more chapters coming soon.", 5.0)
 			if not from_load: events.append({"kind": "gate"})
 
 func visible_pads() -> Array:
@@ -1318,11 +1323,11 @@ func fresh_state() -> void:
 
 func apply_state(d: Dictionary) -> void:
 	fresh_state()
-	S.ch = clampi(int(d.get("ch", 0)), 0, 1)
+	S.ch = clampi(int(d.get("ch", 0)), 0, MooData.STAGE_COUNT - 1)
 	stage = MooData.stage_at(S.ch)
 	S.money = int(d.get("money", 0))
 	S.cap = maxi(int(d.get("cap", 8)), 8)
-	S.done = S.ch == 1 and bool(d.get("done", false))
+	S.done = false
 	var paid = d.get("paid")
 	if int(d.get("ver", 0)) >= 9 and paid is Array and paid.size() == pads.size():
 		for i in pads.size():
@@ -1336,16 +1341,23 @@ func apply_state(d: Dictionary) -> void:
 					p.paid = clampi(int(v), 0, p.cost)
 				else:
 					p.paid = p.cost if int(v) >= p.cost * 0.9 else mini(p.cost - 1, int(v))
-	elif paid is Array and paid.size() == MooData.stage0().pads.size():
-		for i in paid.size(): pads[i].paid = clampi(int(paid[i]), 0, pads[i].cost)
-	# Completion in the old slice meant buying the dairy, not finishing chapter 2.
-	if int(d.get("ch", 0)) == 0 and bool(d.get("done", false)):
+	elif paid is Array:
+		# Array-only native saves used the implemented chapter count at the time.
+		var count := 0
+		for chapter in range(MooData.STAGE_COUNT):
+			count += MooData.stage_at(chapter).pads.size()
+			if paid.size() == count:
+				for i in paid.size(): pads[i].paid = clampi(int(paid[i]), 0, pads[i].cost)
+				break
+	# Previous slice endpoints become ownership of their newly available district.
+	var saved_chapter := int(d.get("ch", 0))
+	if bool(d.get("done", false)) and saved_chapter >= 0 and saved_chapter < MooData.STAGE_COUNT - 1:
 		for p in pads:
-			if p.d == 0 and p.fx == "gate": p.paid = p.cost
+			if p.d == saved_chapter and p.fx == "gate": p.paid = p.cost
 	for p in pads:
 		if p.paid >= p.cost:
 			apply_pad(p, true)
-	S.done = S.ch == 1 and (bool(d.get("done", false)) and int(d.get("ch", 0)) == 1 or pads.any(func(p): return p.d == 1 and p.fx == "gate" and p.paid >= p.cost))
+	S.done = S.ch == MooData.STAGE_COUNT - 1 and (bool(d.get("done", false)) and saved_chapter == MooData.STAGE_COUNT - 1 or pads.any(func(p): return p.d == MooData.STAGE_COUNT - 1 and p.fx == "gate" and p.paid >= p.cost))
 	stage = MooData.stage_at(S.ch)
 	var bx = d.get("bx", {})
 	for m in mods:
@@ -1382,7 +1394,7 @@ func apply_state(d: Dictionary) -> void:
 		player.x = nav_cx(f.x); player.y = nav_cy(f.y)
 
 func travel_to(district: int) -> bool:
-	if district < 0 or district > S.ch or district > 1: return false
+	if district < 0 or district > S.ch or district >= MooData.STAGE_COUNT: return false
 	var a = mod_by("A", district)
 	player.x = a.rect.x + a.rect.w / 2
 	player.y = a.rect.y + a.rect.h + 30

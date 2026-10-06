@@ -24,13 +24,17 @@ class ItemStamp extends Node2D:
 			"egg": Paint.sh_egg(self, 1.0)
 			"coin": Paint.sh_coin(self, 1.0)
 			"cheese": Paint.sh_cheese(self, 1.0)
+			"wheat": Paint.sh_wheat(self, 1.0)
+			"bread": Paint.sh_bread(self, 1.0)
+			"apple": Paint.sh_apple(self, 1.0)
+			"pie": Paint.sh_pie(self, 1.0)
 
 static func prime_items(parent: Node) -> void:
 	if item_baking or not item_textures.is_empty() or DisplayServer.get_name() == "headless":
 		return
 	item_baking = true
 	var views := {}
-	for kind in ["corn", "milk", "egg", "coin", "cheese"]:
+	for kind in ["corn", "milk", "egg", "coin", "cheese", "wheat", "bread", "apple", "pie"]:
 		var view := SubViewport.new()
 		view.size = Vector2i(192, 192)
 		view.transparent_bg = true
@@ -159,13 +163,17 @@ static func item(ci: CanvasItem, t: String, x: float, y: float, s: float = 1.0, 
 		ci.draw_texture_rect(item_textures[t], Rect2(x - 24 * s, y - 32 * s, 48 * s, 48 * s), false)
 		return
 	match t:
-		"corn", "milk", "egg", "coin", "cheese":
+		"corn", "milk", "egg", "coin", "cheese", "wheat", "bread", "apple", "pie":
 			ci.draw_set_transform(Vector2(x, y), 0.0, Vector2(s, s))
 			match t:
 				"corn": sh_corn(ci, alpha)
 				"milk": sh_milk(ci, alpha)
 				"egg": sh_egg(ci, alpha)
 				"cheese": sh_cheese(ci, alpha)
+				"wheat": sh_wheat(ci, alpha)
+				"bread": sh_bread(ci, alpha)
+				"apple": sh_apple(ci, alpha)
+				"pie": sh_pie(ci, alpha)
 				_: sh_coin(ci, alpha)
 			ci.draw_set_transform(Vector2.ZERO)
 		_:
@@ -199,6 +207,36 @@ static func sh_cheese(ci: CanvasItem, a: float) -> void:
 	for hole in [Vector2(-5, -8), Vector2(3, -6), Vector2(6, -2)]:
 		ell(ci, hole.x, hole.y, 1.8, 1.5, C("#c4861c", a))
 	ell(ci, -1, -14, 2, 1.1, C("#dfb540", a))
+
+## Bakery products keep their emoji silhouettes using cached procedural stamps.
+static func sh_wheat(ci: CanvasItem, a: float) -> void:
+	for dx in [-6.0, 0.0, 6.0]:
+		ci.draw_line(Vector2(dx * 0.3, 0), Vector2(dx, -16), C("#c99a2e", a), 1.5)
+		ell(ci, dx, -18, 2.5, 5, C("#f0c24a", a))
+	ci.draw_line(Vector2(-4, -4), Vector2(4, -4), C("#986b29", a), 2)
+
+static func sh_bread(ci: CanvasItem, a: float) -> void:
+	fill_rr(ci, -11, -14, 22, 15, 5, C("#b96d28", a))
+	fill_rr(ci, -11, -17, 22, 14, 6, C("#e9aa55", a))
+	fill_rr(ci, -9, -15, 18, 9, 4, C("#f3c177", a))
+	for dx in [-6.0, 0.0, 6.0]:
+		ci.draw_line(Vector2(dx - 1.5, -13), Vector2(dx + 1.5, -9), C("#ffe4ac", a), 2)
+
+static func sh_apple(ci: CanvasItem, a: float) -> void:
+	ell(ci, -3.5, -8, 6.5, 8.5, C("#d93232", a))
+	ell(ci, 3.5, -8, 6.5, 8.5, C("#e84b3d", a))
+	ci.draw_line(Vector2(0, -15), Vector2(1, -21), C("#7a4a2a", a), 2)
+	ell(ci, 4, -19, 4.5, 2, C("#59aa3d", a))
+	ell(ci, -5, -11, 1.8, 3, Color(1, 1, 1, 0.5 * a))
+
+static func sh_pie(ci: CanvasItem, a: float) -> void:
+	ell(ci, 0, -3, 12, 5, C("#858e9d", a))
+	ell(ci, 0, -5, 12, 5, C("#c98533", a))
+	ell(ci, 0, -7, 11, 4.5, C("#e7b260", a))
+	ell(ci, 0, -7, 8.5, 3.3, C("#a75b2b", a))
+	for dx in [-5.0, 0.0, 5.0]:
+		ci.draw_line(Vector2(dx - 2, -9), Vector2(dx + 2, -5), C("#f6cf83", a), 1.5)
+	ci.draw_line(Vector2(-7, -7), Vector2(7, -7), C("#f6cf83", a), 1.5)
 
 static func sh_coin(ci: CanvasItem, a: float) -> void:
 	ell(ci, 0, -3, 8, 4, C("#c98a12", a))

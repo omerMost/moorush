@@ -16,7 +16,7 @@ func _init() -> void:
 	var bought := {}
 	var first_gate_time := -1.0
 	var t0 := Time.get_ticks_msec()
-	while sim.T < LIMIT and not sim.S.done:
+	while sim.T < LIMIT and sim.S.ch < 2:
 		bot.tick(DT)
 		sim.update(DT)
 		if sim.S.ch == 1 and first_gate_time < 0:
@@ -30,9 +30,9 @@ func _init() -> void:
 			last_report = sim.T
 			print("  t=%6.1fs ch=%d money=%d stack=%s at=(%d,%d)" % [sim.T, sim.S.ch, sim.S.money, str(sim.player.stack), sim.player.x, sim.player.y])
 	expect(first_gate_time > 0, "first gate opens dairy through natural play")
-	expect(sim.S.ch == 1 and sim.S.done, "bakery gate completes supported career within %.0fs" % LIMIT)
-	expect(sim.pads.all(func(p): return p.paid >= p.cost), "both districts' complete upgrade chains purchased")
-	if sim.S.done:
+	expect(sim.S.ch == 2 and not sim.S.done, "bakery gate opens Baker within %.0fs" % LIMIT)
+	expect(sim.pads.filter(func(p): return p.d < 2).all(func(p): return p.paid >= p.cost), "both districts' complete upgrade chains purchased")
+	if sim.S.ch == 2:
 		var cheese = sim.mod_by("D", 1)
 		var eggs = sim.mod_by("F", 1)
 		expect(cheese.sold > 0 and eggs.sold > 0, "dairy cheese and eggs sold to real customers")
@@ -45,11 +45,11 @@ func _init() -> void:
 		# Remove player input after earning upgrades; prove complete helper chain.
 		var before := {}
 		for m in sim.live():
-			if m.type == "counter": before[m.key] = m.sold
+			if m.d < 2 and m.type == "counter": before[m.key] = m.sold
 		sim.test_in = Vector2.ZERO
 		for i in range(9000): sim.update(DT)
 		for m in sim.live():
-			if m.type == "counter":
+			if m.d < 2 and m.type == "counter":
 				var sold: int = m.sold - before[m.key]
 				expect(sold > 0, "%s sells %d unattended in 300s" % [m.key, sold])
 		var ch_before: int = sim.S.ch
@@ -58,7 +58,8 @@ func _init() -> void:
 		expect(sim.mod_by("B", 0).n == 5, "original cows and upgrades retained")
 		expect(sim.S.ch == ch_before and sim.S.done == done_before, "travel preserves career progress")
 		expect(sim.travel_to(1), "travel back to purchased dairy")
-		expect(not sim.travel_to(2), "unsupported bakery cannot be entered")
+		expect(sim.travel_to(2), "purchased bakery can be entered")
+		expect(not sim.travel_to(3), "unsupported supermarket cannot be entered")
 	else:
 		print("  stalled state=%s" % str(sim.state_summary()))
 	var wall := (Time.get_ticks_msec() - t0) / 1000.0

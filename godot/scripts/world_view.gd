@@ -127,7 +127,11 @@ func draw_module(m) -> void:
 				draw_line(Vector2(r.x + 8, y), Vector2(r.x + r.w - 8, y), C("#7a4d2d"), 3)
 			for t in m.tiles:
 				if t.t <= 0:
-					draw_corn_plant(t.x, t.y)
+					match m.item:
+						"corn": draw_corn_plant(t.x, t.y)
+						"wheat": draw_wheat_plant(t.x, t.y)
+						"apple": draw_apple_tree(t.x, t.y)
+						_: Paint.item(self, m.item, t.x, t.y + 8, 1.2)
 				else:
 					var g: float = 1 - t.t / MooSim.REGROW
 					var h := 4 + 12 * g
@@ -174,6 +178,18 @@ func draw_corn_plant(x: float, y: float) -> void:
 	Paint.poly(self, [Vector2(x, y - 2), Vector2(x - 10, y - 6), Vector2(x - 16, y - 16), Vector2(x - 6, y - 10), Vector2(x, y - 6)], leaf)
 	Paint.poly(self, [Vector2(x, y - 4), Vector2(x + 10, y - 8), Vector2(x + 16, y - 18), Vector2(x + 6, y - 12), Vector2(x, y - 8)], leaf)
 	Paint.ell(self, x + 4, y - 15, 4.5, 8, C("#f6c933"))
+
+func draw_wheat_plant(x: float, y: float) -> void:
+	for dx in [-7.0, 0.0, 7.0]:
+		draw_line(Vector2(x + dx * 0.4, y + 6), Vector2(x + dx, y - 16), C("#c99a2e"), 2)
+		Paint.ell(self, x + dx, y - 19, 3, 7, C("#f0c24a"))
+
+func draw_apple_tree(x: float, y: float) -> void:
+	draw_rect(Rect2(x - 2.5, y - 8, 5, 14), C("#7a4a2a"))
+	Paint.circ(self, x, y - 18, 15, C("#3f9b3a"))
+	Paint.circ(self, x - 4, y - 22, 8, C("#57b84a"))
+	for fruit in [Vector2(-7, -14), Vector2(6, -20), Vector2(3, -10)]:
+		Paint.circ(self, x + fruit.x, y + fruit.y, 3.2, C("#e23b3b"))
 
 ## Vehicle shop / armory / bank: out of the slice, drawn as closed shops (provisional).
 func draw_shop_building(m) -> void:

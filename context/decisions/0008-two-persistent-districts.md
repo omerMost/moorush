@@ -1,6 +1,6 @@
 # ADR 0008 — Extend the native world to two persistent districts
 
-**Status:** Provisional implementation choice, pending Android Chapter 2 playtest
+**Status:** Superseded by [ADR 0010](0010-content-count-progression.md) for implemented district count, terminal gate and migration; district-qualified persistence remains in force.
 **Date:** 2026-10-07
 **Supersedes:** None
 

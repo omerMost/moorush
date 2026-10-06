@@ -11,7 +11,7 @@ func compare(sim: MooSim, label: String) -> void:
 func _init() -> void:
 	var sim := MooSim.new(17)
 	sim.autosave = false
-	for i in range(22):
+	for i in range(34):
 		var visible := sim.visible_pads()
 		if visible.is_empty():
 			expect(false, "all upgrades remain reachable")
@@ -29,6 +29,8 @@ func _init() -> void:
 	compare(sim, "new slot reset")
 	sim.apply_state({"ver":9, "ch":0, "done":true, "pk":{"0:Chicken coop":150}})
 	compare(sim, "old completed farm migration")
+	sim.apply_state({"ver":9,"ch":1,"done":true,"pk":{"1:Open a bakery":8400}})
+	compare(sim, "old completed dairy migration")
 	sim.dispose()
 	print(("PASS" if ok else "FAIL") + " upgrade_navigation")
 	quit(0 if ok else 1)

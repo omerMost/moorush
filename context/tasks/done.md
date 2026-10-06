@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Daytime Baker/Chapter 3 port: wheat→bread, apples→pies, helpers/conveyors and 12 new pads; three persistent districts/34 pads, older endpoint migration, cached products and unlocked travel. Eight suites and natural rendered bakery test pass; Android 0.3.0 installed, subjective phone feedback pending.
+
 - 2026-10-07 — User confirms Android 0.2.1 resolves the reported upgrade completion glitch: "yes" after retest prompt.
 
 - 2026-10-07 — Upgrade completion patch: remove screen shake/temporary focus, refresh navigation only for changed geometry; all 22 incremental masks match full rebuilds, both bots pass, Android 0.2.1 installed. User visual comparison remains in device playtest.

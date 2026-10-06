@@ -69,7 +69,7 @@ func _draw() -> void:
 	Paint.circ(self, 30, 28, 11, Paint.C("#ffe58a"))
 	Paint.text(self, txt, 46 + (w - 54) / 2, 30, 21, Color.WHITE)
 	# rank pill
-	var chapter := clampi(int(s.S.ch), 0, 1)
+	var chapter := clampi(int(s.S.ch), 0, MooData.STAGE_COUNT - 1)
 	var rk := "Chapter %d · %s" % [chapter + 1, MooData.TITLES[chapter]]
 	var rw := Paint.text_width(rk, 15) + 48
 	var cx := size.x / 2
@@ -162,7 +162,7 @@ func show_menu() -> void:
 		menu_box.remove_child(c)
 		c.queue_free()
 	menu_box.add_child(lbl("Moo Rush", 40, "#e0702a"))
-	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–2 · v0.2.1", 15))
+	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–3 · v0.3.0", 15))
 	var sound := CheckButton.new()
 	sound.name = "SoundToggle"
 	sound.text = "Sound effects: ON" if Moo.audio.enabled else "Sound effects: OFF"
@@ -187,7 +187,7 @@ func show_menu() -> void:
 		var d = s.read_slot(i)
 		var head := "Slot %d" % i + (" · playing" if i == s.cur_slot else "")
 		if d != null:
-			var chapter := clampi(int(d.get("ch", 0)), 0, 1)
+			var chapter := clampi(int(d.get("ch", 0)), 0, MooData.STAGE_COUNT - 1)
 			var info := "%s %s · 🪙 %s%s" % [MooData.RANKS[chapter], MooData.TITLES[chapter], MooSim.fmt(d.get("money", 0)), " · ✅ complete" if d.get("done", false) else ""]
 			menu_box.add_child(lbl(head + " — " + info, 15))
 			var row := HBoxContainer.new()
@@ -204,7 +204,7 @@ func show_menu() -> void:
 	if s.cur_slot > 0:
 		var travel_row := HBoxContainer.new()
 		travel_row.name = "TravelRow"
-		for district in range(0, mini(int(s.S.ch) + 1, 2)):
+		for district in range(0, mini(int(s.S.ch) + 1, MooData.STAGE_COUNT)):
 			var travel := btn("Chapter %d · %s" % [district + 1, MooData.TITLES[district]], "#528948", func(): travel_to(district))
 			travel.name = "Travel%d" % district
 			travel.custom_minimum_size = Vector2(150, 44)
