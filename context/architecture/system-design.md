@@ -29,3 +29,11 @@ save: snapshot() ⇄ localStorage slots (+ window.claude db when inside claude.a
 
 ## Why this shape
 It was built as a claude.ai artifact, which had to be a single page. The single solid boundary of land and clouds, and pathfinding instead of straight-line chasing, both fixed real stuck bugs (see `sessions/`). Don't regress them.
+
+## Native Chapter 1 slice (ADR 0005)
+
+`godot/scripts/data.gd` holds Farm Kid content. `MooSim` (`sim.gd`, RefCounted) owns the real production/progression/navigation/save logic; the `Moo` autoload exposes it to UI and bots. `world_view.gd` advances and draws it with `Paint`; `hud.gd` handles the slot menu, joystick, keyboard and HUD. `main.tscn` wires these together. The view uses a logical 540×960 expanding portrait canvas.
+
+`check.sh` imports and boots the project, then runs headless gate, unattended-counter, save and touch HUD tests. Tests and the running autoload dispose in-flight callbacks when discarding a simulation, releasing callback reference cycles. Android exports through the committed preset.
+
+Slice limits are explicit: daytime only, no combat/special customers/audio, placeholder shops and a completion flag instead of chapter 2. The HTML remains the frozen specification.

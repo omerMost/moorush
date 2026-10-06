@@ -17,15 +17,17 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## UI / presentation layer
 
-- Canvas 2D with hand-drawn sprites plus emoji. DOM overlays for the HUD, menu and modal. The font is Baloo 2 from Google Fonts.
+- Frozen prototype: Canvas 2D, procedural sprites/emoji, DOM HUD and Baloo 2 from Google Fonts.
+- Native: `Paint`/`world_view.gd` code drawing and `hud.gd` controls. Logical 540×960 canvas_items viewport, expand aspect, portrait; system text/emoji fonts pending Baloo bundle.
 
 ## Data layer
 
-- Content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend.
+- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid data lives in `godot/scripts/data.gd`; `MooSim` owns simulation state.
 
 ## Auth / storage / persistence
 
-- Saves: localStorage, with 3 slots, settings, and migration from v1 and older versions. Cloud: `window.claude` db/user, inside claude.ai only.
+- Native saves: 3 JSON files under `user://`, with snapshot/apply_state in `sim.gd`. Current-version keyed saves preserve partial payments; full legacy HTML import remains pending.
+- Prototype saves: localStorage, with 3 slots, settings, and migration from v1 and older versions. Cloud: `window.claude` db/user, inside claude.ai only.
 
 ## External integrations
 
@@ -33,7 +35,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Tooling (build, test, lint, CI)
 
-- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Not built yet. There is no Playwright suite on the HTML.
+- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, gate bot, unattended counters, populated saves and phone-sized touch HUD. Nonzero processes and engine errors fail. No HTML suite.
 - Prototype: test hook `window.__moo`. Local run: the `prototype` config in `.claude/launch.json` (port 8090).
 - **Android export toolchain (installed 2026-10-07, proven by a probe APK).** To redo it on a fresh Mac:
   1. **JDK 17:** `brew install openjdk@17`. JAVA_HOME = `/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` (it's keg-only and not on PATH; `/usr/bin/java` is only a stub).
@@ -42,7 +44,8 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
   4. **Export templates 4.7.2.stable:** `Godot_v4.7.2-stable_export_templates.tpz` from the GitHub release (1.28 GB; check it against the release's `SHA512-SUMS.txt`, `ca4d71c4…29cff1`). Only `templates/{version.txt,android_debug.apk,android_release.apk,android_source.zip}` are kept, extracted flat into `~/Library/Application Support/Godot/export_templates/4.7.2.stable/` (≈450 MB).
   5. **Debug keystore:** `keytool -genkeypair -keystore "~/Library/Application Support/Godot/keystores/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"`.
   6. **Editor settings** (`~/Library/Application Support/Godot/editor_settings-4.7.tres`): `export/android/java_sdk_path` = the JAVA_HOME above, `export/android/android_sdk_path = "/Users/omer/Library/Android/sdk"`, `export/android/debug_keystore` = the keystore above, `debug_keystore_pass = "android"`. Close the Godot editor before you edit this file, because an open editor can write its own copy back over it.
-  7. **Build:** the preset is `Android` with `gradle_build/use_gradle_build=false` and `arm64-v8a` only. Run `godot --headless --path godot --export-debug "Android" build/moorush-debug.apk`. Godot runs `apksigner` itself. Check the result with `~/Library/Android/sdk/build-tools/36.1.0/aapt dump badging <apk>`; it prints a harmless `android:required` attribute warning. Output: minSdk 24, targetSdk 36.
+  7. **Build:** the preset is `Android` with `gradle_build/use_gradle_build=false` and `arm64-v8a` only. From the repo root run `mkdir -p build`, then `godot --headless --path godot --export-debug "Android" "$PWD/build/moorush-debug.apk"` (an absolute output avoids Godot resolving it inside `godot/`). Godot runs `apksigner` itself. Check the result with `~/Library/Android/sdk/build-tools/36.1.0/aapt dump badging <apk>`; it prints a harmless `android:required` attribute warning. Output: minSdk 24, targetSdk 36.
+  - The committed preset is `godot/export_presets.cfg`, package `com.omer.moorush`, version 0.1.0. `scripts/generate-icons.js` also generates the native placeholder icon. No Internet permission.
   - Build outputs (`build/`, `*.apk`, `*.aab`, `*.idsig`, `.godot/`) are gitignored.
 
 ## What we deliberately did NOT pick

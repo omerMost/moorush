@@ -21,3 +21,9 @@ When to update: any change that alters the sequence, adds a step, or changes whe
 
 ## Trust boundaries
 None. It's a client-only game, and the only external resource is the Google font.
+
+## Native slice flow
+
+Touch/keys in `hud.gd` feed `Moo.sim.move_in`; the world view calls `MooSim.update(dt)`. Players and helpers harvest, feed machines, carry products and collect counter earnings. Standing on pads pays progressively, applies upgrades and reveals cells; the dairy gate sets chapter completion. The view draws this state with procedural sprites. Headless bots drive the same movement and simulation.
+
+`MooSim.snapshot()` writes each selected slot to its own `user://moo-rush-slot-N.json`; loading rebuilds the world, replays finished pads and restores persisted goods, held stack and position. Current-version keyed payment restores exactly. In-flight items/helper cargo remain omitted as in the prototype. Menu/focus/background transitions save; exiting clears in-flight callback references. Android uses the same flow with a logical viewport scaled to device pixels.

@@ -23,7 +23,9 @@ func _init() -> void:
 	var wall := (Time.get_ticks_msec() - t0) / 1000.0
 	if sim.S.done:
 		print("PASS bot_chapter1: gate bought at game time %.1fs (%.1f min), wall %.1fs" % [sim.T, sim.T / 60.0, wall])
+		sim.dispose()
 		quit(0)
 	else:
 		print("FAIL bot_chapter1: no gate after %.0fs; state=%s" % [sim.T, str(sim.state_summary())])
+		sim.dispose()
 		quit(1)

@@ -233,6 +233,11 @@ if (fs.existsSync(iosAssets)) {
   write(path.join(iosAssets, 'AppIcon-Dev.appiconset', 'icon-1024.png'), render(1024, 1024, { bg: DEV_BG, mark: WHITE, hole: DEV_BG, unitRatio: 0.34 }));
 }
 
+// Godot project: keep the same placeholder mark until the brand is chosen.
+if (fs.existsSync(path.join(root, 'godot'))) {
+  write(path.join(root, 'godot', 'icon.png'), render(512, 512, { bg: BG, mark: ACCENT, hole: BG, unitRatio: 0.34 }));
+}
+
 // GitHub social preview (Settings -> General -> Social preview). 1280x640.
 // No API exists for uploading it - drag this file in once.
 write(path.join(root, 'assets', 'github-social-preview.png'), render(1280, 640, { bg: BG, mark: ACCENT, hole: BG, unitRatio: 0.28 }));

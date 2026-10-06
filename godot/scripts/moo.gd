@@ -11,6 +11,10 @@ signal slot_started(i: int)
 func _ready() -> void:
 	sim = MooSim.new()
 
+func _exit_tree() -> void:
+	if sim:
+		sim.dispose()
+
 # ---- test API ----
 func state() -> Dictionary: return sim.state_summary()
 func input(x: float, y: float) -> void: sim.test_in = Vector2(x, y)

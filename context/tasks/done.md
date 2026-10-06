@@ -6,6 +6,9 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Landed existing Godot Chapter 1 slice: Farm Kid production/pads/helpers/gate, code-drawn view, touch/keys and 3 slots. Gate bot 430.9s; unattended counters pass. Completed previously owed STATE and architecture updates.
+- 2026-10-07 — Built and signature-verified native Chapter 1 debug APK (com.omer.moorush, 0.1.0, arm64, SDK 24/36). Added preset, placeholder icon generation and logical phone HUD scaling. Device playtest remains separately queued.
+
 - 2026-10-07 — Android toolchain: JDK 17 (brew openjdk@17), SDK in `~/Library/Android/sdk` (cmdline-tools 15859902, platform-tools 37.0.1, build-tools 36.1.0, android-36), Godot 4.7.2 Android export templates (SHA-512 checked), a debug keystore and the editor settings. Proven with a scratch probe project: a signed debug APK that `aapt dump badging` reads. `godot/` wasn't on `main` yet, so the slice APK moved to the backlog item "Slice APK".
 - 2026-10-07 — Engine decided: Godot 4 + GDScript, Android first, chapter-1 slice first, code-drawn look, tests in Godot only (ADR 0005, cards G1–G4).
 - 2026-10-07 — Dropped "rebuild the test suite on the HTML": the tests move to headless Godot (ADR 0005, G4).

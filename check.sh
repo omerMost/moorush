@@ -1,18 +1,30 @@
 #!/usr/bin/env bash
-# Green = the Godot chapter-1 slice imports, boots, and passes the headless bots (ADR 0002/0005).
+# Import, boot, and run bounded Chapter 1 bots. A process failure is a check failure.
 set -euo pipefail
 cd "$(dirname "$0")/godot"
 GODOT=${GODOT:-/opt/homebrew/bin/godot}
-fail=0
-out=$("$GODOT" --headless --path . --import 2>&1) || true
-if echo "$out" | grep -qE "SCRIPT ERROR|Parse Error"; then echo "$out"; echo "FAIL import"; exit 1; fi
-out=$("$GODOT" --headless --path . --quit-after 120 2>&1) || true
-if echo "$out" | grep -qE "SCRIPT ERROR|Parse Error|^ERROR"; then echo "$out"; echo "FAIL boot"; exit 1; fi
-echo "PASS boot"
-for t in test_bot_chapter1 test_counters_unattended test_save_slots; do
-  out=$("$GODOT" --headless --path . -s "res://tests/$t.gd" 2>&1) || true
-  echo "$out" | grep -E "^(PASS|FAIL)|^  " || true
-  echo "$out" | grep -q "^PASS" || fail=1
-  echo "$out" | grep -qE "SCRIPT ERROR" && fail=1
+run_check() {
+  local label="$1"
+  shift
+  local out
+  if ! out=$("$GODOT" --headless --path . "$@" 2>&1); then
+    printf '%s\nFAIL %s (process exited unsuccessfully)\n' "$out" "$label"
+    return 1
+  fi
+  if printf '%s\n' "$out" | grep -qE 'SCRIPT ERROR|Parse Error|^ERROR|^FAIL'; then
+    printf '%s\nFAIL %s\n' "$out" "$label"
+    return 1
+  fi
+  if [[ "$label" == test_* ]]; then
+    printf '%s\n' "$out" | grep -E '^(PASS|FAIL)|^  ' || true
+    printf '%s\n' "$out" | grep -q '^PASS' || return 1
+  else
+    printf 'PASS %s\n' "$label"
+  fi
+}
+run_check import --import
+run_check boot --quit-after 120
+for t in test_bot_chapter1 test_counters_unattended test_save_slots test_touch_hud; do
+  run_check "$t" -s "res://tests/$t.gd"
 done
-[ $fail = 0 ] && echo "check.sh: GREEN" || { echo "check.sh: RED"; exit 1; }
+printf 'check.sh: GREEN\n'

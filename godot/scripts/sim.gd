@@ -1301,7 +1301,10 @@ func apply_state(d: Dictionary) -> void:
 		for p in pads:
 			var v = d.pk.get(str(p.d) + ":" + p.name)
 			if v != null:
-				p.paid = p.cost if int(v) >= p.cost * 0.9 else mini(p.cost - 1, int(v))
+				if int(d.get("ver", 0)) >= 9:
+					p.paid = clampi(int(v), 0, p.cost)
+				else:
+					p.paid = p.cost if int(v) >= p.cost * 0.9 else mini(p.cost - 1, int(v))
 	for p in pads:
 		if p.paid >= p.cost:
 			apply_pad(p, true)
@@ -1381,6 +1384,10 @@ func start_slot(i: int) -> bool:
 	fresh_state()
 	save(true)
 	return false
+
+# Release in-flight callbacks that capture this simulation before discarding it.
+func dispose() -> void:
+	flyers.clear()
 
 # ===== test API helpers =====
 func pad_named(name: String):

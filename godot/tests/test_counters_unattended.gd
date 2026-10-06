@@ -24,4 +24,5 @@ func _init() -> void:
 			print("  %s sold %d unattended in 300s" % [m.name, sold])
 			if sold <= 0: ok = false
 	print(("PASS" if ok else "FAIL") + " counters_unattended")
+	sim.dispose()
 	quit(0 if ok else 1)

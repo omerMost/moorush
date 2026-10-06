@@ -10,7 +10,7 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 
 ## At a glance
 
-**Working methods (ADRs 0002–0004, adopted 2026-10-07, taken from the friend's RareDrop project):** the AI builds and verifies everything (`check.sh`, bots, decision cards, playtest notes). Claude commits its own verified work and pushes `main` after every landing. Overnight runs leave a morning page.
+**Working methods (ADRs 0002–0004, adopted 2026-10-07, taken from the friend's RareDrop project):** the AI builds and verifies everything (`check.sh`, bots, decision cards, playtest notes). The root AI (Claude or Codex) commits its own verified work and pushes `main` after every landing. Overnight runs leave a morning page.
 
 **Moo Rush: Corn to Capitol** is a top-down tycoon game for touch screens and desktop. You start as a Farm Kid with a corn patch and three cows, and you climb through 9 chapters to President of the USA. Along the way: production chains, conveyors, hired helpers, vehicles, a harbor, robbers, day and night with customers who turn into zombies, aiming weapons, bosses, MOO FEVER and prestige.
 
@@ -20,7 +20,8 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 - **Native app: Godot 4 + GDScript in `godot/`, Android first (ADR 0005).**
   - We start with a chapter-1 (Farm Kid) slice that keeps the code-drawn look, and `check.sh` runs headless Godot bots.
   - The HTML prototype is now a frozen spec.
-  - `godot/` doesn't exist yet. It's the next step.
+  - `godot/` is playable: Farm Kid production, 10 pads, helpers, fog/bounds, code-drawn world, camera, HUD, touch/keys and 3 isolated save slots.
+  - Signed debug APK: `build/moorush-debug.apk` (`com.omer.moorush`, 0.1.0, arm64, minSdk 24, targetSdk 36). No phone connected; device playtest pending.
 
 ## Surfaces / components / modules
 
@@ -42,7 +43,8 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 
 ## Known gaps (not bugs, just not done)
 
-- **No tests in the repo.** The chat's bots existed only in the chat sandbox. New tests will be headless Godot bots (ADR 0005). There will be no HTML test suite.
+- `./check.sh` imports/boots Godot and runs the gate bot (430.9 simulated seconds), unattended counters, populated save round-trips and touch HUD checks at 1080×1920 and 1440×2560. Process failures and engine errors fail the checks.
 - **The core fun problem is open:** the "2-second loop" versus the "one big world" (`research/fun-additions.md`).
 - Untested: the debate when its timer runs out, and MOO FEVER exactly doubling prices.
-- No Moo Rush APK yet: the export preset waits until `godot/` lands on `main` (backlog "Slice APK"). No ads, analytics or store listing. The font loads from a CDN, so the game isn't fully offline.
+- Slice exclusions remain provisional: always daytime, no zombies/special customers/sound, shops marked coming soon, gate marks completion without chapter 2. Native fonts use system fallbacks; Baloo 2 remains to be bundled.
+- Native saves retain the prototype's omission of in-flight goods and helper cargo. Full legacy HTML save import is not implemented; current Godot slots are tested. No ads, analytics or store listing.
