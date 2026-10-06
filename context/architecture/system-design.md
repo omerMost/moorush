@@ -34,6 +34,6 @@ It was built as a claude.ai artifact, which had to be a single page. The single 
 
 `godot/scripts/data.gd` holds Farm Kid content. `MooSim` (`sim.gd`, RefCounted) owns the real production/progression/navigation/save logic; the `Moo` autoload exposes it to UI and bots. `world_view.gd` advances and draws it with `Paint`; `hud.gd` handles the slot menu, joystick, keyboard and HUD. `main.tscn` wires these together. The view uses a logical 540×960 expanding portrait canvas.
 
-`check.sh` imports and boots the project, then runs headless gate, unattended-counter, save and touch HUD tests. Tests and the running autoload dispose in-flight callbacks when discarding a simulation, releasing callback reference cycles. Android exports through the committed preset.
+`check.sh` imports and boots the project, then runs headless gate, unattended-counter, save and touch HUD tests. Tests and the running autoload dispose in-flight callbacks when discarding a simulation, releasing callback reference cycles. Android exports through the committed preset. Optional `test_windowed_chapter1.gd` instantiates the real main scene and drives the guide bot while rendering milestone screenshots; it is separate from headless check.sh.
 
 Slice limits are explicit: daytime only, no combat/special customers/audio, placeholder shops and a completion flag instead of chapter 2. The HTML remains the frozen specification.

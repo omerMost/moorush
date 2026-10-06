@@ -44,6 +44,7 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 ## Known gaps (not bugs, just not done)
 
 - `./check.sh` imports/boots Godot and runs the gate bot (430.9 simulated seconds), unattended counters, populated save round-trips and touch HUD checks at 1080×1920 and 1440×2560. Process failures and engine errors fail the checks.
+- Local rendered test: `godot --path godot -s res://tests/test_windowed_chapter1.gd`; milestone screenshots under `build/`. Native New Game/menu/Resume were exercised via desktop UI; brief keyboard/drag automation did not visibly confirm movement (headless touch/input checks pass).
 - **The core fun problem is open:** the "2-second loop" versus the "one big world" (`research/fun-additions.md`).
 - Untested: the debate when its timer runs out, and MOO FEVER exactly doubling prices.
 - Slice exclusions remain provisional: always daytime, no zombies/special customers/sound, shops marked coming soon, gate marks completion without chapter 2. Native fonts use system fallbacks; Baloo 2 remains to be bundled.

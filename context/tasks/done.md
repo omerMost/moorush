@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Local native playtest and reusable windowed career smoke test: real scene/guide movement to gate (421.7s), rendered milestone captures; native New Game/menu/Resume checked and all four headless suites green. Direct UI keyboard/drag movement remains unconfirmed through automation.
+
 - 2026-10-07 — Landed existing Godot Chapter 1 slice: Farm Kid production/pads/helpers/gate, code-drawn view, touch/keys and 3 slots. Gate bot 430.9s; unattended counters pass. Completed previously owed STATE and architecture updates.
 - 2026-10-07 — Built and signature-verified native Chapter 1 debug APK (com.omer.moorush, 0.1.0, arm64, SDK 24/36). Added preset, placeholder icon generation and logical phone HUD scaling. Device playtest remains separately queued.
 

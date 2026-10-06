@@ -36,6 +36,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 ## Tooling (build, test, lint, CI)
 
 - Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, gate bot, unattended counters, populated saves and phone-sized touch HUD. Nonzero processes and engine errors fail. No HTML suite.
+- Optional rendered smoke test: `godot --path godot -s res://tests/test_windowed_chapter1.gd` (requires a display); runs the career through the main scene with 90s/240s/completion captures under `build/`, in isolated test storage.
 - Prototype: test hook `window.__moo`. Local run: the `prototype` config in `.claude/launch.json` (port 8090).
 - **Android export toolchain (installed 2026-10-07, proven by a probe APK).** To redo it on a fresh Mac:
   1. **JDK 17:** `brew install openjdk@17`. JAVA_HOME = `/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` (it's keg-only and not on PATH; `/usr/bin/java` is only a stub).
