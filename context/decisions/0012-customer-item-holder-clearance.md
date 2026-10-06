@@ -18,3 +18,5 @@ Replace dark output trays with shallow light wood crates at the existing geometr
 
 ## Consequences
 Real queues/departures and forced tray crossings must keep feet clear. Normal pickup paths remain available. Both incremental masks must match full rebuilds; natural careers and saves must still pass. Visual acceptance of crate/cheese designs remains the user's decision.
+
+**C1 selection (2026-10-07):** user chose "C — Cut wheel". Production uses that cached wheel drawing with preview-matching 24×17 stock spacing and the existing 14-unit carried spacing.

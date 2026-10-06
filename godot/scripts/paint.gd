@@ -11,6 +11,7 @@ static var round_points := {}
 static var ellipse_points := {}
 static var color_cache := {}
 static var text_sizes := {}
+static var cheese_wheel: Array = []
 
 # Bake the existing procedural item drawings once, at 4x logical resolution.
 # No external artwork; translucent flyers keep their original drawing path.
@@ -199,16 +200,33 @@ static func sh_egg(ci: CanvasItem, a: float) -> void:
 	stroke_ell(ci, 0, -7, 6, 7.5, C("#d8c39c", a), 1)
 	ell(ci, -2, -10, 1.8, 2.6, Color(1, 1, 1, 0.9 * a))
 
-## Pointed cheese prism with a broad cut face and large round holes.
-## Keep the silhouette distinct from loaves/pies at pile size; bake once as before.
+## User-selected option C: the cut wheel from the native options preview.
+## The opaque path still uses the one-time baked item texture.
 static func sh_cheese(ci: CanvasItem, a: float) -> void:
-	poly(ci, [Vector2(-12, 0), Vector2(10, -13), Vector2(14, -17), Vector2(-8, -4)], C("#ffe779", a))
-	poly(ci, [Vector2(10, -13), Vector2(14, -17), Vector2(14, -2), Vector2(10, 2)], C("#e9a025", a))
-	poly(ci, [Vector2(-12, 0), Vector2(10, -13), Vector2(10, 2)], C("#ffc844", a))
-	for hole in [Vector3(5, -6, 2.3), Vector3(7, -0.5, 1.8), Vector3(-1.5, -0.5, 1.5)]:
-		circ(ci, hole.x, hole.y, hole.z, C("#c7871c", a))
-		ell(ci, hole.x + 0.3, hole.y + 0.5, hole.z * 0.75, hole.z * 0.5, C("#e3a32a", a))
-	ci.draw_line(Vector2(-11, 0), Vector2(9, -12), C("#fff0a1", a), 1)
+	if cheese_wheel.is_empty():
+		var top := [Vector2(0, -12)]
+		for i in 33:
+			var angle: float = deg_to_rad(40.0 + 320.0 * i / 32.0)
+			top.append(Vector2(cos(angle) * 13, -12 + sin(angle) * 7))
+		var bottom := []
+		for point in top: bottom.append(point + Vector2(0, 7))
+		var side := []
+		for i in 17:
+			var angle: float = deg_to_rad(40.0 + 140.0 * i / 16.0)
+			side.append(Vector2(cos(angle) * 13, -12 + sin(angle) * 7))
+		for i in range(16, -1, -1):
+			var angle: float = deg_to_rad(40.0 + 140.0 * i / 16.0)
+			side.append(Vector2(cos(angle) * 13, -5 + sin(angle) * 7))
+		cheese_wheel = [bottom, side, top,
+			[Vector2(0, -12), Vector2(13, -12), Vector2(13, -5), Vector2(0, -5)],
+			[Vector2(0, -12), top[1], top[1] + Vector2(0, 7), Vector2(0, -5)]]
+	poly(ci, cheese_wheel[0], C("#dea22a", a))
+	poly(ci, cheese_wheel[1], C("#eeb73a", a))
+	poly(ci, cheese_wheel[2], C("#ffe475", a))
+	poly(ci, cheese_wheel[3], C("#f3cb5a", a))
+	poly(ci, cheese_wheel[4], C("#d89d2b", a))
+	for hole in [Vector2(-6, -13), Vector2(0, -16), Vector2(-3, -9)]:
+		ell(ci, hole.x, hole.y, 2, 1.3, C("#d5ad3c", a))
 
 ## Bakery products keep their emoji silhouettes using cached procedural stamps.
 static func sh_wheat(ci: CanvasItem, a: float) -> void:

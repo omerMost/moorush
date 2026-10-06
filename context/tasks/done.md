@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Cheese C1: user chose C, cut wheel. Integrated exact native preview shape into the baked cache, matched display spacing, verified natural dairy stock/store/carry and full checks, installed 0.3.3.
+
 - 2026-10-07 — Item-holder follow-up: shallow light wooden crates; public tray clearance and safe customer spawn/lost-exit points while pickup stays available. Route/full-game checks pass, Android 0.3.2 installed; cheese designs await user choice C1.
 
 - 2026-10-07 — Android visual/world patch: clearer cached cheese wedge; restored solid seeded map trees/ponds; customers route around crop beds while harvesting remains available. Nine suites plus rendered scenery/dairy review pass; 0.3.1 installed, subjective retest pending.

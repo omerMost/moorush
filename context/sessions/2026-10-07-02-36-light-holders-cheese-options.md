@@ -17,3 +17,10 @@
 ## Dialogue trace
 - User: "i still dont like the black board that holds the items like the milk , chees still not right give me option to pick from of the chees and zombies still get inside the board item holder".
 - Root addressed item-holder styling/routing and presented three visual cheese options. Asked for A/B/C through the preference card; no answer at landing. Production cheese is not selected on the user's behalf.
+
+## C1 selection follow-up
+- User then chose "C — Cut wheel". Integrated the exact preview wheel into `Paint.sh_cheese`, respecting alpha and retaining the one-time texture bake; cached wheel polygon geometry also avoids repeated fallback construction. Display spacing 24×17 matches preview; carried spacing 14 and inventory/pickup behavior stay the same.
+- C1 accepted, queued selection moved to done, and current architecture/STATE updated. Earlier holder commit is retained as the verified step before this reply.
+- Fresh `./check.sh` GREEN for all nine suites plus import/boot, natural full career 4,521.6s plus 300s unattended production. Native dairy selected-wheel render PASS at 1,286.0s, stock 57/sales 84; holder/store/carried stacks/faded drop item inspected at game size without harmful crowding.
+- Signed Android 0.3.3 exported/verified/installed and resumed. Phone wallet/capacity/chapter/payment arrays and audio preference preserved across install. Cold launch 598ms; startup has no Godot script errors; root phone screenshot confirms cut wheels and wooden holders. Initial five-second startup window 53.8 FPS/p95 19.05ms/draw CPU 11.52ms; sustained heat/scene performance remains unisolated and pending, not a new acceptance claim.
+- User's cheese selection is implemented; subjective phone visual/route retest remains pending.
