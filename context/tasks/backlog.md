@@ -25,6 +25,8 @@ _(Approved, ready to pick up, not started yet.)_
 
 ## Later / stretch
 
+- [ ] Refine Toss-bin artwork with a visible open mouth/rim; current solid top bar makes the eased shrink/fade read as entering a lid (native rendered QA).
+
 _(Parking lot. Ideas, nice-to-haves, things you'd do if everything else were done.)_
 
 - [ ] Research ideas not yet built (`research/`): one-thumb mode, a lunger zombie, safe zones, the dawn payout screen, secret characters, a cow-breed album, the Grandpa Bovine narrator and the rival Chad Cornwell, share cards, weekly mutators, Cow Cannon fast travel, the Tower of Babel stack
