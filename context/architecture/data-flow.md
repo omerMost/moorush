@@ -35,3 +35,5 @@ Sound: simulation actions emit pick/drop/coin/warn/unlock/gate events; World sen
 Menu travel moves the player to an unlocked district without resetting the career, stock or upgrades. Three unfinished pads remain visible per unlocked district; all unlocked districts continue production while visited elsewhere.
 
 Paid upgrades refresh obstacle geometry incrementally, rebuild affected navigation cells and invalidate helper paths only when needed. Confetti/sound/toast mark completion while the camera keeps following the player. Save writes and chapter travel retain their existing behavior.
+
+World rebuild regenerates scenery from cell seeds without consuming gameplay RNG or changing saves. Tree/pond geometry participates in collision and navigation. Customer queue/departure goals use cached paths with the public crop-exclusion mask; crops remain accessible for harvesting. Revealed trees draw at their depth alongside people.

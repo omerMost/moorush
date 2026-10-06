@@ -6,8 +6,10 @@ func expect(value: bool, label: String) -> void:
 	print("  %s %s" % ["ok" if value else "BAD", label])
 func compare(sim: MooSim, label: String) -> void:
 	var incremental: PackedByteArray = sim.NAV.blk.duplicate()
+	var public_incremental: PackedByteArray = sim.NAV.public_blk.duplicate()
 	sim.build_nav()
 	expect(incremental == sim.NAV.blk, label + " incremental grid matches full collision/fog rebuild")
+	expect(public_incremental == sim.NAV.public_blk, label + " customer grid matches full field-avoidance rebuild")
 func _init() -> void:
 	var sim := MooSim.new(17)
 	sim.autosave = false

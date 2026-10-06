@@ -43,7 +43,7 @@ var save_t := 0.0
 var warn_t := 0.0
 var target_bounds := {"x0": 0.0, "y0": 0.0, "x1": W, "y1": 4000.0}
 var bounds = null
-var NAV := {"s": 20, "ox": 0.0, "oy": 0.0, "nx": 0, "ny": 0, "blk": PackedByteArray()}
+var NAV := {"s": 20, "ox": 0.0, "oy": 0.0, "nx": 0, "ny": 0, "blk": PackedByteArray(), "public_blk": PackedByteArray()}
 var stage: Dictionary
 var rng := RandomNumberGenerator.new()
 var no_clip := false
@@ -285,6 +285,7 @@ func pad_rect(p) -> Dictionary:
 
 func build_world() -> void:
 	NAV.blk = PackedByteArray()
+	NAV.public_blk = PackedByteArray()
 	mods = []; pads = []; helpers = []; belts = []; leaving = []; flyers = []; cells = []; ground = []
 	floaters = []; sparks = []
 	var k := 0
@@ -301,11 +302,13 @@ func build_world() -> void:
 			for c in 3:
 				var o := cell_xy(district, c, r)
 				cells.append({"d": district, "c": c, "r": r, "x": o.x, "y": o.y, "w": CW, "h": CHh, "mod": null, "fog": 1.0, "on": false,
-					"seed": (district * 27 + r * 9 + c) * 7919, "obs": []})
+					"seed": (district * 27 + r * 9 + c) * 7919, "obs": [], "decor": []})
 	for m in mods:
 		for c in cells:
 			if c.d == m.d and c.c == m.c and c.r == m.r:
 				c.mod = m
+	for c in cells:
+		if c.mod == null: make_decor(c)
 	for p in pads:
 		p.merge(pad_rect(p), true)
 	for m in mods:
@@ -579,7 +582,7 @@ func new_cust(x: float, y: float, m) -> Dictionary:
 	return {"x": x, "y": y, "want": m.want[0] + rng.randi() % (m.want[1] - m.want[0] + 1), "got": 0, "wait": 0.0, "serve": 0.0,
 		"at": false, "happy": 0.0, "speed": 110.0, "face": 1, "walk": 0.0, "moving": false,
 		"shirt": pick(MooData.SHIRTS), "pants": pick(MooData.PANTS), "skin": pick(MooData.SKINS), "hair": pick(MooData.HAIRS),
-		"hat": rng.randf() < 0.4, "item": m.item, "patience": PATIENCE, "say": null, "leave": null}
+		"hat": rng.randf() < 0.4, "item": m.item, "patience": PATIENCE, "say": null, "leave": null, "path": null, "pathKey": ""}
 
 static func q_slot(m, i: int) -> Dictionary:
 	return {"x": m.ox + 340 - i * 54, "y": m.oy + 330}
@@ -599,7 +602,7 @@ func upd_counter(m, dt: float) -> void:
 	for i in m.q.size():
 		var c = m.q[i]
 		var s := q_slot(m, i)
-		c.at = move_to(c, s.x, s.y, c.speed, dt)
+		c.at = walk_to(c, s.x, s.y, c.speed, dt, true)
 		c.wait += dt
 		if c.at:
 			c.face = 1
@@ -934,7 +937,7 @@ func update(dt: float) -> void:
 	for i in range(leaving.size() - 1, -1, -1):
 		var c = leaving[i]
 		c.happy -= dt
-		if move_to(c, c.leave.x, c.leave.y, c.speed, dt):
+		if walk_to(c, c.leave.x, c.leave.y, c.speed, dt, true):
 			leaving.remove_at(i)
 	for h in helpers:
 		upd_helper(h, dt)
@@ -1000,6 +1003,30 @@ func upd_speech(dt: float) -> void:
 				e.say = null
 
 # ===== solid world (L852-950) =====
+## Frozen HTML makeDecor: stable scenery, with the walking lane kept clear.
+func make_decor(c) -> void:
+	var seed_value: int = c.seed
+	c.decor = []
+	if hash01(seed_value + 99) > 0.45:
+		c.decor.append({"kind":"pond", "x":c.x + CW / 2 + (hash01(seed_value + 5) - 0.5) * 80, "y":c.y + 175, "rx":78.0, "ry":44.0})
+	var tries := 0
+	var trees := 0
+	while trees < 9 and tries < 80:
+		tries += 1
+		var radius := 20 + hash01(seed_value + tries * 13) * 16
+		var x: float = c.x + 45 + radius + hash01(seed_value + tries) * (CW - 90 - 2 * radius)
+		var y: float = c.y + 45 + radius + hash01(seed_value + tries * 7 + 3) * (CHh - 90 - 2 * radius)
+		if y + radius > c.y + 275 and y - radius < c.y + 385: continue
+		var overlaps := false
+		for d in c.decor:
+			if d.kind == "tree":
+				overlaps = overlaps or Vector2(d.x - x, d.y - y).length() < d.r + radius + 26
+			else:
+				overlaps = overlaps or (absf(d.x - x) < d.rx + radius + 20 and absf(d.y - y) < d.ry + radius + 20)
+		if overlaps: continue
+		c.decor.append({"kind":"tree", "x":x, "y":y, "r":radius})
+		trees += 1
+
 func cell_obstacles(c) -> Array:
 	var o := []
 	if not c.on:
@@ -1017,6 +1044,10 @@ func cell_obstacles(c) -> Array:
 			o.append({"r": m.bench})
 		if m.has("bin"):
 			o.append({"r": m.bin})
+	else:
+		for d in c.decor:
+			if d.kind == "tree": o.append({"c":{"x":d.x,"y":d.y,"r":d.r * 0.8}})
+			else: o.append({"r":{"x":d.x-d.rx+10,"y":d.y-d.ry+8,"w":d.rx*2-20,"h":d.ry*2-16}})
 	return o
 
 func refresh_obstacles() -> void:
@@ -1036,8 +1067,13 @@ func refresh_obstacles() -> void:
 			for gy in range(maxi(0, nav_gy(c.y - 60)), mini(NAV.ny, nav_gy(c.y + c.h + 60) + 1)):
 				for gx in range(maxi(0, nav_gx(c.x - 60)), mini(NAV.nx, nav_gx(c.x + c.w + 60) + 1)):
 					NAV.blk[gy * NAV.nx + gx] = nav_blocked(gx, gy)
+					NAV.public_blk[gy * NAV.nx + gx] = field_blocked(nav_cx(gx), nav_cy(gy))
 	for h in helpers:
 		h.path = null
+	for m in mods:
+		if m.type == "counter":
+			for customer in m.q: customer.path = null
+	for customer in leaving: customer.path = null
 
 func near_obs(x: float, y: float, R: float) -> Array:
 	var out := []
@@ -1048,6 +1084,15 @@ func near_obs(x: float, y: float, R: float) -> Array:
 	return out
 
 func push_out(e, o, R: float) -> void:
+	if o.has("c"):
+		var circle = o.c
+		var offset := Vector2(e.x - circle.x, e.y - circle.y)
+		var radius: float = circle.r + R
+		if offset.length() < radius:
+			var direction := offset.normalized() if offset.length() > 0 else Vector2.RIGHT
+			e.x = circle.x + direction.x * radius
+			e.y = circle.y + direction.y * radius
+		return
 	var r = o.r
 	var cx := clampf(e.x, r.x, r.x + r.w)
 	var cy := clampf(e.y, r.y, r.y + r.h)
@@ -1072,6 +1117,9 @@ func push_out(e, o, R: float) -> void:
 
 func blocked_at(x: float, y: float, R: float = 12.0) -> bool:
 	for o in near_obs(x, y, 60):
+		if o.has("c"):
+			if Vector2(x - o.c.x, y - o.c.y).length() < o.c.r + R: return true
+			continue
 		var r = o.r
 		var cx := clampf(x, r.x, r.x + r.w)
 		var cy := clampf(y, r.y, r.y + r.h)
@@ -1145,41 +1193,53 @@ func build_nav() -> void:
 		for gx in NAV.nx:
 			blk[gy * NAV.nx + gx] = nav_blocked(gx, gy)
 	NAV.blk = blk
+	var public_mask := PackedByteArray()
+	public_mask.resize(NAV.nx * NAV.ny)
+	for gy in NAV.ny:
+		for gx in NAV.nx:
+			public_mask[gy * NAV.nx + gx] = field_blocked(nav_cx(gx), nav_cy(gy))
+	NAV.public_blk = public_mask
+
+## Public foot traffic avoids crop beds; harvesting keeps the normal mask.
+func field_blocked(x: float, y: float) -> int:
+	for m in mods:
+		if m.type == "field" and active(m) and in_r({"x":x,"y":y}, m.rect, 18): return 1
+	return 0
 
 func nav_blocked(gx: int, gy: int) -> int:
 	var x := nav_cx(gx)
 	var y := nav_cy(gy)
 	return 1 if not walkable(x, y) or blocked_at(x, y, 14) else 0
 
-func nav_free(gx: int, gy: int) -> bool:
-	return gx >= 0 and gy >= 0 and gx < NAV.nx and gy < NAV.ny and NAV.blk[gy * NAV.nx + gx] == 0
+func nav_free(gx: int, gy: int, avoid_fields: bool = false) -> bool:
+	return gx >= 0 and gy >= 0 and gx < NAV.nx and gy < NAV.ny and NAV.blk[gy * NAV.nx + gx] == 0 and (not avoid_fields or NAV.public_blk[gy * NAV.nx + gx] == 0)
 
-func nearest_free(gx: int, gy: int) -> Vector2i:
-	if nav_free(gx, gy):
+func nearest_free(gx: int, gy: int, avoid_fields: bool = false) -> Vector2i:
+	if nav_free(gx, gy, avoid_fields):
 		return Vector2i(gx, gy)
 	for r in range(1, 25):
 		for dx in range(-r, r + 1):
 			for dy in range(-r, r + 1):
-				if maxi(absi(dx), absi(dy)) == r and nav_free(gx + dx, gy + dy):
+				if maxi(absi(dx), absi(dy)) == r and nav_free(gx + dx, gy + dy, avoid_fields):
 					return Vector2i(gx + dx, gy + dy)
 	return Vector2i(gx, gy)
 
-func line_free(ax: float, ay: float, bx: float, by: float) -> bool:
+func line_free(ax: float, ay: float, bx: float, by: float, avoid_fields: bool = false) -> bool:
 	var d := Vector2(bx - ax, by - ay).length()
 	var n := int(ceil(d / 8))
 	for i in range(1, n):
 		var x := ax + (bx - ax) * i / n
 		var y := ay + (by - ay) * i / n
-		if not nav_free(nav_gx(x), nav_gy(y)):
+		if not nav_free(nav_gx(x), nav_gy(y), avoid_fields):
 			return false
 	return true
 
-func find_path(ax: float, ay: float, bx: float, by: float):
+func find_path(ax: float, ay: float, bx: float, by: float, avoid_fields: bool = false):
 	var nx: int = NAV.nx
-	if line_free(ax, ay, bx, by):
+	if line_free(ax, ay, bx, by, avoid_fields):
 		return [{"x": bx, "y": by}]
-	var s0 := nearest_free(nav_gx(ax), nav_gy(ay))
-	var t0 := nearest_free(nav_gx(bx), nav_gy(by))
+	var s0 := nearest_free(nav_gx(ax), nav_gy(ay), avoid_fields)
+	var t0 := nearest_free(nav_gx(bx), nav_gy(by), avoid_fields)
 	var N: int = nx * NAV.ny
 	var g := PackedFloat32Array(); g.resize(N); g.fill(1e9)
 	var from := PackedInt32Array(); from.resize(N); from.fill(-1)
@@ -1209,9 +1269,9 @@ func find_path(ax: float, ay: float, bx: float, by: float):
 					continue
 				var X: int = x + dx
 				var Y: int = y + dy
-				if not nav_free(X, Y):
+				if not nav_free(X, Y, avoid_fields):
 					continue
-				if dx != 0 and dy != 0 and (not nav_free(x + dx, y) or not nav_free(x, y + dy)):
+				if dx != 0 and dy != 0 and (not nav_free(x + dx, y, avoid_fields) or not nav_free(x, y + dy, avoid_fields)):
 					continue
 				var j := Y * nx + X
 				var ng := g[i] + (1.41 if dx != 0 and dy != 0 else 1.0)
@@ -1233,7 +1293,7 @@ func find_path(ax: float, ay: float, bx: float, by: float):
 	var cx := ax; var cy := ay; var q := 0
 	while q < pts.size():
 		var j := pts.size() - 1
-		while j > q and not line_free(cx, cy, pts[j].x, pts[j].y):
+		while j > q and not line_free(cx, cy, pts[j].x, pts[j].y, avoid_fields):
 			j -= 1
 		out.append(pts[j])
 		cx = pts[j].x; cy = pts[j].y
@@ -1268,10 +1328,13 @@ static func _hpop(heap: Array) -> Array:
 			k = m
 	return top
 
-func walk_to(h, tx: float, ty: float, sp: float, dt: float) -> bool:
+func walk_to(h, tx: float, ty: float, sp: float, dt: float, avoid_fields: bool = false) -> bool:
 	var key := str(round(tx)) + "," + str(round(ty))
 	if h.pathKey != key or h.path == null:
-		var pth = find_path(h.x, h.y, tx, ty)
+		var pth = find_path(h.x, h.y, tx, ty, avoid_fields)
+		if pth == null and avoid_fields:
+			h.moving = false
+			return false
 		h.path = pth if pth != null else [{"x": tx, "y": ty}]
 		h.pathKey = key
 	while h.path.size() > 1 and Vector2(h.path[0].x - h.x, h.path[0].y - h.y).length() < 4:

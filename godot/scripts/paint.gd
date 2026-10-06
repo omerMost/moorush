@@ -199,14 +199,16 @@ static func sh_egg(ci: CanvasItem, a: float) -> void:
 	stroke_ell(ci, 0, -7, 6, 7.5, C("#d8c39c", a), 1)
 	ell(ci, -2, -10, 1.8, 2.6, Color(1, 1, 1, 0.9 * a))
 
-## A small cheese wedge, baked alongside the original procedural items.
+## Pointed cheese prism with a broad cut face and large round holes.
+## Keep the silhouette distinct from loaves/pies at pile size; bake once as before.
 static func sh_cheese(ci: CanvasItem, a: float) -> void:
-	poly(ci, [Vector2(-10, -12), Vector2(10, -7), Vector2(10, 2), Vector2(-10, -3)], C("#e6a52b", a))
-	poly(ci, [Vector2(-10, -12), Vector2(-1, -20), Vector2(10, -7)], C("#ffe47a", a))
-	poly(ci, [Vector2(-10, -12), Vector2(10, -7), Vector2(10, -1), Vector2(-10, -6)], C("#f6c943", a))
-	for hole in [Vector2(-5, -8), Vector2(3, -6), Vector2(6, -2)]:
-		ell(ci, hole.x, hole.y, 1.8, 1.5, C("#c4861c", a))
-	ell(ci, -1, -14, 2, 1.1, C("#dfb540", a))
+	poly(ci, [Vector2(-12, 0), Vector2(10, -13), Vector2(14, -17), Vector2(-8, -4)], C("#ffe779", a))
+	poly(ci, [Vector2(10, -13), Vector2(14, -17), Vector2(14, -2), Vector2(10, 2)], C("#e9a025", a))
+	poly(ci, [Vector2(-12, 0), Vector2(10, -13), Vector2(10, 2)], C("#ffc844", a))
+	for hole in [Vector3(5, -6, 2.3), Vector3(7, -0.5, 1.8), Vector3(-1.5, -0.5, 1.5)]:
+		circ(ci, hole.x, hole.y, hole.z, C("#c7871c", a))
+		ell(ci, hole.x + 0.3, hole.y + 0.5, hole.z * 0.75, hole.z * 0.5, C("#e3a32a", a))
+	ci.draw_line(Vector2(-11, 0), Vector2(9, -12), C("#fff0a1", a), 1)
 
 ## Bakery products keep their emoji silhouettes using cached procedural stamps.
 static func sh_wheat(ci: CanvasItem, a: float) -> void:

@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Android visual/world patch: clearer cached cheese wedge; restored solid seeded map trees/ponds; customers route around crop beds while harvesting remains available. Nine suites plus rendered scenery/dairy review pass; 0.3.1 installed, subjective retest pending.
+
 - 2026-10-07 — Daytime Baker/Chapter 3 port: wheat→bread, apples→pies, helpers/conveyors and 12 new pads; three persistent districts/34 pads, older endpoint migration, cached products and unlocked travel. Eight suites and natural rendered bakery test pass; Android 0.3.0 installed, subjective phone feedback pending.
 
 - 2026-10-07 — User confirms Android 0.2.1 resolves the reported upgrade completion glitch: "yes" after retest prompt.

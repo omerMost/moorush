@@ -172,6 +172,31 @@ func draw_module(m) -> void:
 			Paint.emoji_at(self, MooData.RANKS[m.d + 1], c.x - 70, oy + 142 - 12 * 1.7, 24 * 1.7)
 			Paint.text(self, MooData.TITLES[m.d + 1], c.x + 24, oy + 112, 28, Color.WHITE, Color(40 / 255.0, 25 / 255.0, 10 / 255.0, 0.5))
 
+## Prototype drawDecor: ponds sit below the y-sorted trees and people.
+func draw_decor(cell) -> void:
+	for decoration in cell.get("decor", []):
+		if decoration.kind != "pond":
+			continue
+		var x: float = decoration.x
+		var y: float = decoration.y
+		var rx: float = decoration.rx
+		var ry: float = decoration.ry
+		Paint.ell(self, x, y, rx, ry, C("#3f8fd0"))
+		Paint.ell(self, x, y - 3, rx - 8, ry - 8, C("#5aa9e6"))
+		Paint.ell(self, x - 20, y - 12, 25, 7, Color(1, 1, 1, 0.35))
+		Paint.stroke_ell(self, x, y, rx + 2, ry + 2, C("#c9b48a"), 5)
+
+## Prototype drawTree; the trunk ground position participates in entity sorting.
+func draw_tree(tree) -> void:
+	var x: float = tree.x
+	var y: float = tree.y
+	var r: float = tree.r
+	Paint.ell(self, x, y + r * 0.55, r * 0.95, r * 0.38, Color(0, 0, 0, 0.18))
+	Paint.fill_rr(self, x - 5, y - 4, 10, r * 0.6 + 4, 3, C("#6b4423"))
+	Paint.circ(self, x, y - r * 0.55, r, C("#3f8f35"))
+	Paint.circ(self, x - r * 0.3, y - r * 0.85, r * 0.6, C("#4fa843"))
+	Paint.circ(self, x - r * 0.4, y - r, r * 0.25, Color(1, 1, 1, 0.12))
+
 func draw_corn_plant(x: float, y: float) -> void:
 	draw_line(Vector2(x, y + 6), Vector2(x, y - 18), C("#3f8f35"), 3)
 	var leaf := C("#4fa843")
@@ -403,8 +428,11 @@ func _draw() -> void:
 			draw_rect(Rect2(c.x - 7, c.y - 7, c.w + 14, 14), path_col)
 			draw_rect(Rect2(c.x - 7, c.y - 7, 14, c.h + 14), path_col)
 	for c in sim.cells:
-		if vis(c) and c.fog < 1 and c.mod != null:
-			draw_module(c.mod)
+		if vis(c) and c.fog < 1:
+			if c.mod != null:
+				draw_module(c.mod)
+			else:
+				draw_decor(c)
 	for b in sim.belts:
 		draw_belt(b)
 	var L := sim.live()
@@ -421,6 +449,11 @@ func _draw() -> void:
 			draw_pad(pd)
 	# y-sorted entities
 	var ents: Array = []
+	for cell in sim.cells:
+		if cell.on and cell.mod == null and vis(cell):
+			for decoration in cell.get("decor", []):
+				if decoration.kind == "tree":
+					ents.append([decoration.y + decoration.r * 0.4, "tree", decoration])
 	for m in L:
 		if not vis(m.cell):
 			continue
@@ -444,6 +477,7 @@ func _draw() -> void:
 	for e in ents:
 		var o = e[2]
 		match e[1]:
+			"tree": draw_tree(o)
 			"cow": draw_cow(o)
 			"hen": draw_hen(o)
 			"unit": draw_unit(o.m, o.u)

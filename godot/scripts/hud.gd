@@ -162,7 +162,7 @@ func show_menu() -> void:
 		menu_box.remove_child(c)
 		c.queue_free()
 	menu_box.add_child(lbl("Moo Rush", 40, "#e0702a"))
-	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–3 · v0.3.0", 15))
+	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–3 · v0.3.1", 15))
 	var sound := CheckButton.new()
 	sound.name = "SoundToggle"
 	sound.text = "Sound effects: ON" if Moo.audio.enabled else "Sound effects: OFF"
