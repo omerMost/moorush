@@ -35,7 +35,15 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 - Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Not built yet. There is no Playwright suite on the HTML.
 - Prototype: test hook `window.__moo`. Local run: the `prototype` config in `.claude/launch.json` (port 8090).
-- Android export: needs JDK 17, the Android SDK and the Godot 4.7.2 export templates. **Not installed yet.**
+- **Android export toolchain (installed 2026-10-07, proven by a probe APK).** To redo it on a fresh Mac:
+  1. **JDK 17:** `brew install openjdk@17`. JAVA_HOME = `/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` (it's keg-only and not on PATH; `/usr/bin/java` is only a stub).
+  2. **SDK command-line tools 15859902:** download `https://dl.google.com/android/repository/commandlinetools-mac_arm64-15859902_latest.zip` (156 MB, sha256 `835b62a2…5002c4e`, the same one the brew cask uses) and unzip its `cmdline-tools/` folder to `~/Library/Android/sdk/cmdline-tools/latest/`.
+  3. **SDK packages** (the versions Godot 4.7.2 pins in `platform/android/java/app/config.gradle`): `yes | sdkmanager --sdk_root=$HOME/Library/Android/sdk --licenses`, then `sdkmanager --sdk_root=$HOME/Library/Android/sdk "platform-tools" "build-tools;36.1.0" "platforms;android-36"`. Run it with JAVA_HOME set. That installs platform-tools 37.0.1. The NDK 29 and CMake 3.22.1 are **not** installed: only the Gradle build needs them.
+  4. **Export templates 4.7.2.stable:** `Godot_v4.7.2-stable_export_templates.tpz` from the GitHub release (1.28 GB; check it against the release's `SHA512-SUMS.txt`, `ca4d71c4…29cff1`). Only `templates/{version.txt,android_debug.apk,android_release.apk,android_source.zip}` are kept, extracted flat into `~/Library/Application Support/Godot/export_templates/4.7.2.stable/` (≈450 MB).
+  5. **Debug keystore:** `keytool -genkeypair -keystore "~/Library/Application Support/Godot/keystores/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"`.
+  6. **Editor settings** (`~/Library/Application Support/Godot/editor_settings-4.7.tres`): `export/android/java_sdk_path` = the JAVA_HOME above, `export/android/android_sdk_path = "/Users/omer/Library/Android/sdk"`, `export/android/debug_keystore` = the keystore above, `debug_keystore_pass = "android"`. Close the Godot editor before you edit this file, because an open editor can write its own copy back over it.
+  7. **Build:** the preset is `Android` with `gradle_build/use_gradle_build=false` and `arm64-v8a` only. Run `godot --headless --path godot --export-debug "Android" build/moorush-debug.apk`. Godot runs `apksigner` itself. Check the result with `~/Library/Android/sdk/build-tools/36.1.0/aapt dump badging <apk>`; it prints a harmless `android:required` attribute warning. Output: minSdk 24, targetSdk 36.
+  - Build outputs (`build/`, `*.apk`, `*.aab`, `*.idsig`, `.godot/`) are gitignored.
 
 ## What we deliberately did NOT pick
 

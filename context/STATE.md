@@ -38,11 +38,11 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 
 - Prototype: vanilla JS, canvas 2D and Web Audio in one file. The Google font "Baloo 2" comes from a CDN, with a system-font fallback.
 - Native app: **Godot 4.7.2** (installed at `/opt/homebrew/bin/godot`), GDScript, Android first (ADR 0005).
-- Not installed yet: JDK 17, the Android SDK and the export templates.
+- **Android export toolchain: installed and proven** (2026-10-07). JDK 17 (brew `openjdk@17`), the SDK in `~/Library/Android/sdk` (build-tools 36.1.0, android-36, platform-tools), the Godot 4.7.2 Android templates, a debug keystore and the editor settings. A probe project exported a signed debug APK headless (minSdk 24, targetSdk 36). The exact recipe is in `architecture/tech-stack.md`. No NDK; the Gradle build isn't used.
 
 ## Known gaps (not bugs, just not done)
 
 - **No tests in the repo.** The chat's bots existed only in the chat sandbox. New tests will be headless Godot bots (ADR 0005). There will be no HTML test suite.
 - **The core fun problem is open:** the "2-second loop" versus the "one big world" (`research/fun-additions.md`).
 - Untested: the debate when its timer runs out, and MOO FEVER exactly doubling prices.
-- No native build, ads, analytics or store listing. The font loads from a CDN, so the game isn't fully offline.
+- No Moo Rush APK yet: the export preset waits until `godot/` lands on `main` (backlog "Slice APK"). No ads, analytics or store listing. The font loads from a CDN, so the game isn't fully offline.

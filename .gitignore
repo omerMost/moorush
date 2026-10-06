@@ -3,3 +3,10 @@ dist/
 .env
 .env.*
 .DS_Store
+
+# Godot / Android build outputs
+build/
+*.apk
+*.aab
+*.idsig
+.godot/
