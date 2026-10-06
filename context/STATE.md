@@ -4,7 +4,7 @@
 
 If this is out of sync with the code, the code wins — but raise it as a bug, because keeping STATE current is part of the working discipline (see CLAUDE.md).
 
-**Last updated:** 2026-10-06
+**Last updated:** 2026-10-07
 
 ---
 
@@ -17,7 +17,10 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 - **The game is [`prototype/index.html`](../prototype/index.html):** version 9, one HTML file of 2,233 lines, plain canvas 2D, no libraries.
 - It was built in a claude.ai chat from 2026-10-03 to 10-04 and imported on 2026-10-06. History is in `sessions/2026-10-03-*` and `2026-10-04-*`, and research in `research/`.
 - **The repo copy is now the source of truth.** The public claude.ai artifact (https://claude.ai/artifact/YFNZ2jPt6E6tRczYqF74EY) is a frozen copy.
-- The native app's engine isn't decided yet (backlog).
+- **Native app: Godot 4 + GDScript in `godot/`, Android first (ADR 0005).**
+  - We start with a chapter-1 (Farm Kid) slice that keeps the code-drawn look, and `check.sh` runs headless Godot bots.
+  - The HTML prototype is now a frozen spec.
+  - `godot/` doesn't exist yet. It's the next step.
 
 ## Surfaces / components / modules
 
@@ -34,11 +37,12 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 ## Stack
 
 - Prototype: vanilla JS, canvas 2D and Web Audio in one file. The Google font "Baloo 2" comes from a CDN, with a system-font fallback.
-- Native app: **TBD** (backlog). Godot 4 is what the sibling project Blast Ranger chose (its ADR 0002).
+- Native app: **Godot 4.7.2** (installed at `/opt/homebrew/bin/godot`), GDScript, Android first (ADR 0005).
+- Not installed yet: JDK 17, the Android SDK and the export templates.
 
 ## Known gaps (not bugs, just not done)
 
-- **No tests in the repo.** The chat's bots and feature suites (15 + 30 + 26 tests, the full-career bot) existed only inside the chat sandbox.
+- **No tests in the repo.** The chat's bots existed only in the chat sandbox. New tests will be headless Godot bots (ADR 0005). There will be no HTML test suite.
 - **The core fun problem is open:** the "2-second loop" versus the "one big world" (`research/fun-additions.md`).
 - Untested: the debate when its timer runs out, and MOO FEVER exactly doubling prices.
 - No native build, ads, analytics or store listing. The font loads from a CDN, so the game isn't fully offline.
