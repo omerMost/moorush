@@ -6,7 +6,6 @@ Active, actionable work. One bullet = one chunk you could pick up and finish in 
 
 _(Mid-flight or top-priority. Usually 1–3 items.)_
 
-- [ ] **Android smoothness validation:** compare 0.1.1 caching/input-order candidate with HTML feel on POCO; collect debug MOO_PERF frame windows and confirm with user. Complaint and local benchmark in playtest-2026-10-07.md; resolution not yet claimed.
 - [ ] **Android device playtest:** APK installed/launched on the connected POCO on 2026-10-07. Check actual touch controls, layout, suspend/resume saves and sustained performance; startup logs are clean of Godot script errors/crashes.
 
 - [ ] **The fun core:** the 2-second loop versus the one big world. Decide with the user (`research/fun-additions.md`, item #2 is unbuilt). This stays separate from the port (ADR 0005, G1).

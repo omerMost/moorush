@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Android smoothness validation: user says "yes much better" after v0.1.1; four five-second engine frame windows report 78.4–99.9 FPS on connected POCO. Long sustained performance and suspend/resume remain separate checks.
+
 - 2026-10-07 — Local native playtest and reusable windowed career smoke test: real scene/guide movement to gate (421.7s), rendered milestone captures; native New Game/menu/Resume checked and all four headless suites green. Direct UI keyboard/drag movement remains unconfirmed through automation.
 
 - 2026-10-07 — Landed existing Godot Chapter 1 slice: Farm Kid production/pads/helpers/gate, code-drawn view, touch/keys and 3 slots. Gate bot 430.9s; unattended counters pass. Completed previously owed STATE and architecture updates.

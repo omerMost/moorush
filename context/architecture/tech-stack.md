@@ -18,7 +18,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 ## UI / presentation layer
 
 - Frozen prototype: Canvas 2D, procedural sprites/emoji, DOM HUD and Baloo 2 from Google Fonts.
-- Native drawing cache (ADR 0006, provisional): four procedural 4× item textures baked at runtime, bounded curve/text caches and batched grass; no external sprite art or added dependencies.
+- Native drawing cache (ADR 0006): four procedural 4× item textures baked at runtime, bounded curve/text caches and batched grass; no external sprite art or added dependencies.
 - Native: `Paint`/`world_view.gd` code drawing and `hud.gd` controls. Logical 540×960 canvas_items viewport, expand aspect, portrait; system text/emoji fonts pending Baloo bundle.
 
 ## Data layer

@@ -1,6 +1,6 @@
 # ADR 0006 — Cache procedural drawing for the native slice
 
-**Status:** Provisional implementation choice, pending user playtest
+**Status:** Accepted following user playtest ("yes much better", 2026-10-07)
 **Date:** 2026-10-07
 **Supersedes:** None; preserves ADR 0005’s code-drawn look.
 
@@ -18,4 +18,4 @@ Debug Android builds print five-second frame timing windows only while playing. 
 - New artwork: changes visual direction and contradicts the port scope.
 
 ## Consequences
-Four small GPU textures and bounded geometry/text caches exchange memory for CPU work. Initial baking requires a rendered frame, with original drawing as fallback. Headless tests exercise logic and fallback; rendered captures verify the cached path. Android gameplay comparison and frame timing remain required before calling smoothness resolved.
+Four small GPU textures and bounded geometry/text caches exchange memory for CPU work. Initial baking requires a rendered frame, with original drawing as fallback. Headless tests exercise logic and fallback; rendered captures verify the cached path. Android gameplay comparison confirmed improvement (user: "yes much better"); four five-second debug engine windows report 78.4–99.9 FPS. Long-run thermal performance remains unverified.
