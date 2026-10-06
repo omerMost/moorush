@@ -41,3 +41,5 @@ World rebuild regenerates scenery from cell seeds without consuming gameplay RNG
 Customers enter/exit at a clear counter boundary instead of inside the neighboring machine tray. Public navigation keeps them off item holders; player/helper pickup uses normal navigation and unchanged inventory geometry.
 
 C1 presentation: cheese renders as the user-selected cut wheel; wider pile spacing affects display/flyer origins only. Inventory counts, pricing, production and pickup regions retain their existing behavior.
+
+Spatial pickup: ripe crops use nearest distance within 40 units; tray pickup removes the closest exposed arrived slot and preserves survivor positions. New outputs reserve the first free slot until flight completion. Snapshots store optional visible `bx.tp` IDs plus existing counts, excluding incoming goods; old saves rebuild contiguous IDs. Pending stack-flight tokens rebase on current arrived stack height after Toss/drop. Toss, hopper/counter drops and belts transfer arrived goods only (ADR 0013).

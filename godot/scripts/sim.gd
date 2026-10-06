@@ -32,6 +32,7 @@ var helpers: Array = []
 var belts: Array = []
 var leaving: Array = []
 var flyers: Array = []
+var transfer_serial := 0
 var floaters: Array = []
 var toasts: Array = []
 var sparks: Array = []
@@ -175,6 +176,8 @@ func build_module(cfg: Dictionary, d: int) -> Dictionary:
 			m.hopper = box(m["in"], 24, {"x": pen.x + 8, "y": pen.y + pen.h - 62, "w": 58.0, "h": 54.0} if L else {"x": pen.x + pen.w - 66, "y": pen.y + pen.h - 62, "w": 58.0, "h": 54.0})
 			m.inPad = {"x": ox + 30, "y": oy + 180, "w": 100.0, "h": 74.0} if L else {"x": ox + 340, "y": oy + 180, "w": 100.0, "h": 74.0}
 			m.tray = box(m.out, 60, {"x": ox + 170, "y": oy + 300, "w": 250.0, "h": 76.0} if L else {"x": ox + 50, "y": oy + 300, "w": 250.0, "h": 76.0})
+			m.tray.item_slots = []
+			m.tray.arriving_slots = []
 			m.slots = [P(ox + 35, oy + 60), P(ox + 40, oy + 300)] if L else [P(ox + 345, oy + 60), P(ox + 335, oy + 300)]
 			m.stand = {"x": m.tray.rect.x + m.tray.rect.w / 2.0, "y": oy + 402}
 			m.units = []
@@ -404,49 +407,107 @@ func compute_reveal() -> void:
 	refresh_obstacles()
 
 # ===== transfers (L594-608) =====
+## Recover old count-only saves and test fixtures; live removals retain sparse IDs.
+func ensure_layout(tray) -> void:
+	if not tray.has("item_slots") or tray.item_slots.size() != tray.n:
+		tray.item_slots = range(tray.n)
+		tray.arriving_slots = range(maxi(0, tray.n - tray.inc), tray.n)
+
+func visible_slots(tray) -> Array:
+	ensure_layout(tray)
+	return tray.item_slots.filter(func(slot): return not slot in tray.arriving_slots)
+
+## Reserve before launching so simultaneous producers cannot share a hole.
+func reserve_slot(tray) -> int:
+	ensure_layout(tray)
+	var slot := 0
+	while slot in tray.item_slots:
+		slot += 1
+	tray.item_slots.append(slot)
+	tray.arriving_slots.append(slot)
+	tray.n += 1
+	return slot
+
 func stack_pos(e, i: int) -> Dictionary:
 	var t: String = e.stack.type if e.stack.type != null else "milk"
-	return {"x": e.x + e.face * 12, "y": e.y - 22 - i * MooData.ITEMS[t].sh}
+	var sway: float = -e.get("lean", 0.0) * pow(i, 1.25) * 1.1 + (sin(T * 9) * i * 0.12 if e.get("moving", false) else 0.0)
+	return {"x": e.x + e.face * 12 + sway, "y": e.y - 22 - i * MooData.ITEMS[t].sh}
 
-func fly(type: String, x: float, y: float, to: Callable, dest, dur: float = 0.24) -> void:
+func fly(type: String, x: float, y: float, to: Callable, dest, dur: float = 0.24) -> Dictionary:
 	if dest != null:
 		dest.inc += 1
-	flyers.append({"type": type, "x1": x, "y1": y, "to": to, "dest": dest, "t": 0.0, "dur": dur})
+	var f := {"type": type, "x1": x, "y1": y, "to": to, "dest": dest, "t": 0.0, "dur": dur}
+	flyers.append(f)
+	return f
 
-func take(src, e) -> void:
-	src.n -= 1
+## Rebase pending targets when visible goods leave the stack before arrival.
+func stack_fly(item: String, source, e) -> void:
 	var st = e.stack
-	st.type = src.type
+	st.type = item
 	st.n += 1
-	var idx: int = st.n - 1
-	var f := pile_pos(src.rect, src.n, src.type)
-	fly(src.type, f.x, f.y, func(): return stack_pos(e, idx), st)
+	transfer_serial += 1
+	var token := transfer_serial
+	if not st.has("pending_ids"): st.pending_ids = []
+	st.pending_ids.append(token)
+	var f := fly(item, source.x, source.y, func(): return stack_pos(e, avail(st) + st.pending_ids.find(token)), st)
+	f.stack_token = token
+
+func take(src, e) -> bool:
+	var slots := visible_slots(src)
+	var sp = MooData.ITEMS[src.type]
+	var per: int = maxi(1, int(floor((src.rect.w - 6) / sp.dx))) * maxi(1, int(floor((src.rect.h - 6) / sp.dy)))
+	var best := -1
+	var best_distance := INF
+	for slot in slots:
+		var covered := false
+		for other in src.item_slots:
+			if other > slot and other % per == slot % per:
+				covered = true
+				break
+		if covered: continue
+		var pos := pile_pos(src.rect, slot, src.type)
+		var d := dist(pos, e)
+		if d < best_distance:
+			best = slot
+			best_distance = d
+	if best < 0: return false
+	var source := pile_pos(src.rect, best, src.type)
+	src.item_slots.erase(best)
+	src.n -= 1
+	stack_fly(src.type, source, e)
+	return true
 
 func give(e, dst) -> void:
 	var st = e.stack
+	if avail(st) <= 0: return
+	var f := stack_pos(e, avail(st) - 1)
 	st.n -= 1
 	var idx: int = dst.n
 	dst.n += 1
-	var f := stack_pos(e, st.n)
 	fly(st.type, f.x, f.y, func(): return pile_pos(dst.rect, idx, dst.type), dst)
 	if st.n <= 0:
 		st.n = 0; st.type = null
 
 func harvest(tile, e, item: String) -> void:
 	tile.t = REGROW
-	var st = e.stack
-	st.type = item
-	st.n += 1
-	var idx: int = st.n - 1
-	fly(item, tile.x, tile.y - 12, func(): return stack_pos(e, idx), st)
+	stack_fly(item, {"x": tile.x, "y": tile.y - 12}, e)
 
 func give_belt(e, b) -> void:
 	var st = e.stack
+	if avail(st) <= 0: return
+	var f := stack_pos(e, avail(st) - 1)
 	st.n -= 1
-	var f := stack_pos(e, st.n)
 	belt_push(b, f.x, f.y)
 	if st.n <= 0:
 		st.n = 0; st.type = null
+
+func flight_pose(f) -> Dictionary:
+	var p := clampf(f.t / f.dur, 0.0, 1.0)
+	var target = f.to.call()
+	var tossing: bool = f.get("kind", "") == "toss"
+	var travel := p * p * (3.0 - 2.0 * p) if tossing else p
+	var sink := smoothstep(0.7, 1.0, p) if tossing else 0.0
+	return {"x": lerpf(f.x1, target.x, travel), "y": lerpf(f.y1, target.y, travel) - sin(PI * p) * (38.0 if tossing else 55.0), "scale": 1.0 - sink * 0.75, "alpha": 1.0 - sink}
 
 func move_to(e, tx: float, ty: float, sp: float, dt: float) -> bool:
 	var dx: float = tx - e.x
@@ -500,22 +561,27 @@ func act() -> void:
 		if not active(m) or absf(m.ox + CW / 2 - p.x) > CW or absf(m.oy + CHh / 2 - p.y) > CHh:
 			continue
 		if m.type == "field" and can_take.call(m.item) and in_r(p, m.rect, 20) and dests_for(m.item, L, true).size():
+			var nearest = null
+			var nearest_distance := 40.0
 			for t in m.tiles:
-				if t.t <= 0 and Vector2(t.x - p.x, t.y - p.y).length() < 40:
-					harvest(t, p, m.item)
-					events.append({"kind": "pick"})
-					break
+				var distance := dist(t, p)
+				if t.t <= 0 and distance < nearest_distance:
+					nearest = t
+					nearest_distance = distance
+			if nearest != null:
+				harvest(nearest, p, m.item)
+				events.append({"kind": "pick"})
 		if m.has("tray") and in_r(p, m.tray.rect, 14) and avail(m.tray) > 0:
 			if can_take.call(m.tray.type):
 				# hard-won fix: only pick up what something needs
 				if dests_for(m.tray.type, L, true).size():
-					take(m.tray, p)
-					events.append({"kind": "pick"})
+					if take(m.tray, p):
+						events.append({"kind": "pick"})
 				elif st.type == null:
 					warn("Nobody needs " + icon(m.tray.type) + " right now")
 			elif st.type != null and st.type != m.tray.type:
 				warn("Hands full — drop the " + icon(st.type) + " first")
-		if m.type == "machine" and in_r(p, m.inPad) and st.type != null:
+		if m.type == "machine" and in_r(p, m.inPad) and st.type != null and avail(st) > 0:
 			if st.type == m["in"]:
 				if m.hopper.n < m.hopper.cap:
 					give(p, m.hopper)
@@ -523,7 +589,7 @@ func act() -> void:
 			else:
 				warn(m.name + " needs " + icon(m["in"]))
 		if m.type == "counter":
-			if in_r(p, m.drop) and st.type != null:
+			if in_r(p, m.drop) and st.type != null and avail(st) > 0:
 				if st.type == m.item:
 					if m.box.n < m.box.cap:
 						give(p, m.box)
@@ -542,21 +608,18 @@ func act() -> void:
 				var f := pile_pos(c.rect, c.n, c.type)
 				fly(c.type, f.x, f.y, func(): return {"x": p.x, "y": p.y - 60}, null, 0.2)
 	for m in mods:
-		if m.has("bin") and active(m) and st.type != null and st.n > 0 and in_r(p, m.bin, 22):
+		if m.has("bin") and active(m) and st.type != null and avail(st) > 0 and in_r(p, m.bin, 22):
+			var f := stack_pos(p, avail(st) - 1)
 			st.n -= 1
-			var f := stack_pos(p, st.n)
-			var c := ctr(m.bin)
-			fly(st.type, f.x, f.y, func(): return c, null, 0.2)
+			var c := {"x": m.bin.x + m.bin.w / 2.0, "y": m.bin.y + 8.0}
+			var flight := fly(st.type, f.x, f.y, func(): return c, null, 0.32)
+			flight.kind = "toss"
 			if st.n <= 0:
 				st.n = 0; st.type = null
 			break
 	for b in belts:
-		if st.type == b.item and in_r(p, b.start) and belt_room(b):
-			st.n -= 1
-			var f := stack_pos(p, st.n)
-			belt_push(b, f.x, f.y)
-			if st.n <= 0:
-				st.n = 0; st.type = null
+		if st.type == b.item and avail(st) > 0 and in_r(p, b.start) and belt_room(b):
+			give_belt(p, b)
 	for pd in visible_pads():
 		if not in_r(p, pd):
 			continue
@@ -693,10 +756,10 @@ func upd_machine(m, dt: float) -> void:
 				m.hopper.n -= 1
 				u.eat = 0.8 if sp > 0 else 0.0
 				u.anim = 0.5
-				var idx: int = m.tray.n
-				m.tray.n += 1
 				var tr = m.tray
-				fly(m.out, u.x, u.y - 24, func(): return pile_pos(tr.rect, idx, m.out), tr, 0.45)
+				var idx := reserve_slot(tr)
+				var flight := fly(m.out, u.x, u.y - 24, func(): return pile_pos(tr.rect, idx, m.out), tr, 0.45)
+				flight.slot = idx
 			else:
 				u.timer = m.period
 
@@ -949,6 +1012,8 @@ func update(dt: float) -> void:
 		if f.t >= f.dur:
 			if f.dest != null:
 				f.dest.inc -= 1
+				if f.has("slot"): f.dest.arriving_slots.erase(f.slot)
+				if f.has("stack_token"): f.dest.pending_ids.erase(f.stack_token)
 			flyers.remove_at(i)
 	for i in range(floaters.size() - 1, -1, -1):
 		floaters[i].t += dt
@@ -1358,7 +1423,9 @@ func snapshot() -> Dictionary:
 	for m in mods:
 		var o := {}
 		if m.has("hopper"): o.h = avail(m.hopper)
-		if m.has("tray"): o.t = avail(m.tray)
+		if m.has("tray"):
+			o.t = avail(m.tray)
+			o.tp = visible_slots(m.tray).duplicate()
 		if m.has("box"): o.b = avail(m.box)
 		if m.has("cash"):
 			o.cn = avail(m.cash); o.cv = m.cash.val
@@ -1437,7 +1504,16 @@ func apply_state(d: Dictionary) -> void:
 		if o == null:
 			continue
 		if m.has("hopper") and o.has("h"): m.hopper.n = clampi(int(o.h), 0, m.hopper.cap)
-		if m.has("tray") and o.has("t"): m.tray.n = clampi(int(o.t), 0, m.tray.cap)
+		if m.has("tray") and o.has("t"):
+			m.tray.n = clampi(int(o.t), 0, m.tray.cap)
+			var positions: Array = o.get("tp", [])
+			var restored: Array = []
+			for value in positions:
+				var slot := int(value)
+				if slot < 0 or slot >= m.tray.cap or slot in restored: break
+				restored.append(slot)
+			m.tray.item_slots = restored if restored.size() == m.tray.n else range(m.tray.n)
+			m.tray.arriving_slots = []
 		if m.has("box") and o.has("b"): m.box.n = clampi(int(o.b), 0, m.box.cap)
 		if m.has("cash") and o.has("cn"):
 			m.cash.n = maxi(0, int(o.cn)); m.cash.val = maxi(0, int(o.cv))

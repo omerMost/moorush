@@ -98,7 +98,9 @@ func tray(b) -> void:
 
 func draw_pile(b, max_draw: int = 200) -> void:
 	var v := mini(max_draw, maxi(0, MooSim.avail(b)))
-	for i in v:
+	var slots: Array = sim.visible_slots(b) if b.has("item_slots") else range(v)
+	slots.sort()
+	for i in slots.slice(0, v):
 		var p := sim.pile_pos(b.rect, i, b.type)
 		Paint.item(self, b.type, p.x, p.y)
 
@@ -385,8 +387,8 @@ func draw_stack(e, cap: int) -> void:
 	var h: float = MooData.ITEMS[st.type].sh
 	e.lean = e.get("lean", 0.0) + ((e.get("vx", 0.0) / 230.0) - e.get("lean", 0.0)) * 0.12
 	for i in v:
-		var sway: float = -e.lean * pow(i, 1.25) * 1.1 + (sin(sim.T * 9) * i * 0.12 if e.moving else 0.0)
-		Paint.item(self, st.type, e.x + e.face * 12 + sway, e.y - 22 - i * h)
+		var pos := sim.stack_pos(e, i)
+		Paint.item(self, st.type, pos.x, pos.y)
 	if cap > 0 and st.n >= cap:
 		Paint.text(self, "MAX", e.x + e.face * 12, e.y - 34 - v * h, 15, C("#ff4d3d"), Color.WHITE)
 
@@ -546,9 +548,8 @@ func _draw() -> void:
 		speech(c, 100)
 	speech(sim.player, 108)
 	for f in sim.flyers:
-		var p := minf(1.0, f.t / f.dur)
-		var to = f.to.call()
-		Paint.item(self, f.type, f.x1 + (to.x - f.x1) * p, f.y1 + (to.y - f.y1) * p - sin(PI * p) * 55)
+		var pose := sim.flight_pose(f)
+		Paint.item(self, f.type, pose.x, pose.y, pose.scale, pose.alpha)
 	for f in sim.floaters:
 		var a := maxf(0.0, 1 - maxf(0.0, f.t - 0.7) / 0.5)
 		Paint.text(self, f.text, f.x, f.y - f.t * 40, 22, C("#ffd54a", a), C("#7a4a10", a))
