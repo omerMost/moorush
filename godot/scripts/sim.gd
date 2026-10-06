@@ -284,6 +284,7 @@ func pad_rect(p) -> Dictionary:
 	return mod_by(p.m, p.d).slots[p.s]
 
 func build_world() -> void:
+	NAV.blk = PackedByteArray()
 	mods = []; pads = []; helpers = []; belts = []; leaving = []; flyers = []; cells = []; ground = []
 	floaters = []; sparks = []
 	var k := 0
@@ -567,10 +568,6 @@ func act() -> void:
 			events.append({"kind": "unlock", "name": pd.name})
 			if pd.fx != "gate":
 				toast("Unlocked: " + pd.name + "!", 2.4)
-			if pd.fx == "unlock":
-				var t = mod_by(pd.t, pd.d)
-				cam_focus = {"x": t.ox + CW / 2, "y": t.oy + CHh / 2, "t": 1.3}
-			shake_amt = 5.0
 
 # ===== simulation (L638-718) =====
 func new_cust(x: float, y: float, m) -> Dictionary:
@@ -1018,9 +1015,22 @@ func cell_obstacles(c) -> Array:
 	return o
 
 func refresh_obstacles() -> void:
+	var changed: Array = []
 	for c in cells:
-		c.obs = cell_obstacles(c)
-	build_nav()
+		var obstacles := cell_obstacles(c)
+		if c.obs != obstacles:
+			c.obs = obstacles
+			changed.append(c)
+	if NAV.blk.size() != NAV.nx * NAV.ny:
+		build_nav()
+	elif changed.is_empty():
+		return
+	else:
+		# Fog/walkable margins and collision radii extend beyond the cell edges.
+		for c in changed:
+			for gy in range(maxi(0, nav_gy(c.y - 60)), mini(NAV.ny, nav_gy(c.y + c.h + 60) + 1)):
+				for gx in range(maxi(0, nav_gx(c.x - 60)), mini(NAV.nx, nav_gx(c.x + c.w + 60) + 1)):
+					NAV.blk[gy * NAV.nx + gx] = nav_blocked(gx, gy)
 	for h in helpers:
 		h.path = null
 
@@ -1128,9 +1138,13 @@ func build_nav() -> void:
 	blk.resize(NAV.nx * NAV.ny)
 	for gy in NAV.ny:
 		for gx in NAV.nx:
-			if not walkable(nav_cx(gx), nav_cy(gy)) or blocked_at(nav_cx(gx), nav_cy(gy), 14):
-				blk[gy * NAV.nx + gx] = 1
+			blk[gy * NAV.nx + gx] = nav_blocked(gx, gy)
 	NAV.blk = blk
+
+func nav_blocked(gx: int, gy: int) -> int:
+	var x := nav_cx(gx)
+	var y := nav_cy(gy)
+	return 1 if not walkable(x, y) or blocked_at(x, y, 14) else 0
 
 func nav_free(gx: int, gy: int) -> bool:
 	return gx >= 0 and gy >= 0 and gx < NAV.nx and gy < NAV.ny and NAV.blk[gy * NAV.nx + gx] == 0

@@ -33,3 +33,5 @@ Native input sampling runs before World simulation each frame. Drawing reuses op
 Sound: simulation actions emit pick/drop/coin/warn/unlock/gate events; World sends them to cached audio clips before draining the queue. Gate suppresses duplicate unlock celebration, repeated actions are rate-limited, and mute prevents playback. Menu toggle writes only the audio preference file; game slot state remains independent.
 
 Menu travel moves the player to an unlocked district without resetting the career, stock or upgrades. Three unfinished pads remain visible per unlocked district; both farms continue production while visited elsewhere.
+
+Paid upgrades refresh obstacle geometry incrementally, rebuild affected navigation cells and invalidate helper paths only when needed. Confetti/sound/toast mark completion while the camera keeps following the player. Save writes and chapter travel retain their existing behavior.
