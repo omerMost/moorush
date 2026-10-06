@@ -5,6 +5,47 @@ extends RefCounted
 
 static var font: SystemFont
 static var emoji: SystemFont
+static var item_textures := {}
+static var item_baking := false
+static var round_points := {}
+static var ellipse_points := {}
+static var color_cache := {}
+static var text_sizes := {}
+
+# Bake the existing procedural item drawings once, at 4x logical resolution.
+# No external artwork; translucent flyers keep their original drawing path.
+class ItemStamp extends Node2D:
+	var kind := ""
+	func _draw() -> void:
+		draw_set_transform(Vector2(96, 128), 0.0, Vector2(4, 4))
+		match kind:
+			"corn": Paint.sh_corn(self, 1.0)
+			"milk": Paint.sh_milk(self, 1.0)
+			"egg": Paint.sh_egg(self, 1.0)
+			"coin": Paint.sh_coin(self, 1.0)
+
+static func prime_items(parent: Node) -> void:
+	if item_baking or not item_textures.is_empty() or DisplayServer.get_name() == "headless":
+		return
+	item_baking = true
+	var views := {}
+	for kind in ["corn", "milk", "egg", "coin"]:
+		var view := SubViewport.new()
+		view.size = Vector2i(192, 192)
+		view.transparent_bg = true
+		view.disable_3d = true
+		view.render_target_update_mode = SubViewport.UPDATE_ONCE
+		var stamp := ItemStamp.new()
+		stamp.kind = kind
+		view.add_child(stamp)
+		parent.add_child(view)
+		views[kind] = view
+	await RenderingServer.frame_post_draw
+	for kind in views:
+		var view: SubViewport = views[kind]
+		item_textures[kind] = ImageTexture.create_from_image(view.get_texture().get_image())
+		view.queue_free()
+	item_baking = false
 
 static func fonts() -> void:
 	if font == null:
@@ -15,19 +56,28 @@ static func fonts() -> void:
 		emoji.font_names = PackedStringArray(["Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji"])
 
 static func C(hex: String, a: float = 1.0) -> Color:
-	var c := Color(hex)
+	if not color_cache.has(hex):
+		color_cache[hex] = Color(hex)
+	var c: Color = color_cache[hex]
 	c.a = a
 	return c
 
 static func rr_pts(x: float, y: float, w: float, h: float, r: float) -> PackedVector2Array:
 	r = minf(r, minf(w, h) / 2.0)
+	var key := Vector3(w, h, r)
+	if round_points.has(key):
+		return Transform2D(0.0, Vector2(x, y)) * round_points[key]
+	var px := x; var py := y
+	x = 0.0; y = 0.0
 	var pts := PackedVector2Array()
 	var corners := [[x + w - r, y + r, -PI / 2], [x + w - r, y + h - r, 0.0], [x + r, y + h - r, PI / 2], [x + r, y + r, PI]]
 	for c in corners:
 		for i in 6:
 			var a: float = c[2] + (PI / 2) * i / 5.0
 			pts.append(Vector2(c[0] + cos(a) * r, c[1] + sin(a) * r))
-	return pts
+	if round_points.size() >= 512: round_points.clear()
+	round_points[key] = pts
+	return Transform2D(0.0, Vector2(px, py)) * pts
 
 static func fill_rr(ci: CanvasItem, x: float, y: float, w: float, h: float, r: float, col: Color) -> void:
 	if w <= 0.5 or h <= 0.5:
@@ -46,11 +96,16 @@ static func dash_rr(ci: CanvasItem, x: float, y: float, w: float, h: float, col:
 	ci.draw_dashed_line(Vector2(x, y + h), Vector2(x, y), col, width, dash)
 
 static func ell_pts(x: float, y: float, rx: float, ry: float, seg: int = 22) -> PackedVector2Array:
+	var key := Vector3(rx, ry, seg)
+	if ellipse_points.has(key):
+		return Transform2D(0.0, Vector2(x, y)) * ellipse_points[key]
 	var pts := PackedVector2Array()
 	for i in seg:
 		var a := TAU * i / seg
-		pts.append(Vector2(x + cos(a) * rx, y + sin(a) * ry))
-	return pts
+		pts.append(Vector2(cos(a) * rx, sin(a) * ry))
+	if ellipse_points.size() >= 256: ellipse_points.clear()
+	ellipse_points[key] = pts
+	return Transform2D(0.0, Vector2(x, y)) * pts
 
 static func ell(ci: CanvasItem, x: float, y: float, rx: float, ry: float, col: Color) -> void:
 	if rx <= 0 or ry <= 0:
@@ -72,7 +127,7 @@ static func poly(ci: CanvasItem, pts: Array, col: Color) -> void:
 static func text(ci: CanvasItem, t: String, x: float, y: float, size: float, fill: Color, stroke = null) -> void:
 	fonts()
 	var fs := int(round(size))
-	var sz := font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
+	var sz := measured(t, fs)
 	var pos := Vector2(x - sz.x / 2.0, y + (font.get_ascent(fs) - font.get_descent(fs)) / 2.0)
 	if stroke != null:
 		ci.draw_string_outline(font, pos, t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, maxi(2, int(size / 4.0) * 2), stroke)
@@ -80,7 +135,14 @@ static func text(ci: CanvasItem, t: String, x: float, y: float, size: float, fil
 
 static func text_width(t: String, size: float) -> float:
 	fonts()
-	return font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, int(round(size))).x
+	return measured(t, int(round(size))).x
+
+static func measured(t: String, fs: int) -> Vector2:
+	var key := str(fs) + ":" + t
+	if not text_sizes.has(key):
+		if text_sizes.size() >= 1024: text_sizes.clear()
+		text_sizes[key] = font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
+	return text_sizes[key]
 
 static func emoji_at(ci: CanvasItem, e: String, x: float, y: float, size: float, alpha: float = 1.0) -> void:
 	fonts()
@@ -92,6 +154,9 @@ static func emoji_at(ci: CanvasItem, e: String, x: float, y: float, size: float,
 # ===== items & sprites (prototype L395-404) =====
 ## drawItem(t, x, y, s): code-drawn corn/milk/egg/coin, emoji for the rest.
 static func item(ci: CanvasItem, t: String, x: float, y: float, s: float = 1.0, alpha: float = 1.0) -> void:
+	if alpha == 1.0 and item_textures.has(t):
+		ci.draw_texture_rect(item_textures[t], Rect2(x - 24 * s, y - 32 * s, 48 * s, 48 * s), false)
+		return
 	match t:
 		"corn", "milk", "egg", "coin":
 			ci.draw_set_transform(Vector2(x, y), 0.0, Vector2(s, s))

@@ -9,6 +9,7 @@ var menu_btn: Button
 var del_arm := 0
 
 func _ready() -> void:
+	process_priority = -10  # Sample current input before World advances the simulation.
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	menu_btn = Button.new()
@@ -157,7 +158,7 @@ func show_menu() -> void:
 	for c in menu_box.get_children():
 		c.queue_free()
 	menu_box.add_child(lbl("Moo Rush", 40, "#e0702a"))
-	menu_box.add_child(lbl("Corn to Capitol · chapter-1 slice", 15))
+	menu_box.add_child(lbl("Corn to Capitol · Chapter 1 · v0.1.1", 15))
 	var s := Moo.sim
 	for i in range(1, MooSim.SLOTS + 1):
 		var d = s.read_slot(i)

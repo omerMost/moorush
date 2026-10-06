@@ -8,7 +8,9 @@ var cam := Vector2.ZERO
 var zoom := 1.0
 var vis_rect := Rect2()
 var tufts: Array = []
+var grass_lines := PackedVector2Array()
 var cam_snapped := false
+var draw_cpu_us := 0
 
 func _ready() -> void:
 	sim = Moo.sim
@@ -18,6 +20,9 @@ func _ready() -> void:
 		var a := s / 2147483647.0
 		s = (s * 16807) % 2147483647
 		tufts.append(Vector2(a * 600, s / 2147483647.0 * 600))
+	for t in tufts:
+		grass_lines.append_array(PackedVector2Array([Vector2(t.x - 3, t.y - 4), t, t, Vector2(t.x + 3, t.y - 5)]))
+	Paint.prime_items(self)
 	Moo.slot_started.connect(func(_i): cam_snapped = false)
 
 func view_size() -> Vector2:
@@ -343,6 +348,7 @@ func player_look() -> Dictionary:
 func _draw() -> void:
 	if sim == null:
 		return
+	var draw_start := Time.get_ticks_usec()
 	var V := vis_rect
 	draw_rect(V, C(THEME0))
 	# grass tufts
@@ -352,8 +358,7 @@ func _draw() -> void:
 	while gx < V.end.x:
 		var gy := ty0
 		while gy < V.end.y:
-			for t in tufts:
-				draw_polyline(PackedVector2Array([Vector2(gx + t.x - 3, gy + t.y - 4), Vector2(gx + t.x, gy + t.y), Vector2(gx + t.x + 3, gy + t.y - 5)]), Color(0, 0, 0, 0.06), 2)
+			draw_multiline(Transform2D(0.0, Vector2(gx, gy)) * grass_lines, Color(0, 0, 0, 0.06), 2)
 			gy += 600
 		gx += 600
 	# paths along cell borders
@@ -475,6 +480,7 @@ func _draw() -> void:
 	draw_rect(Rect2(V.position.x, V.position.y, V.size.x, B.y0 - V.position.y), fogc)
 	draw_rect(Rect2(V.position.x, B.y1, V.size.x, V.end.y - B.y1), fogc)
 	draw_guide()
+	draw_cpu_us = Time.get_ticks_usec() - draw_start
 
 func draw_pocket_meter(m) -> void:
 	var r = m.cash.rect

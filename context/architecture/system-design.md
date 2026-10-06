@@ -37,3 +37,7 @@ It was built as a claude.ai artifact, which had to be a single page. The single 
 `check.sh` imports and boots the project, then runs headless gate, unattended-counter, save and touch HUD tests. Tests and the running autoload dispose in-flight callbacks when discarding a simulation, releasing callback reference cycles. Android exports through the committed preset. Optional `test_windowed_chapter1.gd` instantiates the real main scene and drives the guide bot while rendering milestone screenshots; it is separate from headless check.sh.
 
 Slice limits are explicit: daytime only, no combat/special customers/audio, placeholder shops and a completion flag instead of chapter 2. The HTML remains the frozen specification.
+
+## Drawing cache (ADR 0006, provisional)
+
+`Paint.prime_items()` renders the four original procedural product/coin drawings into 4× transparent SubViewports once, copies them into ImageTextures and releases the temporary nodes. Opaque item draws use those textures; translucent items and headless tests retain the primitive path. Bounded local rounded/ellipse points and text sizes are reused; grass uses a retained point array and multiline batches. `HUD.process_priority=-10` samples input before World’s simulation update. Debug Android `Moo` reports five-second frame timing windows; explicit `--profile=300` measures World draw CPU on desktop.

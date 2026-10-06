@@ -11,7 +11,8 @@ func run() -> void:
 	moo.sim.save_dir = "user://test_touch_hud"
 	moo.sim.delete_slot(1)
 	var hud = root.find_child("HUD", true, false)
-	var ok := true
+	var ok: bool = hud.process_priority < main.get_node("World").process_priority
+	print("  fresh HUD input precedes simulation: %s" % ok)
 	for pixels in [Vector2i(1080, 1920), Vector2i(1440, 2560)]:
 		root.size = pixels
 		await process_frame

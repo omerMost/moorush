@@ -21,7 +21,7 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
   - We start with a chapter-1 (Farm Kid) slice that keeps the code-drawn look, and `check.sh` runs headless Godot bots.
   - The HTML prototype is now a frozen spec.
   - `godot/` is playable: Farm Kid production, 10 pads, helpers, fog/bounds, code-drawn world, camera, HUD, touch/keys and 3 isolated save slots.
-  - Signed debug APK: `build/moorush-debug.apk` (`com.omer.moorush`, 0.1.0, arm64, minSdk 24, targetSdk 36). Installed and launched on the user’s connected POCO device (model 2412DPC0AG); Vulkan/Mali-G720 startup succeeds. Touch feel, suspend/resume saves and sustained performance still await device playtesting.
+  - Signed debug APK: `build/moorush-debug.apk` (`com.omer.moorush`, 0.1.1, arm64, minSdk 24, targetSdk 36). Installed and launched on the user’s connected POCO device (model 2412DPC0AG); Vulkan/Mali-G720 startup succeeds. Touch feel, suspend/resume saves and sustained performance still await device playtesting.
 
 ## Surfaces / components / modules
 
@@ -45,6 +45,7 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
 
 - `./check.sh` imports/boots Godot and runs the gate bot (430.9 simulated seconds), unattended counters, populated save round-trips and touch HUD checks at 1080×1920 and 1440×2560. Process failures and engine errors fail the checks.
 - Local rendered test: `godot --path godot -s res://tests/test_windowed_chapter1.gd`; milestone screenshots under `build/`. Native New Game/menu/Resume were exercised via desktop UI; brief keyboard/drag automation did not visibly confirm movement (headless touch/input checks pass).
+- Android smoothness candidate (ADR 0006): input sampled before simulation, cached procedural item textures/curves/text and batched grass; debug Android frame timing logs every 5s while playing. Local draw CPU mean 21.083→8.315ms; user comparison/Android frame metrics pending.
 - **The core fun problem is open:** the "2-second loop" versus the "one big world" (`research/fun-additions.md`).
 - Untested: the debate when its timer runs out, and MOO FEVER exactly doubling prices.
 - Slice exclusions remain provisional: always daytime, no zombies/special customers/sound, shops marked coming soon, gate marks completion without chapter 2. Native fonts use system fallbacks; Baloo 2 remains to be bundled.

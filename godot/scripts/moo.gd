@@ -4,6 +4,10 @@ extends Node
 ## Headless tests may also build their own MooSim directly (tests/).
 
 var sim: MooSim
+var perf_times: Array[float] = []
+var perf_elapsed := 0.0
+var perf_draw_us := 0.0
+
 var paused := true  # true while the slot menu is open
 
 signal slot_started(i: int)
@@ -14,6 +18,23 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if sim:
 		sim.dispose()
+
+# Debug Android measurements only; no HUD or save changes.
+func _process(delta: float) -> void:
+	if not OS.is_debug_build() or OS.get_name() != "Android":
+		return
+	if paused or delta > 0.5:
+		perf_times.clear(); perf_elapsed = 0.0; perf_draw_us = 0.0
+		return
+	perf_times.append(delta * 1000.0)
+	perf_elapsed += delta
+	var world = get_tree().root.find_child("World", true, false)
+	if world:
+		perf_draw_us += world.draw_cpu_us
+	if perf_elapsed >= 5.0:
+		perf_times.sort()
+		print("MOO_PERF fps=%.1f frame_p95_ms=%.2f draw_cpu_ms=%.2f" % [perf_times.size() / perf_elapsed, perf_times[int(perf_times.size() * 0.95)], perf_draw_us / perf_times.size() / 1000.0])
+		perf_times.clear(); perf_elapsed = 0.0; perf_draw_us = 0.0
 
 # ---- test API ----
 func state() -> Dictionary: return sim.state_summary()
@@ -57,10 +78,13 @@ func _enter_tree() -> void:
 	for a in OS.get_cmdline_user_args():
 		var kv := a.trim_prefix("--").split("=", true, 1)
 		args[kv[0]] = kv[1] if kv.size() > 1 else ""
+	if args.has("profile"):
+		_run_profile.call_deferred(int(args.profile))
 	if args.has("demo"):
 		_run_demo.call_deferred(float(args.demo), args.get("shot", ""))
 
 func _run_demo(secs: float, shot: String) -> void:
+	sim.rng.seed = 1
 	sim.save_dir = "user://demo"
 	sim.delete_slot(1)
 	var hud = get_tree().root.find_child("HUD", true, false)
@@ -82,3 +106,18 @@ func _run_demo(secs: float, shot: String) -> void:
 		img.save_png(shot)
 		print("screenshot saved: ", shot, " at game time ", sim.T)
 		get_tree().quit()
+
+# Display-dependent deterministic draw benchmark; use --demo=240 --profile=300.
+func _run_profile(frames: int) -> void:
+	var samples: Array[float] = []
+	for i in 30:
+		await get_tree().process_frame
+	var world = get_tree().root.find_child("World", true, false)
+	for i in frames:
+		await RenderingServer.frame_post_draw
+		samples.append(world.draw_cpu_us / 1000.0)
+	var total := 0.0
+	for v in samples: total += v
+	samples.sort()
+	print("MOO_PROFILE frames=%d draw_mean_ms=%.3f draw_p95_ms=%.3f" % [frames, total / frames, samples[int(frames * 0.95)]])
+	get_tree().quit()
