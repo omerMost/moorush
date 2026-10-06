@@ -4,6 +4,7 @@
 
 ## What changed
 - Reviewed state, ADRs and recent sessions. Found completed slice commit `7c8f4b2` in the clean Claude worktree; integrated it without modifying that worktree. Resolved backlog overlap with installed Android toolchain.
+- Tracked Godot-generated UID for the new touch test.
 - Added Android preset (com.omer.moorush, 0.1.0), reused generator's placeholder icon, and scaled the HUD to a logical 540×960 portrait canvas.
 - Fixed current-version keyed saves promoting 90%-paid pads to completion. Added populated persisted-snapshot and slot reset tests.
 - Made check.sh reject failed processes and engine errors. Cleared in-flight callback reference cycles at simulation/test teardown.
