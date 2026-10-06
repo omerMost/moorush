@@ -21,7 +21,7 @@ If this is out of sync with the code, the code wins — but raise it as a bug, b
   - We start with a chapter-1 (Farm Kid) slice that keeps the code-drawn look, and `check.sh` runs headless Godot bots.
   - The HTML prototype is now a frozen spec.
   - `godot/` is playable: Farm Kid production, 10 pads, helpers, fog/bounds, code-drawn world, camera, HUD, touch/keys and 3 isolated save slots.
-  - Signed debug APK: `build/moorush-debug.apk` (`com.omer.moorush`, 0.1.0, arm64, minSdk 24, targetSdk 36). No phone connected; device playtest pending.
+  - Signed debug APK: `build/moorush-debug.apk` (`com.omer.moorush`, 0.1.0, arm64, minSdk 24, targetSdk 36). Installed and launched on the user’s connected POCO device (model 2412DPC0AG); Vulkan/Mali-G720 startup succeeds. Touch feel, suspend/resume saves and sustained performance still await device playtesting.
 
 ## Surfaces / components / modules
 

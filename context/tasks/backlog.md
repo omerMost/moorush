@@ -6,7 +6,7 @@ Active, actionable work. One bullet = one chunk you could pick up and finish in 
 
 _(Mid-flight or top-priority. Usually 1–3 items.)_
 
-- [ ] **Android device playtest:** install `build/moorush-debug.apk` on a connected phone/emulator; check launch, touch controls, suspend/resume saves and sustained performance. No device connected on 2026-10-07.
+- [ ] **Android device playtest:** APK installed/launched on the connected POCO on 2026-10-07. Check actual touch controls, layout, suspend/resume saves and sustained performance; startup logs are clean of Godot script errors/crashes.
 
 - [ ] **The fun core:** the 2-second loop versus the one big world. Decide with the user (`research/fun-additions.md`, item #2 is unbuilt). This stays separate from the port (ADR 0005, G1).
 - [ ] Replace the placeholder icon mark in `scripts/generate-icons.js` when the brand exists, re-run it
