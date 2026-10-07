@@ -18,6 +18,17 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
 - [ ] Replace the placeholder icon mark in `scripts/generate-icons.js` when the brand exists, re-run it
 
 ## Next
+- [ ] **Tutorial: Grandpa's soft opening, chapter 1 B0–B6 (ADR 0016, `design/tutorial.md` §2–§6, §8).** Codex builds, Claude reviews.
+  - `tutorial.gd`, the sim's `ev_*` events, the HUD bubble with the portrait placeholder, the moo-babble, and the `tut` save key with old-save migration.
+  - Remove the intro toast.
+  - Done check: `test_tutorial_bot` (all beats by T ≤ 45 s, first sale ≤ 20 s, no pause), `test_tutorial_order`, `test_tutorial_saves` (resume, old save unchanged, 3-slot isolation, delete), and the chapter-1 bot within ±5% of 444.6 s.
+- [ ] **Tutorial: Grandpa's first-time lines and constant commentary for chapters 1–3 (`design/tutorial.md` §5).** Replace the chapter intro toasts.
+  - Done check: `test_grandpa_lines`: ≤ 12 words and ≤ 64 chars, cooldowns 20/120/300 s, 10–30 lines per 600 s, no idle nags.
+- [ ] **With the night port: Gary the practice zombie (`design/tutorial.md` §7, cards T8/T9).**
+  - Gary pathfinds with `findPath`/`NAV`, can't bite, and trips after 60 s.
+  - Armory-arrow hook when gunless. Night first-time lines.
+  - Done check: `test_tutorial_night`. Also verify a gunless first night is survivable, and raise a card if not.
+- [ ] Grandpa Bovine's portrait art and voice: take them from `design/characters.md` (the character session) when it lands. Until then the placeholder is 👴🐮.
 
 
 _(Approved, ready to pick up, not started yet.)_
