@@ -1,5 +1,5 @@
 extends SceneTree
-## Rendered A/B for ADR 0019 (needs a window; not part of headless check.sh):
+## Rendered A/B for ADR 0024 (needs a window; not part of headless check.sh):
 ## godot --path godot -s res://tests/test_windowed_shape_cache.gd
 ## The same frozen full chapter-3 farm frame is drawn with the original
 ## per-call polygon path (Paint.mesh_cache=false, no people culling) and with
@@ -54,8 +54,13 @@ func run() -> void:
 	sim.compute_reveal()
 	sim.travel_to(2)
 	for i in 30: await process_frame  # item textures bake
-	while sim.T < 420.0:
+	# Step count, not sim.T: a night checkpoint restore can rewind T. The fight
+	# bot plays so night zombies and the night overlay appear in the views.
+	var bot := MooFightBot.new(sim)
+	for i in 30 * 300:  # to evening/night of day 1
+		bot.tick()
 		sim.update(1.0 / 30.0)
+	sim.test_in = Vector2.ZERO; sim.fire_in = false
 	sim.toasts.clear()
 	sim.events.clear()
 	var old_ms := 0.0

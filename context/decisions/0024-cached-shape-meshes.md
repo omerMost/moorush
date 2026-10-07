@@ -1,8 +1,8 @@
-# ADR 0019 — Cached shape meshes instead of per-call polygons
+# ADR 0024 — Cached shape meshes instead of per-call polygons
 
-**Status:** Accepted for the code (provisional until the POCO soak confirms; see session 2026-10-07 perf note)
+**Status:** Accepted for the code; phone acceptance (uninterrupted 10-minute soak) pending
 **Date:** 2026-10-07
-**Supersedes:** _(none)_. Extends ADR 0006 (cached procedural drawing).
+**Supersedes:** _(none)_. Extends ADR 0006 (cached procedural drawing). Renumbered from a draft 0016/0019 after main took those numbers.
 
 ## Context
 
@@ -35,6 +35,7 @@ Godot 4 creates and frees a GPU vertex buffer for every polygon/circle command (
 
 ## Consequences
 
+- POCO X7, same slot and starting temperature (27.5/28.6 °C): 0.3.5 valid 600 s soak 58.8 FPS mean, window p95 17.8 ms, draw 10.7 ms (62.4 → 56.3 FPS, −9.8%); 0.3.6 108.6 FPS, p95 10.2 ms, draw 5.15 ms over 400 s before the phone was disconnected (invalid as acceptance). 0.3.6 runs uncapped at ~120 Hz and still slows thermally (117 → 97 FPS, draw 4.5 → 6.4 ms on a static scene); whether to cap the frame rate is an open user decision.
 - Rendered draw CPU on the Mac drops from ~13.8 ms to ~3.0 ms for the full chapter-3 farm, flat over 32 simulated minutes. `test_windowed_shape_cache.gd` renders 8 views both ways: 7 pixel-identical, 1 with a single edge pixel rounded differently (GPU-side translation), tolerance ≤10 pixels.
 - Headless (dummy renderer) cannot see the buffer cost; `test_perf_drift.gd` guards it via the polygon-call budget (≤40/frame; ~8 measured) plus collection plateaus and the 15% drift check.
 - New convex shapes should go through `fill_shape`. Non-convex shapes stay on `Paint.poly`; the fan triangulation is only valid for convex outlines.
