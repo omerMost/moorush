@@ -2,6 +2,7 @@ extends Node2D
 ## Draws the world with _draw() (prototype draw(), L1540-1750) and runs the
 ## camera (camTarget/moveCam, L834-842). The node transform is the camera.
 
+const ZombiePaint = preload("res://scripts/zombie_paint.gd")
 const THEME0 := "#86c25a"
 var sim: MooSim
 var cam := Vector2.ZERO
@@ -399,7 +400,7 @@ func draw_stack(e, cap: int) -> void:
 func draw_cust(c) -> void:
 	var t := clampf(c.wait / c.patience, 0, 1)
 	var skin := C(c.skin)
-	if t >= 0.25:
+	if sim.real_night() and t >= 0.25:
 		skin = skin.lerp(C("#7fb04a"), clampf((t - 0.25) / 0.55, 0, 1))
 	var o: Dictionary = c.duplicate()
 	o.skin = skin
@@ -489,6 +490,8 @@ func _draw() -> void:
 				ents.append([c.y, "cust", c])
 	for c in sim.leaving:
 		ents.append([c.y, "cust", c])
+	for z in sim.zombies:
+		if vis({"x":z.x-60,"y":z.y-140,"w":160,"h":150}): ents.append([z.y,"zombie",z])
 	for h in sim.helpers:
 		ents.append([h.y, "helper", h])
 	ents.append([sim.player.y, "player", sim.player])
@@ -503,6 +506,7 @@ func _draw() -> void:
 			"bench": draw_bench(o)
 			"lamp": draw_lamp(o)
 			"cust": draw_cust(o)
+			"zombie": ZombiePaint.draw_actor(self, o, sim.T)
 			"helper":
 				var look: Dictionary = o.look.duplicate()
 				look.merge({"walk": o.walk, "moving": o.moving, "face": o.face}, true)
@@ -549,6 +553,7 @@ func _draw() -> void:
 				speech(c, 112)
 	for c in sim.leaving:
 		speech(c, 100)
+	for z in sim.zombies: speech(z, 100)
 	speech(sim.player, 108)
 	for f in sim.flyers:
 		var pose := sim.flight_pose(f)

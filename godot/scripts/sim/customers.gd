@@ -33,10 +33,10 @@ func upd_counter(m, dt: float) -> void:
 		var c = m.q[i]
 		var s := q_slot(m, i)
 		c.at = sim.walk_to(c, s.x, s.y, c.speed, dt, true)
-		c.wait += dt
+		c.wait += dt * (3.0 if sim.is_night() else 1.0)
 		if c.at:
 			c.face = 1
-	# customers who waited too long storm off (zombies come with the night port)
+	# Patience loss is daytime reputation loss; near night customers can turn.
 	for i in range(m.q.size() - 1, -1, -1):
 		var c = m.q[i]
 		if c.wait >= c.patience:
@@ -71,6 +71,9 @@ func customer_lost(c, m) -> void:
 	c.leave = {"x": m.ox - 8, "y": c.y}
 	c.happy = 0.0
 	sim.say(c, sim.pick(MooData.LOST_LINES), 1.8)
+	if sim.turn_customer(c, m):
+		m.lost = m.get("lost", 0) + 1
+		return
 	sim.leaving.append(c)
 	m.lost = m.get("lost", 0) + 1
 

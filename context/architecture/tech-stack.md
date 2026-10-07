@@ -28,11 +28,11 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Data layer
 
-- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid, daytime Farmer and Baker data live in `godot/scripts/data.gd`; `MooSim` owns simulation state and the tick sequence; eight composed RefCounted systems in `scripts/sim/` implement the logic with typed weak owner references (ADRs 0019–0020).
+- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid, daytime Farmer and Baker data live in `godot/scripts/data.gd`; `MooSim` owns simulation state and the tick sequence; nine composed RefCounted systems in `scripts/sim/` implement the logic with typed weak owner references (ADRs 0019–0021).
 
 ## Auth / storage / persistence
 
-- Native saves: 3 JSON files under `user://`, with snapshot/apply_state implemented in `scripts/sim/saves.gd` behind the unchanged `MooSim` API (ADR 0019). Day/phase/night counters persist as optional `day`/`time`/`cn` fields with old-save defaults (ADR 0020). Current-version keyed saves preserve partial payments; full legacy HTML import remains pending.
+- Native saves: 3 JSON files under `user://`, with snapshot/apply_state implemented in `scripts/sim/saves.gd` behind the unchanged `MooSim` API (ADR 0019). Day/phase/night counters persist as optional `day`/`time`/`cn` fields with old-save defaults (ADR 0020). Optional `tut`/`night` fields preserve Gary, actors and wave schedule with a decimal-string 64-bit threat RNG state (ADR 0021). Current-version keyed saves preserve partial payments; full legacy HTML import remains pending.
 - Prototype saves: localStorage, with 3 slots, settings, and migration from v1 and older versions. Cloud: `window.claude` db/user, inside claude.ai only.
 
 ## External integrations
@@ -41,7 +41,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Tooling (build, test, lint, CI)
 
-- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, three chapter bots, unattended counters, populated three-district saves/older slice migrations and incremental navigation equivalence and phone-sized touch HUD/font and audio waveform/settings/dispatch. Clock transition/persistence tests and the fixed-seed 1,200s snapshot regression pin the current save hash plus the pre-S0 economy hash (wall-clock metadata normalized; clock fields projected out only for the economy comparison). Nonzero processes and engine errors fail. No HTML suite.
+- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, three chapter bots, unattended counters, populated three-district saves/older slice migrations and incremental navigation equivalence and phone-sized touch HUD/font and audio waveform/settings/dispatch. Clock/night transition, route, Gary and persistence tests plus the fixed-seed 1,200s snapshot regression pin the current save hash (wall-clock metadata normalized). S0/S1 historical hashes remain in their session notes; night patience intentionally changes the current economy. Nonzero processes and engine errors fail. No HTML suite.
 - Optional rendered smoke test: `godot --path godot -s res://tests/test_windowed_chapter1.gd` (requires a display); runs the career through the main scene with 90s/240s/completion captures under `build/`, in isolated test storage.
 - Dairy rendered smoke: `godot --path godot -s res://tests/test_windowed_chapter2.gd`; real cheese production, menu and district travel in isolated storage.
 - Prototype: test hook `window.__moo`. Local run: the `prototype` config in `.claude/launch.json` (port 8090).
@@ -77,3 +77,5 @@ _(Things that were on the table and lost. Each entry: what it was, why it lost. 
 - Stable tray slot/pending-transfer metadata is native GDScript; no dependency added. Optional `bx.tp` extends existing native JSON saves compatibly. Shared `flight_pose()` drives Toss drawing and numerical regression checks (ADR 0013).
 
 - Android lifecycle: explicit GDScript focus/pause flags, separate menu pause, zeroed input and stopped voices (ADR 0014). Read-only stdlib collector: `python3 scripts/android_soak.py --serial DEVICE --seconds 600 --output build/android-soak`; game must be open and screen unlocked. Read calls retry transient USB errors; `--resume` continues a same-PID run from its summary and marks clock recovery/gaps. It rejects missing gameplay, insufficient coverage, estimated legacy clocks, focus interruptions and OS suspension markers between checkpoints. `python3 scripts/tests/test_android_soak.py` runs four isolated CLI scenarios for collection/retry/rejection. Reports engine frame intervals/battery temperatures, not compositor presentation FPS or thermal causality.
+
+- Native threats (ADR 0021): saved independent RandomNumberGenerator, four rotating chase replans per tick, max ten actors; no new runtime dependency. `zombie_paint.gd` uses existing procedural primitives and preserves item caches. Optional `test_windowed_night.gd` checks eight actor renders and HUD isolation. Phone performance acceptance remains pending.

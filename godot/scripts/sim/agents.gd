@@ -128,7 +128,7 @@ func nearest(list: Array):
 func guide_target():
 	var st = sim.player.stack
 	var aff := sim.visible_pads().any(func(p): return sim.wallet() >= p.cost - p.paid)
-	var sig := str(st.type) + str(st.n >= sim.S.cap) + str(sim.S.ch) + "|" + str(aff)
+	var sig := str(st.type) + str(st.n >= sim.S.cap) + str(sim.S.ch) + "|" + str(aff) + "|" + str(sim.S.tut.gary) + "|" + str(sim.S.get("gun",0)) + "|" + str(sim.gary_guide() != null)
 	if sim.g_cache != null and sim.T < sim.g_cache.until and sim.g_cache.sig == sig and sim.g_cache.p != null and MooSim.dist(sim.player, sim.g_cache.p) > 25:
 		return sim.g_cache.p
 	var r = sim.guide_raw()
@@ -136,6 +136,8 @@ func guide_target():
 	return r
 
 func guide_raw():
+	var practice = sim.gary_guide()
+	if practice != null: return practice
 	var st = sim.player.stack
 	var L := sim.live()
 	for p in sim.visible_pads():

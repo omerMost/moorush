@@ -24,7 +24,7 @@ run_check() {
 }
 run_check import --import
 run_check boot --quit-after 120
-for t in test_clock test_sim_determinism test_bot_chapter1 test_bot_chapter2 test_bot_chapter3 test_counters_unattended test_save_slots test_touch_hud test_audio test_upgrade_navigation test_customer_routes test_item_transfers test_app_lifecycle; do
+for t in test_clock test_night test_sim_determinism test_bot_chapter1 test_bot_chapter2 test_bot_chapter3 test_counters_unattended test_save_slots test_touch_hud test_audio test_upgrade_navigation test_customer_routes test_item_transfers test_app_lifecycle; do
   run_check "$t" -s "res://tests/$t.gd"
 done
 printf 'check.sh: GREEN\n'

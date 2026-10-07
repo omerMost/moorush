@@ -16,6 +16,7 @@ func reset_clock() -> void:
 	sim.S.day = 1
 	sim.S.time = START_TIME
 	sim.S.cn = 0
+	sim.reset_night(true)
 
 func restore_clock(d: Dictionary) -> void:
 	sim.S.day = maxi(1, int(d.get("day", 1)))
@@ -58,6 +59,7 @@ func upd_clock(dt: float) -> void:
 	while remaining > 0.0:
 		var boundary: float = PHASE_ENDS[sim.phase_idx()]
 		var step := minf(remaining, boundary - float(sim.S.time))
+		if sim.is_night(): sim.advance_night(step * DAY_LEN)
 		sim.S.time += step
 		remaining -= step
 		if sim.S.time >= boundary - EPSILON:
@@ -72,13 +74,16 @@ func upd_clock(dt: float) -> void:
 func on_phase(phase: int) -> void:
 	if phase == 3:
 		sim.S.cn += 1
+		sim.begin_night()
 		sim.toast("Night %d · Sunrise in 90 seconds" % sim.S.cn, 2.4)
 	elif phase == 2:
+		sim.evening_gary()
 		sim.toast("Evening on the farm", 2.4)
 	sim.events.append({"kind": "phase", "phase": phase, "day": sim.S.day,
 		"cn": sim.S.cn, "boss_night": sim.is_boss_night()})
 
 func sunrise() -> void:
+	sim.end_night()
 	sim.S.day += 1
 	sim.events.append({"kind": "sunrise", "night": sim.S.cn, "day": sim.S.day})
 	sim.toast("Survived night %d · Day %d" % [sim.S.cn, sim.S.day], 3.0)

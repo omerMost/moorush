@@ -31,6 +31,9 @@ var cells: Array = []
 var helpers: Array = []
 var belts: Array = []
 var leaving: Array = []
+var zombies: Array = []
+var night_rng := RandomNumberGenerator.new()
+var night_state := {"serial":0, "beat":-1, "elapsed":0.0, "cursor":0}
 var flyers: Array = []
 var transfer_serial := 0
 var floaters: Array = []
@@ -70,6 +73,7 @@ var g_cache = null
 var g_mode = null
 
 # System seams: future zombies/combat/hearts/bosses/robbers follow this pattern.
+var _zombies = preload("res://scripts/sim/zombies.gd").new(self)
 var _clock = preload("res://scripts/sim/clock.gd").new(self)
 var _world = preload("res://scripts/sim/world.gd").new(self)
 var _items = preload("res://scripts/sim/items.gd").new(self)
@@ -219,6 +223,7 @@ func update(dt: float) -> void:
 			leaving.remove_at(i)
 	for h in helpers:
 		upd_helper(h, dt)
+	upd_zombies(dt)
 	upd_ground(dt)
 	upd_speech(dt)
 	for i in range(flyers.size() - 1, -1, -1):
@@ -367,3 +372,18 @@ func clock_label() -> String: return _clock.clock_label()
 func upd_clock(dt: float) -> void: _clock.upd_clock(dt)
 func on_phase(phase: int) -> void: _clock.on_phase(phase)
 func sunrise() -> void: _clock.sunrise()
+
+# Night actor seams for the upcoming combat/hearts ports.
+func reset_night(chapter_entry: bool = false) -> void: _zombies.reset_night(chapter_entry)
+func begin_night() -> void: _zombies.begin_night()
+func advance_night(dt: float) -> void: _zombies.advance_night(dt)
+func evening_gary() -> void: _zombies.evening_gary()
+func real_night() -> bool: return _zombies.real_night()
+func horde_zombie(): return _zombies.horde_zombie()
+func turn_customer(c, m) -> bool: return _zombies.turn_customer(c, m)
+func upd_zombies(dt: float) -> void: _zombies.upd_zombies(dt)
+func hit_zombie(z, damage: float, item: String = "") -> void: _zombies.hit_zombie(z, damage, item)
+func end_night() -> void: _zombies.end_night()
+func night_snapshot() -> Dictionary: return _zombies.night_snapshot()
+func restore_night(d: Dictionary) -> void: _zombies.restore_night(d)
+func gary_guide(): return _zombies.gary_guide()

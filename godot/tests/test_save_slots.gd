@@ -108,7 +108,8 @@ func _init() -> void:
 	var reset := make_sim(102)
 	reset.start_slot(1)
 	reset.delete_slot(1)
-	var pristine := make_sim(103)
+	# S1 saves the seed-dependent threat RNG: compare fresh games with the same seed.
+	var pristine := make_sim(102)
 	expect(reset.cur_slot == 0 and stable(reset.snapshot()) == stable(pristine.snapshot()), "active slot deletion resets state")
 	expect(reset.read_slot(1) == null, "deleted slot file is gone")
 	for i in [2, 3]:

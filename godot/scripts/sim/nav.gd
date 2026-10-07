@@ -79,6 +79,9 @@ func refresh_obstacles() -> void:
 		if m.type == "counter":
 			for customer in m.q: customer.path = null
 	for customer in sim.leaving: customer.path = null
+	for zombie in sim.zombies:
+		zombie.path = []
+		zombie.repath = 0.0
 
 func near_obs(x: float, y: float, R: float) -> Array:
 	var out := []

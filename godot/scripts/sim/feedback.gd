@@ -53,6 +53,7 @@ func upd_speech(dt: float) -> void:
 		if m.type == "counter":
 			ents.append_array(m.q)
 	ents.append_array(sim.leaving)
+	ents.append_array(sim.zombies)
 	for e in ents:
 		if e.get("say") != null:
 			e.say.t -= dt
