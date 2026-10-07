@@ -36,14 +36,20 @@ func snapshot() -> Dictionary:
 	return {"v": 1, "ver": 9, "engine": "godot", "t": int(Time.get_unix_time_from_system() * 1000), "ch": sim.S.ch, "money": sim.S.money,
 		"day": sim.S.day, "time": sim.S.time, "cn": sim.S.cn,
 		"tut": sim.S.tut.duplicate(true), "night": sim.night_snapshot(),
+		"hearts": sim.S.hearts, "inv_t": sim.inv_t, "faint": sim.faint.duplicate(true) if sim.faint != null else null,
+		"checkpoints": sim.checkpoints.duplicate(true), "stats": sim.S.stats.duplicate(true),
+		"hats": sim.S.hats.duplicate(true), "rng": str(sim.rng.state),
+		"helper_cargo": sim.helper_snapshot(),
 		"votes": 0, "cap": sim.S.cap, "won": false, "done": sim.S.done,
 		"paid": sim.pads.map(func(p): return p.paid), "pk": pk, "bx": bx, "bl": bl,
 		"px": int(round(sim.player.x)), "py": int(round(sim.player.y)), "rep": rep,
 		"hold": [st.type, maxi(0, st.n - st.inc)] if st.type != null else null}
 
 func fresh_state() -> void:
+	sim.rng.seed = sim.rng.seed
 	sim.stage = MooData.stage0()
 	sim.S = {"ch": 0, "money": 0, "votes": 0, "cap": 8, "won": false, "done": false}
+	sim.reset_hearts()
 	sim.reset_night()
 	sim.reset_clock()
 	sim.build_world()
@@ -53,6 +59,7 @@ func fresh_state() -> void:
 	sim.bounds = sim.target_bounds.duplicate()
 	for c in sim.cells:
 		c.fog = 0.0 if c.on else 1.0
+	sim.capture_checkpoint("chapter_start")
 
 func apply_state(d: Dictionary) -> void:
 	sim.fresh_state()
@@ -137,6 +144,7 @@ func apply_state(d: Dictionary) -> void:
 		sim.player.x = sim.nav_cx(f.x); sim.player.y = sim.nav_cy(f.y)
 
 	sim.restore_night(d)
+	sim.restore_hearts(d)
 
 func travel_to(district: int) -> bool:
 	if district < 0 or district > sim.S.ch or district >= MooData.STAGE_COUNT: return false

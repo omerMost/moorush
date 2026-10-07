@@ -9,7 +9,7 @@ func expect(condition: bool, description: String) -> void:
 	ok = condition and ok
 
 func _init() -> void:
-	var sim := MooSim.new(7)
+	var sim := MooEconomySim.new(7)
 	sim.autosave = false
 	var bot := MooBot.new(sim)
 	var last_report := 0.0

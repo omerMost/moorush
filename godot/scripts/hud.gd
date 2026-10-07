@@ -7,6 +7,9 @@ var menu: PanelContainer
 var menu_box: VBoxContainer
 var menu_btn: Button
 var del_arm := 0
+var faint_card: PanelContainer
+var faint_line: Label
+var retry_btn: Button
 
 func _ready() -> void:
 	process_priority = -10  # Sample current input before World advances the simulation.
@@ -22,19 +25,27 @@ func _ready() -> void:
 	menu_btn.position = Vector2(-56, 10)
 	menu_btn.pressed.connect(func(): show_menu())
 	add_child(menu_btn)
+	build_faint_card()
 	build_menu()
 	show_menu()
 
 func _process(_dt: float) -> void:
 	var s := Moo.sim
+	faint_card.visible = s.faint != null and not Moo.paused
+	if s.faint != null:
+		joy = null
+		faint_line.text = "Grandpa: %s got you. Let’s try again!" % s.faint.cause.capitalize()
+		retry_btn.text = "Restart chapter" if s.faint.checkpoint == "chapter_start" else "Retry from dusk"
+		faint_card.size = faint_card.get_combined_minimum_size()
+		faint_card.position = (size - faint_card.size) / 2
 	var k := Vector2.ZERO
-	if not Moo.paused and not Moo.suspended:
+	if not Moo.paused and not Moo.suspended and s.faint == null:
 		if Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT): k.x -= 1
 		if Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT): k.x += 1
 		if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP): k.y -= 1
 		if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN): k.y += 1
 	var mv := k.normalized()
-	if joy != null and not Moo.paused and not Moo.suspended:
+	if joy != null and not Moo.paused and not Moo.suspended and s.faint == null:
 		var d: Vector2 = joy.p - joy.s
 		if d.length() > 6:
 			mv = d.normalized() * minf(1.0, d.length() / 45.0)
@@ -42,7 +53,7 @@ func _process(_dt: float) -> void:
 	queue_redraw()
 
 func _input(e: InputEvent) -> void:
-	if Moo.paused or Moo.suspended:
+	if Moo.paused or Moo.suspended or Moo.sim.faint != null:
 		return
 	if e is InputEventScreenTouch:
 		if e.pressed and joy == null:
@@ -70,6 +81,14 @@ func _draw() -> void:
 	Paint.circ(self, 30, 30, 13, Paint.C("#f5b921"))
 	Paint.circ(self, 30, 28, 11, Paint.C("#ffe58a"))
 	Paint.text(self, txt, 46 + (w - 54) / 2, 30, 21, Color.WHITE)
+	# Hearts occupy the top-right gap, leaving Grandpa's future area below money.
+	Paint.fill_rr(self, size.x - 186, 16, 122, 28, 14, ink)
+	for i in 5:
+		var x := size.x - 172 + i * 23
+		var col := Paint.C("#ee6572") if i < s.S.hearts else Paint.C("#695256")
+		draw_circle(Vector2(x - 4, 26), 5, col)
+		draw_circle(Vector2(x + 4, 26), 5, col)
+		draw_colored_polygon(PackedVector2Array([Vector2(x-9,27),Vector2(x+9,27),Vector2(x,38)]), col)
 	# Clock sits below rank, leaving the money/hearts and menu areas free.
 	var clock := s.clock_label()
 	var cw := Paint.text_width(clock, 13) + 24
@@ -245,3 +264,29 @@ func travel_to(district: int) -> void:
 	Moo.paused = false
 	menu.visible = false
 	menu_btn.visible = true
+
+func build_faint_card() -> void:
+	faint_card = PanelContainer.new()
+	faint_card.name = "FaintCard"
+	var style := StyleBoxFlat.new()
+	style.bg_color = Paint.C("#fff8e7")
+	style.set_corner_radius_all(20)
+	style.content_margin_left = 20; style.content_margin_right = 20
+	style.content_margin_top = 20; style.content_margin_bottom = 20
+	faint_card.add_theme_stylebox_override("panel", style)
+	faint_card.visible = false
+	add_child(faint_card)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 14)
+	faint_card.add_child(box)
+	box.add_child(lbl("You fainted!", 28, "#a33144"))
+	faint_line = lbl("", 16)
+	faint_line.custom_minimum_size.x = 300
+	faint_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(faint_line)
+	retry_btn = btn("Retry from dusk", "#e0702a", func():
+		if not Moo.suspended:
+			Moo.sim.restore_checkpoint()
+			joy = null)
+	retry_btn.name = "RetryCheckpoint"
+	box.add_child(retry_btn)

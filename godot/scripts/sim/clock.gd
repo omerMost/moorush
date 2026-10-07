@@ -75,6 +75,8 @@ func on_phase(phase: int) -> void:
 	if phase == 3:
 		sim.S.cn += 1
 		sim.begin_night()
+		sim.capture_checkpoint("dusk")
+		sim.save(true)
 		sim.toast("Night %d · Sunrise in 90 seconds" % sim.S.cn, 2.4)
 	elif phase == 2:
 		sim.evening_gary()
@@ -84,6 +86,7 @@ func on_phase(phase: int) -> void:
 
 func sunrise() -> void:
 	sim.end_night()
+	sim.refill_hearts()
 	sim.S.day += 1
 	sim.events.append({"kind": "sunrise", "night": sim.S.cn, "day": sim.S.day})
 	sim.toast("Survived night %d · Day %d" % [sim.S.cn, sim.S.day], 3.0)

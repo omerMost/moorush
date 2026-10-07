@@ -15,7 +15,7 @@ func expect(condition: bool, description: String) -> void:
 	ok = condition and ok
 
 func make_sim(seed_value: int) -> MooSim:
-	var s := MooSim.new(seed_value)
+	var s := MooEconomySim.new(seed_value)
 	s.save_dir = test_save_dir
 	simulations.append(s)
 	return s

@@ -28,7 +28,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Data layer
 
-- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid, daytime Farmer and Baker data live in `godot/scripts/data.gd`; `MooSim` owns simulation state and the tick sequence; nine composed RefCounted systems in `scripts/sim/` implement the logic with typed weak owner references (ADRs 0019–0021).
+- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid, daytime Farmer and Baker data live in `godot/scripts/data.gd`; `MooSim` owns simulation state and the tick sequence; ten composed RefCounted systems in `scripts/sim/` implement the logic with typed weak owner references (ADRs 0019–0022), including health and two embedded slot-local checkpoints.
 
 ## Auth / storage / persistence
 

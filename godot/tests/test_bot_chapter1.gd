@@ -4,7 +4,7 @@ const DT := 1.0 / 30.0
 const LIMIT := 3600.0
 
 func _init() -> void:
-	var sim := MooSim.new(1)
+	var sim := MooEconomySim.new(1)
 	sim.autosave = false
 	var bot := MooBot.new(sim)
 	var last_report := 0.0

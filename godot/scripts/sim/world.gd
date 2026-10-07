@@ -231,6 +231,9 @@ func apply_pad(p, from_load: bool) -> void:
 				if not from_load:
 					sim.compute_reveal()
 					sim.travel_to(p.d + 1)
+					if entered:
+						sim.checkpoints.erase("dusk")
+						sim.capture_checkpoint("chapter_start")
 					sim.toast("Chapter %d · %s! %s" % [sim.S.ch + 1, sim.stage.title, sim.stage.intro], 5.0)
 			else:
 				sim.S.done = true

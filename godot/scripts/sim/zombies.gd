@@ -195,8 +195,8 @@ func upd_zombies(dt: float) -> void:
 			if z.st <= 0.0:
 				if z.state == "windup":
 					if MooSim.dist(z, sim.player) < 42:
-						# Hearts/checkpoint port owns damage; no stock or wallet penalty yet.
-						sim.events.append({"kind": "zombie_bite", "id": z.id, "type": z.type})
+						sim.zombie_bite(z)
+						if sim.faint != null: return
 					z.state = "recover"; z.st = 0.9; z.bite = 2.0
 				else: z.state = "chase"
 			continue

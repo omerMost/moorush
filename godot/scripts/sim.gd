@@ -25,6 +25,9 @@ static func cell_xy(d: int, c: int, r: int) -> Vector2:
 
 # ===== state (L427-431) =====
 var S := {}
+var checkpoints: Dictionary = {}
+var faint = null
+var inv_t := 0.0
 var mods: Array = []
 var pads: Array = []
 var cells: Array = []
@@ -72,7 +75,8 @@ var autosave := true
 var g_cache = null
 var g_mode = null
 
-# System seams: future zombies/combat/hearts/bosses/robbers follow this pattern.
+# System seams: future combat/bosses/robbers follow this pattern.
+var _hearts = preload("res://scripts/sim/hearts.gd").new(self)
 var _zombies = preload("res://scripts/sim/zombies.gd").new(self)
 var _clock = preload("res://scripts/sim/clock.gd").new(self)
 var _world = preload("res://scripts/sim/world.gd").new(self)
@@ -144,6 +148,8 @@ static func P(x: float, y: float, w: float = 90.0, h: float = 70.0) -> Dictionar
 
 
 func update(dt: float) -> void:
+	if faint != null: return
+	upd_hearts(dt)
 	T += dt
 	upd_clock(dt)
 	warn_t -= dt
@@ -224,6 +230,7 @@ func update(dt: float) -> void:
 	for h in helpers:
 		upd_helper(h, dt)
 	upd_zombies(dt)
+	if faint != null: return
 	upd_ground(dt)
 	upd_speech(dt)
 	for i in range(flyers.size() - 1, -1, -1):
@@ -387,3 +394,14 @@ func end_night() -> void: _zombies.end_night()
 func night_snapshot() -> Dictionary: return _zombies.night_snapshot()
 func restore_night(d: Dictionary) -> void: _zombies.restore_night(d)
 func gary_guide(): return _zombies.gary_guide()
+
+func reset_hearts() -> void: _hearts.reset_hearts()
+func restore_hearts(d: Dictionary) -> void: _hearts.restore_hearts(d)
+func upd_hearts(dt: float) -> void: _hearts.upd_hearts(dt)
+func refill_hearts() -> void: _hearts.refill_hearts()
+func hurt_player(cause: String, damage: int = 1) -> bool: return _hearts.hurt_player(cause, damage)
+func zombie_bite(z: Dictionary) -> void: _hearts.zombie_bite(z)
+func capture_checkpoint(kind: String) -> void: _hearts.capture_checkpoint(kind)
+func restore_checkpoint() -> bool: return _hearts.restore_checkpoint()
+
+func helper_snapshot(settle_pending: bool = false) -> Array: return _hearts.helper_snapshot(settle_pending)

@@ -1,7 +1,7 @@
 extends SceneTree
 ## (2) Every counter sells unattended once its helpers are bought (player idle).
 func _init() -> void:
-	var sim := MooSim.new(2)
+	var sim := MooEconomySim.new(2)
 	sim.autosave = false
 	sim.S.money = 100000
 	for p in sim.pads.filter(func(p): return p.d == 0):
