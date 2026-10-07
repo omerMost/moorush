@@ -270,7 +270,7 @@ Image: `gary.png`. Needed by `tutorial.md` (the first-night beat). Not on a card
   - waves while waiting (zombie arms bob 3 px at 1 Hz);
   - **hit: he bursts into straw**: 18 straw sticks 8×1.6 fly out radially, the mask flies off, the shirt and jeans lie flat, and the burlap head smiles;
   - trip (tutorial step 5): he falls forward and plays the same burst.
-- **Hook:** "Practice zombie. He's corn."
+- **Hook:** "Practice zombie. He's straw."
 
 ---
 
