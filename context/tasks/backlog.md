@@ -27,8 +27,9 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
 - [ ] **With the night port: Gary the practice zombie (`design/tutorial.md` §7, cards T8/T9).**
   - Gary pathfinds with `findPath`/`NAV`, can't bite, and trips after 60 s.
   - Armory-arrow hook when gunless. Night first-time lines.
+  - Look: `design/characters.md` §6 and `docs/design/characters/gary.png` (*provisional*): a scarecrow in a too-small zombie mask who bursts into straw when hit.
   - Done check: `test_tutorial_night`. Also verify a gunless first night is survivable, and raise a card if not.
-- [ ] Grandpa Bovine's portrait art and voice: take them from `design/characters.md` (the character session) when it lands. Until then the placeholder is 👴🐮.
+- [ ] **Grandpa Bovine portrait art** (card D3 A, "A Cow farmer"; `design/characters.md` §2, `docs/design/characters/grandpa.png`): the cow-farmer bust in the 56 px HUD bubble and the 240×150 dialog/newspaper frame, with the mustache wiggle while talking. It replaces the 👴🐮 placeholder. His voice and catchphrases are in §2.
 
 
 _(Approved, ready to pick up, not started yet.)_
@@ -44,8 +45,6 @@ _(Approved, ready to pick up, not started yet.)_
   - Customers and supporting cast get face style C.
   - Cache the variants (ADR 0006/0017). Done check: `check.sh` green, a render test comparing against the PNGs, and Android FPS no worse than 0.3.5.
 - [ ] **Character pass 2: zombies, with the night port** (cards Z1/D5/D8; `characters.md` §5, `zombies.png`). The grumpy zombie face and torn hem; joke zombies with their own body shapes and props; mood brows on customers who are turning. Add the new **Zombie Granny** type: speed ×0.7, HP +2, weight ~8, the scarf hat on her first cure. Those stats are *provisional* and need an economy check. Fold this into the Now item "Night and zombies".
-- [ ] **Gary, the practice zombie** for the tutorial's first night (`characters.md` §6, `gary.png`, *provisional* look): a scarecrow in a too-small zombie mask who bursts into straw when hit. Build it with the tutorial.
-- [ ] **Grandpa Bovine art** (card D3 A; `characters.md` §2, `grandpa.png`): a cow-farmer bust for the 56 px HUD bubble and the 240×150 dialog/newspaper frame, with the mustache wiggle while talking. Build it with the tutorial (`design/tutorial.md` §3), replacing the 👴🐮 placeholder.
 - [ ] **Chad Cornwell** (card D4 B; `characters.md` §3, `chad.png`): corn-cob hair, the purple suit and a smug mouth, always drawn at the player's next-chapter scale. He shows up in chapter-intro newspaper cards, as the rival robber kind and as the debate opponent. Build him when the story/newspaper cards and the politics chapters are ported.
 - [ ] **Mascot-suit bosses** (card D7 C; `characters.md` §7, `bosses.png`): a foam suit shaped like each chapter's product, with sneakers and a sweaty face hole. On defeat the head pops off to reveal Chad ("...this was Dad's idea."). Build with the boss port. The suit shapes for chapters 3–9 are *provisional*.
 - [ ] Give the specialist agents (`.claude/agents/*.md`) a Godot section. They're written for `prototype/index.html` today
