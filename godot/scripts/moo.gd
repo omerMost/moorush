@@ -19,7 +19,14 @@ signal suspension_changed(is_suspended: bool)
 
 signal slot_started(i: int)
 
+## Card P3, user: "Cap at 60 FPS (Recommended)". Phones only: 120 Hz panels
+## otherwise render ~120 FPS and throttle from heat (ADR 0024). Desktop and
+## headless tests keep their own pacing.
+const ANDROID_MAX_FPS := 60
+
 func _ready() -> void:
+	if OS.get_name() == "Android":
+		Engine.max_fps = ANDROID_MAX_FPS
 	sim = MooSim.new()
 	audio = MooAudio.new()
 	add_child(audio)

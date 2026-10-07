@@ -50,15 +50,18 @@ User asked: "create a new session fix the Performance". This is an explicit exce
   - not rewriting A* during Codex's split;
   - ADR renumbered to 0024 because main took 0016–0023.
   - update-drift check uses a 1%-trimmed mean (raw mean also printed).
-- Open: card F-cap (60 FPS cap?) in the backlog.
+- **P3 (frame cap), user via the review session:** "Cap at 60 FPS (Recommended)". Implemented as Android-only `Engine.max_fps = 60` in `moo.gd` (*provisional* mechanism, over a vsync/display-mode change). The phone done check becomes ≥ 58 FPS mean, last 2 min within 10% of minutes 1–2, p95 ≤ 20 ms.
+- **Later P2 answer, via the review session:** "Later". Done check (b) stays open in the backlog until the user frees the phone.
 
 ## Dialogue trace
 - User: "create a new session fix the Performance".
 - Claude, card P1 (phone soak plan) → user: "A: before + after (Recommended)".
 - Claude, card P2 (unlock phone) → user: "Unlocked".
 - Claude, card P3 (unlock again after cool-down) → user: "Unlocked".
+- Review session relayed later answers. P2: "Later" (land the code fix first; the soak waits for the phone). P3: "Cap at 60 FPS (Recommended)".
 - Review session (local_d6450a0b) asked for a rebase onto the sim split, check.sh, perf with nights, a dusk/sunrise spike measurement and the soak status. All were sent back to it.
 
 ## Notes for next session
-- The phone has 0.3.6 built *before* the rebase (no night code). The next phone build must be 0.3.7 (code 14).
+- The phone has 0.3.6 built *before* the rebase (no night code, no 60 FPS cap). The next phone build must be 0.3.7 (code 14).
+- To stop my own runs I used `pkill -f "godot --headless --path . -s"`, which could also have killed a concurrent Codex test run in the main checkout. None was running afterwards. Next time, kill by PID.
 - The windowed A/B warm-up now uses the fight bot and a step count: a night checkpoint restore can rewind `sim.T`, so `while sim.T < X` loops hang.

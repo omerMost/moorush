@@ -6,7 +6,7 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
-- 2026-10-07 — Android performance drift root cause found and fixed (ADR 0024): no unbounded growth; Godot 4 polygon/circle commands each built a GPU buffer (~14 µs). Cached shape meshes + off-view culling: Mac rendered draw 13.75→2.99 ms, pixel-identical A/B. `test_perf_drift.gd` in check.sh (32 simulated minutes, nights + fight bot). POCO: 0.3.5 baseline 58.8 FPS valid 10 min; 0.3.6 108.6 FPS partial. Uninterrupted acceptance soak stays in the Android playtest item.
+- 2026-10-07 — Android performance drift root cause found and fixed (ADR 0024): no unbounded growth; Godot 4 polygon/circle commands each built a GPU buffer (~14 µs). Cached shape meshes + off-view culling: Mac rendered draw 13.75→2.99 ms, pixel-identical A/B. `test_perf_drift.gd` in check.sh (32 simulated minutes, nights + fight bot). POCO: 0.3.5 baseline 58.8 FPS valid 10 min; 0.3.6 108.6 FPS partial. Card P3 "Cap at 60 FPS (Recommended)": Android `Engine.max_fps = 60`. Uninterrupted acceptance soak stays in the Android playtest item (P2: "Later").
 
 - 2026-10-07 — S2 native hearts/checkpoints (ADR 0022): five hearts, bite immunity/item loss, sunrise refill, named faint/retry card and per-slot dusk/chapter backups retaining tutorial/wardrobe/stats. Pending inventory and route-matched helper cargo survive retry; numeric save round trips, 15 headless suites and four rendered checks pass. Weapons/fight bots remain S3.
 
