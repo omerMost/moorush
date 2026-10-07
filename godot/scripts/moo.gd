@@ -75,6 +75,7 @@ func open_menu() -> void:
 	paused = true
 	sim.test_in = Vector2.ZERO
 	sim.move_in = Vector2.ZERO
+	sim.clear_combat_input()
 
 ## OS focus and pause events can arrive in either order; resume after both clear.
 func set_lifecycle(focused: bool, stopped: bool) -> void:
@@ -85,6 +86,7 @@ func set_lifecycle(focused: bool, stopped: bool) -> void:
 		if sim:
 			sim.test_in = Vector2.ZERO
 			sim.move_in = Vector2.ZERO
+			sim.clear_combat_input()
 			sim.events.clear()
 		if audio: audio.stop_all()
 		if not was_suspended and sim and sim.cur_slot:

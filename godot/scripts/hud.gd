@@ -2,6 +2,7 @@ extends Control
 ## HUD (prototype L1988): money pill, rank, saved flash, toasts, the touch
 ## joystick (L719-750) and the 3-slot menu (L2096-2140, trimmed to the slice).
 
+var controls = preload("res://scripts/combat_controls.gd").new(self)
 var joy = null  # {id, s: Vector2, p: Vector2}
 var menu: PanelContainer
 var menu_box: VBoxContainer
@@ -14,7 +15,8 @@ var retry_btn: Button
 func _ready() -> void:
 	process_priority = -10  # Sample current input before World advances the simulation.
 	Moo.suspension_changed.connect(func(stopped):
-		if stopped: joy = null)
+		if stopped:
+			joy = null; controls.clear())
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	menu_btn = Button.new()
@@ -25,11 +27,15 @@ func _ready() -> void:
 	menu_btn.position = Vector2(-56, 10)
 	menu_btn.pressed.connect(func(): show_menu())
 	add_child(menu_btn)
+	controls.ready()
+	Moo.slot_started.connect(func(_slot):
+		joy = null; controls.clear())
 	build_faint_card()
 	build_menu()
 	show_menu()
 
 func _process(_dt: float) -> void:
+	controls.process()
 	var s := Moo.sim
 	faint_card.visible = s.faint != null and not Moo.paused
 	if s.faint != null:
@@ -55,6 +61,8 @@ func _process(_dt: float) -> void:
 func _input(e: InputEvent) -> void:
 	if Moo.paused or Moo.suspended or Moo.sim.faint != null:
 		return
+	if e is InputEventScreenTouch and e.pressed and menu_btn.get_global_rect().has_point(e.position): return
+	if controls.input(e): return
 	if e is InputEventScreenTouch:
 		if e.pressed and joy == null:
 			if menu_btn.get_global_rect().has_point(e.position):
@@ -68,12 +76,14 @@ func _input(e: InputEvent) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		joy = null
+		controls.clear()
 
 func _draw() -> void:
 	var s := Moo.sim
 	if s == null or Moo.paused:
 		return
 	var ink := Color(40 / 255.0, 25 / 255.0, 10 / 255.0, 0.55)
+	controls.draw()
 	# money pill
 	var txt := MooSim.fmt(s.S.money)
 	var w := Paint.text_width(txt, 21) + 54
@@ -185,6 +195,7 @@ func show_menu() -> void:
 		Moo.audio.play("drop")
 	Moo.open_menu()
 	joy = null
+	controls.clear()
 	for c in menu_box.get_children():
 		menu_box.remove_child(c)
 		c.queue_free()
@@ -261,6 +272,7 @@ func delete(i: int) -> void:
 func travel_to(district: int) -> void:
 	if not Moo.sim.travel_to(district):
 		return
+	joy = null; controls.clear()
 	Moo.paused = false
 	menu.visible = false
 	menu_btn.visible = true

@@ -177,6 +177,9 @@ func upd_zombies(dt: float) -> void:
 		unstick(z)
 		z.moving = false
 		z.bite -= dt; z.slow -= dt
+		z.flash = maxf(0,float(z.get("flash",0))-dt)
+		if z.type == "vault" and not z.get("vaulted",false) and MooSim.dist(z,sim.player) < 240 and MooSim.dist(z,sim.player) > 60:
+			z.vaulted = true; z.vault = 0.55; sim.say(z,"HUP!",1)
 		if z.type == "gary":
 			if int(sim.S.get("gun", 0)) == 0: continue
 			z.armed += dt
@@ -189,6 +192,10 @@ func upd_zombies(dt: float) -> void:
 		if z.kbt > 0.0:
 			z.kbt -= dt
 			safe_move(z, z.x + z.kbx * dt, z.y + z.kby * dt, Vector2(z.kbx,z.kby).length(), dt)
+			continue
+		if float(z.get("vault",0)) > 0:
+			z.vault -= dt; z.spd = MooSim.SPEED*2.2*(0.5 if z.slow > 0 else 1.0)
+			chase(z,dt)
 			continue
 		if z.state != "chase":
 			z.st -= dt
@@ -210,13 +217,17 @@ func upd_zombies(dt: float) -> void:
 			if z.infl_t <= 0.0:
 				z.infl_t = 4.0
 				sim.events.append({"kind":"camera_flash", "duration":0.25})
+				sim.combat.flash = 0.25
 				sim.say(z, "Like and subscribe!", 1.4)
 	path_cursor = (path_cursor + 1) % maxi(1, sim.zombies.size())
 
 func hit_zombie(z, damage: float, item: String = "") -> void:
 	if z not in sim.zombies or damage <= 0.0: return
+	if z.type == "granny": sim.say(z,"Mind the knitting!",1.4)
 	z.hp -= damage * (3 if z.type == "lactose" and item in ["milk", "cheese"] else 1)
-	z.slow = 0.45; z.state = "chase"; z.spd = 0.0
+	z.slow = 0.45; z.spd = 0.0
+	if z.state == "windup": z.state = "recover"; z.st = 0.5
+	else: z.state = "chase"
 	var direction := Vector2(z.x - sim.player.x, z.y - sim.player.y).normalized()
 	z.kbx = direction.x * 210; z.kby = direction.y * 210; z.kbt = 0.16
 	if z.hp > 0: return

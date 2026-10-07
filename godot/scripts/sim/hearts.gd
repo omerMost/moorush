@@ -63,6 +63,7 @@ func hurt_player(cause: String, damage: int = 1) -> bool:
 		sim.S.stats.faints = int(sim.S.stats.get("faints", 0)) + 1
 		sim.faint = {"cause":cause, "checkpoint":"chapter_start" if sim.is_boss_night() else "dusk"}
 		sim.move_in = Vector2.ZERO; sim.test_in = Vector2.ZERO
+		sim.clear_combat_input()
 		sim.save(true)
 	return true
 

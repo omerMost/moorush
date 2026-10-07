@@ -2,8 +2,7 @@ class_name MooData
 extends RefCounted
 ## Chapter data copied from prototype/index.html (the frozen spec).
 ## STAGES[0..2] = Farm Kid, Farmer and Baker, with PM/TUNE price rescale.
-## Out of scope for the slice: the V (vehicle shop), W (armory) and K (bank)
-## modules keep their cells (they shape the revealed world) but have no pads yet.
+## Vehicles and bank retain their placeholder shops; S3 armories are playable.
 
 const TUNE := [1, 1.4, 0.9, 0.8, 1.15, 2.5, 1.4, 1.55, 2.0]
 const PM := [1, 2, 4, 10, 25, 60, 150, 400, 1000]
@@ -41,6 +40,7 @@ static func stage0() -> Dictionary:
 		],
 	}
 	_rescale(st, 0)
+	_armory(st, 0)
 	return st
 
 static func stage1() -> Dictionary:
@@ -73,6 +73,7 @@ static func stage1() -> Dictionary:
 	}
 	# Night taco production is deferred with the day/night and combat systems.
 	_rescale(st, 1)
+	_armory(st, 1)
 	return st
 
 static func stage2() -> Dictionary:
@@ -104,7 +105,25 @@ static func stage2() -> Dictionary:
 		],
 	}
 	_rescale(st, 2)
+	_armory(st, 2)
 	return st
+
+# Final coin prices, independent of production PM/TUNE. Weapon pads are optional.
+const WEAPONS := [
+	{"name":"Milk squirter", "damage":1.0, "cd":0.45, "range":230.0, "splash":0.0, "splash_damage":0.0, "cost":100},
+	{"name":"Egg launcher", "damage":2.0, "cd":0.6, "range":280.0, "splash":60.0, "splash_damage":1.0, "cost":1200},
+	{"name":"Pie launcher", "damage":4.0, "cd":0.7, "range":300.0, "splash":70.0, "splash_damage":2.0, "cost":4000},
+]
+
+static func _armory(st: Dictionary, chapter: int) -> void:
+	if chapter > 0:
+		st.mods.append({"id":"W", "c":0 if chapter == 1 else 2, "r":0, "type":"armory", "name":"Armory"})
+	var weapon: Dictionary = WEAPONS[chapter]
+	for i in 3:
+		st.pads.append({"m":"W", "s":i, "fx":["gun","gun_damage","gun_speed"][i], "v":chapter+1,
+			"cost":[[100,200,300],[1200,1800,2400],[4000,4000,5000]][chapter][i], "name":[weapon.name, weapon.name+" · Bigger nozzle", weapon.name+" · Faster pump"][i],
+			"label":[weapon.name,"Bigger nozzle","Faster pump"][i],
+			"icon":["🔫","💥","⚡"][i], "combat":true})
 
 static func stage_at(index: int) -> Dictionary:
 	match index:

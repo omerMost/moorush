@@ -7,6 +7,7 @@ const SAMPLE_RATE := 44100
 const VOICES := 8
 const SETTINGS_PATH := "user://moo-audio-settings.json"
 const NOTES := {
+	"pop": [[420.0, 0.035], [210.0, 0.045]],
 	"pick": [[880.0, 0.05]],
 	"drop": [[520.0, 0.05]],
 	"coin": [[988.0, 0.06], [1319.0, 0.09]],
@@ -52,10 +53,10 @@ func consume(events: Array) -> void:
 		var kind := str(event.get("kind", ""))
 		if kind == "unlock" and has_gate:
 			continue
-		play(kind)
+		play(kind,float(event.get("pitch",1.0)))
 
 
-func play(kind: String) -> bool:
+func play(kind: String, pitch: float = 1.0) -> bool:
 	if not enabled or not clips.has(kind):
 		return false
 	var now := Time.get_ticks_msec()
@@ -64,6 +65,7 @@ func play(kind: String) -> bool:
 		return false
 	for player in _players:
 		if not player.playing:
+			player.pitch_scale = clampf(pitch,0.5,2.0)
 			player.stream = clips[kind]
 			player.play()
 			_last_play[kind] = now

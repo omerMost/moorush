@@ -94,14 +94,16 @@ func _init() -> void:
 	expect(old_dairy.pads.filter(func(p): return p.d == 2).all(func(p): return p.paid == 0), "dairy migration does not grant bakery upgrades")
 	old_dairy.dispose()
 	# Old array-only saves restore partial payments at either previous slice size.
-	for old_size in [10, 22]:
+	for old_size in [10, 22, 34]:
 		var array_save := make_sim(106 + old_size)
 		var payments: Array = []
-		for index in old_size: payments.append(array_save.pads[index].cost - 1)
+		var economic := array_save.pads.filter(func(p): return not p.get("combat",false))
+		for index in old_size: payments.append(economic[index].cost - 1)
 		array_save.apply_state({"ver":9, "ch":0 if old_size == 10 else 1, "paid":payments, "money":123})
 		var restored := true
-		for index in array_save.pads.size():
-			restored = restored and array_save.pads[index].paid == (payments[index] if index < old_size else 0)
+		economic = array_save.pads.filter(func(p): return not p.get("combat",false))
+		for index in economic.size():
+			restored = restored and economic[index].paid == (payments[index] if index < old_size else 0)
 		expect(restored and array_save.S.money == 123, "old %d-pad array restores exact partial prefix" % old_size)
 		array_save.dispose()
 	# Current-slot deletion resets state without touching peers.

@@ -15,21 +15,29 @@ func _init() -> void:
 	var last_report := 0.0
 	var bought := {}
 	var first_gate_time := -1.0
+	var entries := {0:0.0}
+	var prior_chapter := 0
 	var t0 := Time.get_ticks_msec()
 	while sim.T < LIMIT and not sim.S.done:
 		bot.tick(DT)
 		sim.update(DT)
+		if sim.S.ch != prior_chapter:
+			entries[sim.S.ch] = sim.T; prior_chapter = sim.S.ch
 		if sim.S.ch == 1 and first_gate_time < 0:
 			first_gate_time = sim.T
 		for p in sim.pads:
 			var key: String = str(p.d) + ":" + p.name
 			if p.paid >= p.cost and not bought.has(key):
 				bought[key] = sim.T
+				if p.get("combat",false):
+					var elapsed: float = sim.T-entries[p.d]
+					var deadline := 486.0 if p.fx == "gun" else 1686.0
+					expect(elapsed <= deadline,"%s bought at chapter %.1fs before %.0fs deadline" % [key,elapsed,deadline])
 				print("  t=%6.1fs bought %s ($%d)" % [sim.T, key, p.cost])
 		if sim.T - last_report >= 300:
 			last_report = sim.T
 			print("  t=%6.1fs ch=%d money=%d stack=%s at=(%d,%d)" % [sim.T, sim.S.ch, sim.S.money, str(sim.player.stack), sim.player.x, sim.player.y])
-	expect(sim.pads.size() == 34, "all 34 prototype upgrades are present")
+	expect(sim.pads.size() == 43, "all 34 economic and nine weapon upgrades are present")
 	expect(first_gate_time > 0, "first gate opens dairy through natural play")
 	expect(sim.S.ch == 2 and sim.S.done, "supermarket gate completes supported career within %.0fs" % LIMIT)
 	expect(sim.pads.all(func(p): return p.paid >= p.cost), "all three districts' complete upgrade chains purchased")

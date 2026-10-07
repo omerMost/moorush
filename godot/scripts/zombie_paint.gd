@@ -14,6 +14,7 @@ static func draw_actor(ci: CanvasItem, z, time: float) -> void:
 		"flag": o.shirt = "#5b4636"
 		"granny": o.shirt = "#c77dbb"; o.hair = "#e8e8e8"
 	Paint.person(ci, 0, 0, o)
+	if float(z.get("flash",0)) > 0: Paint.ell(ci,0,-30,15,24,Color(1,1,1,0.5))
 	var f: float = z.face
 	var bob := sin(time * TAU) * 3.0 if z.type == "gary" else 0.0
 	var skin := Paint.C(z.skin)

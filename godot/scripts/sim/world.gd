@@ -204,6 +204,13 @@ func build_world() -> void:
 func apply_pad(p, from_load: bool) -> void:
 	var m = sim.mod_by(p.m, p.d) if p.has("m") else null
 	match p.fx:
+		"gun":
+			sim.S.gun = maxi(sim.S.gun, p.v)
+			if not from_load: sim.toast("Right stick: aim / tap: shoot · Dash to dodge", 4.0)
+		"gun_damage":
+			sim.S.gun_damage[p.v - 1] = true
+		"gun_speed":
+			sim.S.gun_speed[p.v - 1] = true
 		"feed":
 			var b = sim.make_belt(m)
 			if b != null:
@@ -246,10 +253,14 @@ func visible_pads() -> Array:
 	for p in sim.pads:
 		if p.d > sim.S.ch or p.paid >= p.cost:
 			continue
+		if p.get("combat", false):
+			if p.fx == "gun" or sim.pads.any(func(g): return g.d == p.d and g.fx == "gun" and g.paid >= g.cost): out.append(p)
+			continue
 		var n := int(counts.get(p.d, 0))
 		if n < 3:
 			out.append(p)
 			counts[p.d] = n + 1
+	out.sort_custom(func(a,b): return a.fx != "gate" and b.fx == "gate")
 	return out
 
 func wallet() -> int:

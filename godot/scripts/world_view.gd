@@ -246,7 +246,7 @@ func draw_shop_building(m) -> void:
 	Paint.fill_rr(self, s.x - 6, s.y - 10, s.w + 12, 22, 8, C(n[1]))
 	Paint.text(self, n[0], s.x + s.w / 2, s.y + 1, 14, Color.WHITE)
 	Paint.emoji_at(self, n[2], s.x + s.w / 2, s.y + 48, 28)
-	Paint.text(self, "Coming soon", m.ox + MooSim.CW / 2, m.oy + 240, 18, Color(1, 1, 1, 0.85), Color(40 / 255.0, 25 / 255.0, 10 / 255.0, 0.45))
+	Paint.text(self, "Carry products to shoot" if m.type == "armory" else "Coming soon", m.ox + MooSim.CW / 2, m.oy + 240, 18, Color(1, 1, 1, 0.85), Color(40 / 255.0, 25 / 255.0, 10 / 255.0, 0.45))
 
 func draw_belt(b) -> void:
 	var x0: float = minf(b.x1, b.x2)
@@ -307,7 +307,7 @@ func draw_pad(pd) -> void:
 		Paint.emoji_at(self, pd.icon, c.x, c.y + (6 if gate else 2) - 12 * (1.5 if gate else 0.95), 24 * (1.5 if gate else 0.95))
 	Paint.item(self, "coin", c.x - 24, y + h - 6, 0.8)
 	Paint.text(self, MooSim.fmt(pd.cost - pd.paid), c.x + 8, y + h - 15, 18, Color.WHITE, Color(0, 0, 0, 0.3))
-	Paint.text(self, pd.name, c.x, y - 11, 17 if gate else 13, Color.WHITE, Color(40 / 255.0, 25 / 255.0, 10 / 255.0, 0.6))
+	Paint.text(self, pd.get("label",pd.name), c.x, y - 11, 17 if gate else 13, Color.WHITE, Color(40 / 255.0, 25 / 255.0, 10 / 255.0, 0.6))
 
 func draw_fog(c) -> void:
 	if c.fog <= 0.01:
@@ -517,6 +517,15 @@ func _draw() -> void:
 				pl.merge({"walk": o.walk, "moving": o.moving, "face": o.face}, true)
 				Paint.person(self, o.x, o.y, pl)
 				draw_stack(o, sim.S.cap)
+	# Reuse cached item sprites for projectiles; aim and muzzle are cheap primitives.
+	for shot in sim.shots: Paint.item(self,shot.item,shot.x,shot.y,0.8)
+	if sim.S.gun > 0:
+		var origin := Vector2(sim.player.x,sim.player.y-30)
+		var direction := sim.aim_in.normalized()
+		if direction.length() > 0:
+			draw_line(origin+direction*22,origin+direction*sim.weapon_stats().range,C("#ffd54a",0.4),2)
+			Paint.fill_rr(self,origin.x-8,origin.y-7,16,14,3,C("#6a4c93"))
+			if sim.combat.muzzle > 0: Paint.circ(self,origin.x+direction.x*24,origin.y+direction.y*24,9,C("#fff7bd"))
 	# bubbles: hungry machines, customers' wants with a patience ring
 	for m in L:
 		if not vis(m.cell):

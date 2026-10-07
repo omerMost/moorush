@@ -143,10 +143,11 @@ func act() -> void:
 	var st = p.stack
 	var can_take := func(t): return (st.type == null or st.type == t) and st.n < sim.S.cap
 	var L := sim.live()
+	var ammo: bool = sim.S.gun > 0
 	for m in sim.mods:
 		if not sim.active(m) or absf(m.ox + MooSim.CW / 2 - p.x) > MooSim.CW or absf(m.oy + MooSim.CHh / 2 - p.y) > MooSim.CHh:
 			continue
-		if m.type == "field" and can_take.call(m.item) and MooSim.in_r(p, m.rect, 20) and sim.dests_for(m.item, L, true).size():
+		if m.type == "field" and can_take.call(m.item) and MooSim.in_r(p, m.rect, 20) and (ammo or sim.dests_for(m.item, L, true).size()):
 			var nearest = null
 			var nearest_distance := 40.0
 			for t in m.tiles:
@@ -160,7 +161,7 @@ func act() -> void:
 		if m.has("tray") and MooSim.in_r(p, m.tray.rect, 14) and MooSim.avail(m.tray) > 0:
 			if can_take.call(m.tray.type):
 				# hard-won fix: only pick up what something needs
-				if sim.dests_for(m.tray.type, L, true).size():
+				if ammo or sim.dests_for(m.tray.type, L, true).size():
 					if sim.take(m.tray, p):
 						sim.events.append({"kind": "pick"})
 				elif st.type == null:

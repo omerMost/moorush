@@ -34,6 +34,7 @@ func snapshot() -> Dictionary:
 			rep[m.key] = round(m.rep * 10) / 10.0
 	var st = sim.player.stack
 	return {"v": 1, "ver": 9, "engine": "godot", "t": int(Time.get_unix_time_from_system() * 1000), "ch": sim.S.ch, "money": sim.S.money,
+		"gun":sim.S.gun, "combat":sim.combat_snapshot(),
 		"day": sim.S.day, "time": sim.S.time, "cn": sim.S.cn,
 		"tut": sim.S.tut.duplicate(true), "night": sim.night_snapshot(),
 		"hearts": sim.S.hearts, "inv_t": sim.inv_t, "faint": sim.faint.duplicate(true) if sim.faint != null else null,
@@ -49,6 +50,7 @@ func fresh_state() -> void:
 	sim.rng.seed = sim.rng.seed
 	sim.stage = MooData.stage0()
 	sim.S = {"ch": 0, "money": 0, "votes": 0, "cap": 8, "won": false, "done": false}
+	sim.reset_combat()
 	sim.reset_hearts()
 	sim.reset_night()
 	sim.reset_clock()
@@ -82,13 +84,10 @@ func apply_state(d: Dictionary) -> void:
 				else:
 					p.paid = p.cost if int(v) >= p.cost * 0.9 else mini(p.cost - 1, int(v))
 	elif paid is Array:
-		# Array-only native saves used the implemented chapter count at the time.
-		var count := 0
-		for chapter in range(MooData.STAGE_COUNT):
-			count += MooData.stage_at(chapter).pads.size()
-			if paid.size() == count:
-				for i in paid.size(): sim.pads[i].paid = clampi(int(paid[i]), 0, sim.pads[i].cost)
-				break
+		# Pre-S3 array-only native saves: 10 / 22 / 34 economic pads.
+		var economic := sim.pads.filter(func(p): return not p.get("combat", false))
+		if paid.size() in [10,22,34]:
+			for i in paid.size(): economic[i].paid = clampi(int(paid[i]), 0, economic[i].cost)
 	# Previous slice endpoints become ownership of their newly available district.
 	var saved_chapter := int(d.get("ch", 0))
 	if bool(d.get("done", false)) and saved_chapter >= 0 and saved_chapter < MooData.STAGE_COUNT - 1:
@@ -143,6 +142,7 @@ func apply_state(d: Dictionary) -> void:
 		var f := sim.nearest_free(sim.nav_gx(sim.player.x), sim.nav_gy(sim.player.y))
 		sim.player.x = sim.nav_cx(f.x); sim.player.y = sim.nav_cy(f.y)
 
+	sim.restore_combat(d)
 	sim.restore_night(d)
 	sim.restore_hearts(d)
 
@@ -153,6 +153,8 @@ func travel_to(district: int) -> bool:
 	sim.player.y = a.rect.y + a.rect.h + 30
 	sim.player.pinned = 0.0
 	sim.move_in = Vector2.ZERO; sim.test_in = Vector2.ZERO
+	sim.clear_combat_input()
+	sim.shots.clear()
 	sim.g_cache = null; sim.g_mode = null; sim.cam_focus = null
 	sim.bounds = sim.target_bounds.duplicate()
 	return true

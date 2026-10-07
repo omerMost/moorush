@@ -76,6 +76,14 @@ var g_cache = null
 var g_mode = null
 
 # System seams: future combat/bosses/robbers follow this pattern.
+var _combat = preload("res://scripts/sim/combat.gd").new(self)
+var aim_in := Vector2.ZERO
+var fire_in := false
+var quick_shot := false
+var dash_request := false
+var combat := {}
+var shots: Array = []
+
 var _hearts = preload("res://scripts/sim/hearts.gd").new(self)
 var _zombies = preload("res://scripts/sim/zombies.gd").new(self)
 var _clock = preload("res://scripts/sim/clock.gd").new(self)
@@ -149,7 +157,11 @@ static func P(x: float, y: float, w: float = 90.0, h: float = 70.0) -> Dictionar
 
 func update(dt: float) -> void:
 	if faint != null: return
+	if combat.hit_stop > 0:
+		combat.hit_stop = maxf(0,combat.hit_stop-dt)
+		return
 	upd_hearts(dt)
+	upd_combat_timers(dt)
 	T += dt
 	upd_clock(dt)
 	warn_t -= dt
@@ -162,10 +174,13 @@ func update(dt: float) -> void:
 	if test_in.length() > 0.001:
 		dir = test_in.normalized()
 		mag = 1.0
-	p.moving = mag > 0
 	var px0: float = p.x
 	var py0: float = p.y
-	var sp := SPEED
+	var sp: float = SPEED * combat.dash_mul
+	if combat.dash_mul > 1:
+		if mag == 0: dir = Vector2(combat.dash_x, combat.dash_y)
+		mag = 1.0
+	p.moving = mag > 0
 	p.vx = dir.x * mag * sp if mag > 0 else 0.0
 	if mag > 0:
 		p.x += dir.x * mag * sp * dt
@@ -229,6 +244,7 @@ func update(dt: float) -> void:
 			leaving.remove_at(i)
 	for h in helpers:
 		upd_helper(h, dt)
+	upd_combat(dt)
 	upd_zombies(dt)
 	if faint != null: return
 	upd_ground(dt)
@@ -273,6 +289,8 @@ func update(dt: float) -> void:
 # Release in-flight callbacks that capture this simulation before discarding it.
 func dispose() -> void:
 	flyers.clear()
+	shots.clear()
+	clear_combat_input()
 
 
 # Source-compatible forwarding API; default arguments and static calls stay intact.
@@ -405,3 +423,12 @@ func capture_checkpoint(kind: String) -> void: _hearts.capture_checkpoint(kind)
 func restore_checkpoint() -> bool: return _hearts.restore_checkpoint()
 
 func helper_snapshot(settle_pending: bool = false) -> Array: return _hearts.helper_snapshot(settle_pending)
+
+func reset_combat() -> void: _combat.reset_combat()
+func clear_combat_input() -> void: _combat.clear_input()
+func restore_combat(d: Dictionary) -> void: _combat.restore_combat(d)
+func combat_snapshot() -> Dictionary: return _combat.snapshot()
+func weapon_stats(index: int = -1) -> Dictionary: return _combat.weapon_stats(index)
+func upd_combat_timers(dt: float) -> void: _combat.timers(dt)
+func upd_combat(dt: float) -> void: _combat.update(dt)
+func try_dash() -> bool: return _combat.try_dash()

@@ -13,7 +13,7 @@ func compare(sim: MooSim, label: String) -> void:
 func _init() -> void:
 	var sim := MooSim.new(17)
 	sim.autosave = false
-	for i in range(34):
+	for i in range(43):
 		var visible := sim.visible_pads()
 		if visible.is_empty():
 			expect(false, "all upgrades remain reachable")

@@ -138,9 +138,22 @@ func guide_target():
 func guide_raw():
 	var practice = sim.gary_guide()
 	if practice != null: return practice
+	for pad in sim.visible_pads():
+		if pad.fx == "gun" and pad.d == sim.S.ch and sim.wallet() >= pad.cost-pad.paid: return MooSim.ctr(pad)
 	var st = sim.player.stack
 	var L := sim.live()
+	var economic := sim.pads.filter(func(p): return p.d == sim.S.ch and not p.get("combat",false) and p.fx != "gate")
+	var built := economic.filter(func(p): return p.paid >= p.cost).size()
+	var base = sim.pads.filter(func(p): return p.d == sim.S.ch and p.fx == "gun")[0]
+	# The arrow reserves earnings for the base after two production investments.
+	# Upgrades get the same treatment once local automation is established.
+	var reserve = base if base.paid < base.cost and built >= 2 else null
+	if reserve == null and built >= (6 if sim.S.ch == 2 else economic.size()):
+		for pad in sim.visible_pads():
+			if pad.d == sim.S.ch and pad.get("combat",false): reserve = pad; break
+	if reserve != null and sim.wallet() >= reserve.cost-reserve.paid: return MooSim.ctr(reserve)
 	for p in sim.visible_pads():
+		if reserve != null and p.d == sim.S.ch: continue
 		if sim.wallet() >= p.cost - p.paid:
 			return MooSim.ctr(p)
 	if st.type == null:

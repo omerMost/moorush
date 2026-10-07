@@ -105,12 +105,17 @@ func run() -> void:
 	hud._input(release)
 	hud._process(0.0)
 	expect(hud.joy == null and sim.move_in == Vector2.ZERO, "resumed joystick release stops movement")
+	# Exercise a resumed animal wander, which legitimately advances saved RNG.
+	var rng_before_resume: int = sim.rng.state
+	sim.mod_by("B",0).units[0].idle = 0.0
 	world._process(0.03)
 	expect(moo.audio.played_count == sounds_before, "resume does not replay discarded pre-background sound effects")
+	expect(sim.rng.state != rng_before_resume,"resumed animal wander advances gameplay RNG before its next save")
 	expect(is_equal_approx(sim.T,time_before + 0.03), "world advances normally after both lifecycle flags clear")
 	expect(is_equal_approx(sim.S.time, clock_before + 0.03 / 300.0), "resume advances the chapter clock by the real gameplay tick")
 	# S1 persists clock time; retain every original inventory/wallet/payment expectation.
 	expected.time = sim.S.time
+	expected.rng = str(sim.rng.state)
 	expected = stable(expected)
 	# Reverse Android callback order: resumed arrives before focus-in.
 	notify_app(Node.NOTIFICATION_APPLICATION_PAUSED)
@@ -133,7 +138,8 @@ func run() -> void:
 	var cold := MooSim.new(81)
 	cold.save_dir = save_dir
 	expect(cold.start_slot(1), "fresh simulation cold-loads suspended game's actual slot file")
-	expect(stable(cold.snapshot()) == expected, "cold load restores settled inventory, sparse slots, wallet and partial upgrades")
+	var actual := stable(cold.snapshot())
+	expect(actual == expected, "cold load restores settled inventory, sparse slots, wallet and partial upgrades")
 	cold.dispose()
 	sim.delete_slot(1)
 	moo.audio.stop_all()

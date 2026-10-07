@@ -43,6 +43,56 @@ func run() -> void:
 		hud._input(touch)
 		hud._process(0.0)
 		ok = ok and moo.sim.move_in == Vector2.ZERO
+		# Two live IDs: movement release must not end right-stick fire.
+		moo.sim.S.gun = 1
+		touch.index = 0; touch.position = Vector2(100,750); touch.pressed = true; hud._input(touch)
+		touch = touch.duplicate(); touch.index = 1; touch.position = Vector2(420,750); hud._input(touch)
+		drag.index = 0; drag.position = Vector2(145,750); hud._input(drag)
+		drag = drag.duplicate(); drag.index = 1; drag.position = Vector2(420,795); hud._input(drag)
+		hud._process(0)
+		ok = ok and moo.sim.move_in == Vector2.RIGHT and moo.sim.aim_in == Vector2.DOWN and moo.sim.fire_in
+		touch.index = 0; touch.pressed = false; hud._input(touch); hud._process(0)
+		ok = ok and moo.sim.move_in == Vector2.ZERO and moo.sim.fire_in
+		touch.index = 1; hud._input(touch); hud._process(0)
+		ok = ok and not moo.sim.fire_in and not moo.sim.quick_shot
+		touch.position = Vector2(420,750); touch.pressed = true; hud._input(touch)
+		touch = touch.duplicate(); touch.pressed = false; hud._input(touch)
+		ok = ok and moo.sim.quick_shot
+		moo.open_menu()
+		ok = ok and not moo.sim.quick_shot and not moo.sim.fire_in
+		hud.controls.clear()
+		moo.paused = false
+		hud._process(0)
+		# Desktop click routes through the actual viewport; Dash never creates a stick.
+		var dash_tap := InputEventMouseButton.new()
+		dash_tap.button_index = MOUSE_BUTTON_LEFT
+		dash_tap.position = hud.controls.dash_btn.get_global_rect().get_center()
+		dash_tap.pressed = true; root.push_input(dash_tap,true)
+		dash_tap = dash_tap.duplicate(); dash_tap.pressed = false; root.push_input(dash_tap,true)
+		ok = ok and moo.sim.dash_request and hud.joy == null
+		moo.sim.clear_combat_input()
+		dash_tap.position = Vector2(450,400); dash_tap.pressed = true; root.push_input(dash_tap,true); hud._process(0)
+		ok = ok and moo.sim.fire_in and moo.sim.aim_in.length() > 0.99 and hud.controls.aim == null and hud.joy == null
+		var emulated := dash_tap.duplicate()
+		emulated.device = InputEvent.DEVICE_ID_EMULATION; emulated.pressed = false; hud._input(emulated)
+		ok = ok and moo.sim.fire_in
+		# Release location must never retain an existing movement/aim/fire ID.
+		dash_tap.position = hud.controls.dash_btn.get_global_rect().get_center(); dash_tap.pressed = false
+		hud._input(dash_tap); hud._process(0)
+		ok = ok and not moo.sim.fire_in
+		for endpoint in [hud.controls.dash_btn.get_global_rect().get_center(),hud.menu_btn.get_global_rect().get_center()]:
+			touch.index = 0; touch.position = Vector2(100,750); touch.pressed = true; hud._input(touch)
+			drag.index = 0; drag.position = Vector2(145,750); hud._input(drag)
+			touch = touch.duplicate(); touch.pressed = false; touch.position = endpoint; hud._input(touch)
+			ok = ok and hud.joy == null
+			touch.index = 1; touch.position = Vector2(420,750); touch.pressed = true; hud._input(touch)
+			drag.index = 1; drag.position = Vector2(420,795); hud._input(drag)
+			touch = touch.duplicate(); touch.pressed = false; touch.position = endpoint; hud._input(touch)
+			ok = ok and hud.controls.aim == null
+		moo.set_lifecycle(false,false); hud._process(0)
+		ok = ok and not moo.sim.fire_in and hud.controls.aim == null and not moo.sim.dash_request
+		moo.set_lifecycle(true,false)
+		print("  dual touch IDs, independent release, quick tap/menu reset: %s" % ok)
 		hud.show_menu()
 		await process_frame
 		ok = ok and moo.paused and hud.menu.visible and hud.menu.size.x <= hud.size.x and hud.menu.size.y <= hud.size.y
