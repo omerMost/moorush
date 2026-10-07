@@ -12,7 +12,7 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
   3. **Weapons: S3 done** (ADR 0023): Milk/Egg/Pie, two upgrades each, independent armory pads, settled carried-product ammo, aim/tap/hold, splash, dash, joke actors and feedback. Headless real shots/reload, dual touch/pointer and normal-night fights plus natural purchase-deadline checks. Boss fights/full armed-career bot remain S4.
   4. **Bosses as chapter exams:** every 3rd night; Cornelius, The Big Cheese and The Sourdough Starter with 3 powers each; `boss_beaten[ch]` plus the gate are needed to leave the chapter. Looks from `characters.md` §7.
   5. **Robbers, by day only** (v9 L950–1022): no hearts, tackle refunds 2×.
-  6. The Farmer night taco stand.
+  6. The Farmer night taco stand (in d1 cell (1,2) per `design/chapter2.md` §4; build after the ch2 redesign).
   - **Out of ch1–3:** MOO FEVER, BREAKING MOOS events, weather, daily goals (F8); turrets, floodlights, dog, collectors, pockets, hats (*provisional*).
   - **Night performance acceptance:** profile Android beat-spawn/replan/save timing before deploying the completed night port. The S3 headless full-career run is 421.0s wall with parallel validations, versus S2 ~230s and prior ~85–97s; this is CPU-test evidence, not device FPS.
   - **Done check:** the tests in `fun-systems.md` §5 (hearts, checkpoints, night escalation, zombie HP + pathing + unstick, bosses ch1–3, gate requires boss, robbers day-only, a fight bot over 10 seeds, the career bot ch1–3).
@@ -29,19 +29,14 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
   - The fight bot took **0 hits in 30 first nights**. Measure later nights (5, 8) and report the hearts lost, as input for a difficulty card. No tuning before the card.
 
 ## Next
-- [ ] **No repeated farm in later chapters** (the user, 2026-10-07: "i want you to add to tasks to change things so there will not be another corn field and cow barn or farm because its making the field to complex to track"). Not started; it needs a design card before Codex builds it.
-  - **What repeats today:**
-    - Chapter 2 (Farmer) has its own Corn field, Dairy barn, Big coop and Egg stand, copies of chapter 1's corn field, cow barn, chicken coop and egg stand. That's both in `godot/scripts/data.gd` `stage1()` and in prototype L129–135.
-    - Later chapters repeat the same way: Paper delivery, Print shop and TV studio appear in several of chapters 6–9 (prototype L223–285).
-  - **The rule:** each chapter has *new* production only. One corn field and one cow barn exist in the whole game.
-  - **Open card (N2), for when this is picked up. How does chapter 2 get its milk for the Cheese press?**
-    - A: the ch1 barn feeds it, through a belt or helpers carrying across the district gap;
-    - B: a milk delivery truck (the `supply` type);
-    - C: chapter 2 is redesigned around a new product chain.
-  - **Constraints:**
-    - Old saves with ch2 pads bought must keep their progress (the price-rescale rule).
-    - The tutorial's ch1 beats and the fun-systems ch2 weapon (Egg launcher) depend on ch2 content, so check `design/tutorial.md` and `design/fun-systems.md`.
-  - **Done check:** no two chapters share a production module name or type+item. The career bot and `check.sh` stay green.
+- [ ] **Chapter 2 redesign: the farm grows, plus cheese (cards G1–G6, ADR 0024, spec `design/chapter2.md`).** Codex builds it, Claude reviews. **Order:** after S4 (bosses) and before S6 (the taco stand moves to d1 (1,2)). S4 doesn't wait.
+  - **Ch2 drops its corn field, dairy barn, big coop and egg stand.** Its 12 pads grow ch1's field, barn and coop where they stand (a new `grow` effect, cross-district targets like `"m":"0:B"`). The new things are the Cheese press, Cheese shop and the Milk pipeline from the ch1 barn (N2 = A).
+  - **Shops appear only when useful:** the bank and vehicle shop are hidden in ch1–3; the armory appears at the first dusk.
+  - **The discovery moment:** glide 0.6 s, zoom 1.2, a Grandpa line for 2.0 s, glide back 0.5 s, tap to skip. Only for unlocks, new chapters and the armory, never for ordinary pads (ADR 0009 stays).
+  - **Old ch2 saves migrate** (§5: map the pads, refund the rest).
+  - **Done check:** `design/chapter2.md` §8.
+- [ ] **No repeated production in later chapters** (the user, 2026-10-07: "i want you to add to tasks to change things so there will not be another corn field and cow barn or farm because its making the field to complex to track"). Ch2 is settled by ADR 0024. The rule (one of each type in the whole game, at most two products per chapter, G2) applies when chapters 4–9 are ported: Paper delivery, Print shop and TV studio repeat across chapters 6–9 (prototype L223–285). Needs a card per chapter at port time.
+- [ ] **Card before porting the Harbor:** which chapter number becomes the water chapter (G4: its own chapter, fish → sushi, boat, own boss; pearls cut; `design/chapter2.md` §7).
 - [ ] **Tutorial: Grandpa's soft opening, chapter 1 B0–B6 (ADR 0016, `design/tutorial.md` §2–§6, §8).** Codex builds, Claude reviews.
   - `tutorial.gd`, the sim's `ev_*` events, the HUD bubble with the portrait placeholder, the moo-babble, and the `tut` save key with old-save migration.
   - Remove the intro toast.
