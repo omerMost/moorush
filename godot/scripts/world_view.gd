@@ -491,7 +491,7 @@ func _draw() -> void:
 			for c in m.q:
 				ents.append([c.y, "cust", c])
 	# People elsewhere on the map are skipped; the margin covers their tallest
-	# carried stack, speech and smile above the feet (ADR 0025).
+	# carried stack, speech and smile above the feet (ADR 0026).
 	var near := V.grow(140) if cull_people else Rect2(-1e9, -1e9, 2e9, 2e9)
 	for c in sim.leaving:
 		if near.has_point(Vector2(c.x, c.y)):

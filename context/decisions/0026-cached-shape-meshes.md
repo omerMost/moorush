@@ -1,8 +1,8 @@
-# ADR 0025 — Cached shape meshes instead of per-call polygons
+# ADR 0026 — Cached shape meshes instead of per-call polygons
 
 **Status:** Accepted for the code; phone acceptance (uninterrupted 10-minute soak) pending
 **Date:** 2026-10-07
-**Supersedes:** _(none)_. Extends ADR 0006 (cached procedural drawing). Renumbered from drafts 0016/0019/0024 after main took those numbers.
+**Supersedes:** _(none)_. Extends ADR 0006 (cached procedural drawing). Renumbered from drafts 0016/0019/0024/0025 after main took those numbers.
 
 ## Context
 

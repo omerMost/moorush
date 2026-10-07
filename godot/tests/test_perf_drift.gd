@@ -1,5 +1,5 @@
 extends SceneTree
-## Long-run performance drift (ADR 0025). A full chapter-3 farm (all pads incl.
+## Long-run performance drift (ADR 0026). A full chapter-3 farm (all pads incl.
 ## weapons, 13 helpers, four belts, six counters) runs 32 simulated minutes in the
 ## real scene with day/night, zombies and the fight bot playing. The camera repeats a fixed 10-view tour of the bakery district every
 ## 10 rendered frames, so every minute draws the same views and only game state
@@ -183,7 +183,7 @@ func run() -> void:
 	# reported above and excluded here so the check measures sustained cost.
 	expect(tl <= te * 1.15, "update CPU (1%%-trimmed mean %.4f -> %.4f ms/step, %+.1f%%) last 5 min within 15%% of minutes 5-10" % [te, tl, (tl / te - 1) * 100])
 	# Godot 4 builds a GPU buffer per polygon command (~14us CPU on a desktop);
-	# repeated shapes must come from the mesh cache (ADR 0025).
+	# repeated shapes must come from the mesh cache (ADR 0026).
 	var pm := mean(poly_late)
 	expect(pm <= POLY_BUDGET, "uncached polygon commands per frame %.1f <= %d (cached meshes %d)" % [pm, POLY_BUDGET, Paint.shape_meshes.size()])
 	# Hard caps: gameplay collections (rate-bounded by lifetimes/capacities) and Paint caches.

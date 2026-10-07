@@ -12,7 +12,7 @@ User asked: "create a new session fix the Performance". This is an explicit exce
   - One person ≈ 210 µs. Sectioned profile of the full farm: fields 4.3 ms, machines 2.2, helpers 2.6, other entities ~3.
 - Triangulation ruled out: a cached fan through `canvas_item_add_triangle_array` gave no gain.
 
-## Fix (ADR 0025)
+## Fix (ADR 0026)
 - `Paint.fill_shape`: repeated convex shapes (rounded rects, ellipses, circles in `draw_circle`'s 64-segment layout, person hair and cap) become one cached `ArrayMesh` each, drawn with `draw_mesh` plus a translation.
   - Single-use shapes (pulsing pads) keep the polygon path.
   - Meshes unused for 300 frames are released; hard bounds of 1,024 meshes and 4,096 seen keys.
@@ -48,7 +48,7 @@ User asked: "create a new session fix the Performance". This is an explicit exce
   - fan-mesh caching only for convex shapes;
   - 140-unit people cull margin;
   - not rewriting A* during Codex's split;
-  - ADR renumbered to 0025 because main took 0016–0024.
+  - ADR renumbered to 0026 because main took 0016–0025.
   - update-drift check uses a 1%-trimmed mean (raw mean also printed).
 - **P3 (frame cap), user via the review session:** "Cap at 60 FPS (Recommended)". Implemented as Android-only `Engine.max_fps = 60` in `moo.gd` (*provisional* mechanism, over a vsync/display-mode change). The phone done check becomes ≥ 58 FPS mean, last 2 min within 10% of minutes 1–2, p95 ≤ 20 ms.
 - **Later P2 answer, via the review session:** "Later". Done check (b) stays open in the backlog until the user frees the phone.
