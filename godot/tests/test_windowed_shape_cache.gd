@@ -1,5 +1,5 @@
 extends SceneTree
-## Rendered A/B for ADR 0024 (needs a window; not part of headless check.sh):
+## Rendered A/B for ADR 0025 (needs a window; not part of headless check.sh):
 ## godot --path godot -s res://tests/test_windowed_shape_cache.gd
 ## The same frozen full chapter-3 farm frame is drawn with the original
 ## per-call polygon path (Paint.mesh_cache=false, no people culling) and with

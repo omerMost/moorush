@@ -20,7 +20,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 - Frozen prototype: Canvas 2D, procedural sprites/emoji, DOM HUD and Baloo 2 from Google Fonts.
 - Native lighting (ADR 0020): one canvas shader quad with 24 bounded radial lights; no per-frame mask texture baking or new dependency.
 - Native drawing cache (ADR 0006): nine procedural 4× item textures baked at runtime, bounded curve/text caches and batched grass; no external sprite art or added dependencies.
-- Shape meshes (ADR 0024): repeated rounded rects/ellipses/circles/hair/caps are cached `ArrayMesh`es drawn via `draw_mesh` (Godot 4 polygons cost ~14 µs each for buffer creation). check.sh runs `test_perf_drift.gd` (32 simulated minutes, nights + fight bot).
+- Shape meshes (ADR 0025): repeated rounded rects/ellipses/circles/hair/caps are cached `ArrayMesh`es drawn via `draw_mesh` (Godot 4 polygons cost ~14 µs each for buffer creation). check.sh runs `test_perf_drift.gd` (32 simulated minutes, nights + fight bot).
 - Native: `Paint`/`world_view.gd` code drawing and `hud.gd` controls. Logical 540×960 canvas_items viewport, expand aspect, portrait; bundled Baloo 2 variable font at weight 800 (OFL), OS emoji fallback.
 
 ## Audio

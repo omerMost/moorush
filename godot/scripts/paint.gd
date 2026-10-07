@@ -100,7 +100,7 @@ static func fill_rr(ci: CanvasItem, x: float, y: float, w: float, h: float, r: f
 
 ## Godot 4 builds and frees a GPU buffer for every polygon/circle command
 ## (~14us CPU each). Shapes drawn more than once reuse one cached mesh with the
-## same local vertices, translated by draw_mesh (ADR 0024). Single-use shapes
+## same local vertices, translated by draw_mesh (ADR 0025). Single-use shapes
 ## (e.g. pulsing pads) keep the polygon path so the cache stays bounded.
 static func fill_shape(ci: CanvasItem, key: Vector4, x: float, y: float, col: Color) -> void:
 	var mesh = shape_meshes.get(key) if mesh_cache else null
