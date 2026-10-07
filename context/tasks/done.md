@@ -6,6 +6,7 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Claude/Codex coordination decided: Codex builds, Claude reviews (ADR 0015, card C1).
 - 2026-10-07 — Soak collector validity: OS pause markers reject brief interruptions between foreground checkpoints; functional CLI checks cover stable samples, hidden suspension, transient USB recovery and changed process. Interrupted phone runs recorded without claiming sustained acceptance.
 
 - 2026-10-07 — Explicit app suspension and local lifecycle regression: idempotent save, frozen background simulation, cleared movement/touch/audio, both resume orders and preserved menu. Read-only bounded Android soak collector added; 22 lifecycle assertions and eleven suites pass. POCO Home/cold-reopen/app-switch checks preserve progress; lock/wake and uninterrupted soak remain in backlog.

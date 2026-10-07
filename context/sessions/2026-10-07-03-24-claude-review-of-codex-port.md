@@ -34,4 +34,6 @@ Also checked, and *not* a bug: STATE's "4,632.2 s" supermarket gate and check.sh
 
 ## Dialogue trace
 - User: "i have continue on codex to develop this. take a strong look at what now have"
-- Claude: reviewed git history, the vault, the code and the tests, then ran the checks and the rendered bots. Findings above. A decision card on the next direction (N1) went to the user.
+- Claude: reviewed git history, the vault, the code and the tests, then ran the checks and the rendered bots. Findings above. Two decision cards went to the user: N1 (the next step) and C1 (who leads).
+- User, N1: "Night + zombies (Recommended)". It's the new top Now item in the backlog, with the `sim.gd` split first.
+- User, C1: "Codex builds, Claude reviews (Recommended)". Recorded as ADR 0015.
