@@ -45,9 +45,9 @@ func _process(delta: float) -> void:
 	sim = Moo.sim
 	var vs := view_size()
 	zoom = minf(vs.x / 560.0, vs.y / (560.0 * 1.36))  # resize() L2219, zoom 'normal'
-	if not Moo.paused:
+	if not Moo.paused and not Moo.suspended:
 		sim.update(minf(delta, 0.05))
-	if not Moo.paused:
+	if not Moo.paused and not Moo.suspended:
 		Moo.audio.consume(sim.events)
 	sim.events.clear()
 	var t := cam_target()

@@ -10,6 +10,8 @@ var del_arm := 0
 
 func _ready() -> void:
 	process_priority = -10  # Sample current input before World advances the simulation.
+	Moo.suspension_changed.connect(func(stopped):
+		if stopped: joy = null)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	menu_btn = Button.new()
@@ -26,13 +28,13 @@ func _ready() -> void:
 func _process(_dt: float) -> void:
 	var s := Moo.sim
 	var k := Vector2.ZERO
-	if not Moo.paused:
+	if not Moo.paused and not Moo.suspended:
 		if Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT): k.x -= 1
 		if Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT): k.x += 1
 		if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP): k.y -= 1
 		if Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN): k.y += 1
 	var mv := k.normalized()
-	if joy != null:
+	if joy != null and not Moo.paused and not Moo.suspended:
 		var d: Vector2 = joy.p - joy.s
 		if d.length() > 6:
 			mv = d.normalized() * minf(1.0, d.length() / 45.0)
@@ -40,7 +42,7 @@ func _process(_dt: float) -> void:
 	queue_redraw()
 
 func _input(e: InputEvent) -> void:
-	if Moo.paused:
+	if Moo.paused or Moo.suspended:
 		return
 	if e is InputEventScreenTouch:
 		if e.pressed and joy == null:
@@ -53,7 +55,7 @@ func _input(e: InputEvent) -> void:
 		joy.p = e.position
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		joy = null
 
 func _draw() -> void:
@@ -154,7 +156,7 @@ func btn(t: String, col: String, cb: Callable) -> Button:
 	return b
 
 func show_menu() -> void:
-	if not Moo.paused:
+	if not Moo.paused and not Moo.suspended:
 		Moo.audio.play("drop")
 	Moo.open_menu()
 	joy = null
@@ -162,7 +164,7 @@ func show_menu() -> void:
 		menu_box.remove_child(c)
 		c.queue_free()
 	menu_box.add_child(lbl("Moo Rush", 40, "#e0702a"))
-	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–3 · v0.3.4", 15))
+	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–3 · v0.3.5", 15))
 	var sound := CheckButton.new()
 	sound.name = "SoundToggle"
 	sound.text = "Sound effects: ON" if Moo.audio.enabled else "Sound effects: OFF"

@@ -10,6 +10,12 @@ var perf_elapsed := 0.0
 var perf_draw_us := 0.0
 
 var paused := true  # true while the slot menu is open
+var app_focused := true
+var app_paused := false
+var suspended: bool:
+	get: return not app_focused or app_paused
+
+signal suspension_changed(is_suspended: bool)
 
 signal slot_started(i: int)
 
@@ -26,7 +32,7 @@ func _exit_tree() -> void:
 func _process(delta: float) -> void:
 	if not OS.is_debug_build() or OS.get_name() != "Android":
 		return
-	if paused or delta > 0.5:
+	if paused or suspended or delta > 0.5:
 		perf_times.clear(); perf_elapsed = 0.0; perf_draw_us = 0.0
 		return
 	perf_times.append(delta * 1000.0)
@@ -70,10 +76,36 @@ func open_menu() -> void:
 	sim.test_in = Vector2.ZERO
 	sim.move_in = Vector2.ZERO
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		if sim and sim.cur_slot:
+## OS focus and pause events can arrive in either order; resume after both clear.
+func set_lifecycle(focused: bool, stopped: bool) -> void:
+	var was_suspended := suspended
+	app_focused = focused
+	app_paused = stopped
+	if suspended:
+		if sim:
+			sim.test_in = Vector2.ZERO
+			sim.move_in = Vector2.ZERO
+			sim.events.clear()
+		if audio: audio.stop_all()
+		if not was_suspended and sim and sim.cur_slot:
 			sim.save(true)
+	if was_suspended != suspended:
+		suspension_changed.emit(suspended)
+		if OS.is_debug_build() and OS.get_name() == "Android":
+			print("MOO_LIFECYCLE suspended=%s menu_paused=%s slot=%d" % [suspended, paused, sim.cur_slot if sim else 0])
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_FOCUS_OUT:
+			set_lifecycle(false, app_paused)
+		NOTIFICATION_APPLICATION_PAUSED:
+			set_lifecycle(app_focused, true)
+		NOTIFICATION_APPLICATION_FOCUS_IN:
+			set_lifecycle(true, app_paused)
+		NOTIFICATION_APPLICATION_RESUMED:
+			set_lifecycle(app_focused, false)
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			if sim and sim.cur_slot: sim.save(true)
 
 # ---- demo / screenshot mode: godot --path godot -- --demo=SECONDS --shot=PATH ----
 ## Fast-forwards a fresh game in a throwaway save dir with the arrow bot, then
