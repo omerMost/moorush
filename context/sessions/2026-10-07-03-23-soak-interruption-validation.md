@@ -17,3 +17,5 @@
 - User: "what next ?", then "ok continue" after lifecycle and sustained Android testing were proposed.
 - Root requested reconnect/unlock when USB disappeared and the screen was securely locked; the phone later became unlocked and real Home/cold-reopen checks completed.
 - Root asked which game should use the phone after the coloring app interrupted the performance run. No answer in this turn. A fresh attempt after Moo Rush returned to foreground was interrupted again; root preserved partial evidence and stopped its collector instead of reporting a completed continuous test.
+
+- Final snapshot refresh: STATE now records the interrupted runs and pending exclusive-device validation.
