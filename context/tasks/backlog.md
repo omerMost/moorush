@@ -18,6 +18,10 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
 _(Approved, ready to pick up, not started yet.)_
 
 - [ ] Port the rest in verified steps after the slice: chapters 4–9, the harbor, vehicles, robbers, night and zombies (`findPath`/`NAV`), weapons, turrets, collectors, the fun layer (fever, events, bosses, hats, debate, prestige). Also the solid world boundary plus the unstick safety net
+- [ ] **Split `godot/scripts/sim.gd` by system before porting night and zombies** (from Claude's review on 2026-10-07, *provisional*). It's 1,614 lines in one file and mirrors the HTML monolith. With 9 chapters, night, zombies and the fun layer it heads toward 5,000+. Proposed split: economy/pads, customers/counters, nav/collision, saves. Keep `check.sh` green across the split.
+- [ ] **Tier `check.sh`** (from the review). The full run takes about 4.5 minutes today, and the chapter-3 bot alone is 85–97 s of real time. Each new chapter bot adds more. Proposal: a fast tier under 60 s on every commit, and the full bots before landing on `main`.
+- [ ] **Make STATE.md terse again** (from the review). It's a 66-line wall of text, and "At a glance" still calls the HTML "the game". Godot is the game now; the HTML is the spec. Split the Android device evidence out into the playtest notes.
+- [ ] **A coordination rule for Claude and Codex.** Both act as the root in the same checkout: Codex landed `bed5f84` in the middle of Claude's review. Decide on one root at a time, or have each AI work in its own worktree.
 - [ ] Give the specialist agents (`.claude/agents/*.md`) a Godot section. They're written for `prototype/index.html` today
 - [ ] Define native save import/migration coverage and whether to preserve in-flight goods/helper cargo; current slots are isolated but full old HTML import remains pending.
 - [ ] Godot tests for the two cases v9 never tested: the debate timer running out, and MOO FEVER exactly doubling prices (once those systems are ported)
@@ -25,6 +29,7 @@ _(Approved, ready to pick up, not started yet.)_
 
 ## Later / stretch
 
+- [ ] Branch cleanup (the user's call, since deleting branches is theirs): 17 local `codex/*` branches, all already merged into `main`, plus 2 stale Claude worktrees (`.claude/worktrees/infallible-lovelace-*` and `laughing-varahamihira-*`) and their `claude/*` branches.
 - [ ] Refine Toss-bin artwork with a visible open mouth/rim; current solid top bar makes the eased shrink/fade read as entering a lid (native rendered QA).
 
 _(Parking lot. Ideas, nice-to-haves, things you'd do if everything else were done.)_
