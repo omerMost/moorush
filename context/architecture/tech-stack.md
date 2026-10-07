@@ -27,11 +27,11 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Data layer
 
-- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid, daytime Farmer and Baker data live in `godot/scripts/data.gd`; `MooSim` owns simulation state.
+- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid, daytime Farmer and Baker data live in `godot/scripts/data.gd`; `MooSim` owns simulation state and the tick sequence; seven composed RefCounted systems in `scripts/sim/` implement the logic with typed weak owner references (ADR 0019).
 
 ## Auth / storage / persistence
 
-- Native saves: 3 JSON files under `user://`, with snapshot/apply_state in `sim.gd`. Current-version keyed saves preserve partial payments; full legacy HTML import remains pending.
+- Native saves: 3 JSON files under `user://`, with snapshot/apply_state implemented in `scripts/sim/saves.gd` behind the unchanged `MooSim` API (ADR 0019). Current-version keyed saves preserve partial payments; full legacy HTML import remains pending.
 - Prototype saves: localStorage, with 3 slots, settings, and migration from v1 and older versions. Cloud: `window.claude` db/user, inside claude.ai only.
 
 ## External integrations
@@ -40,7 +40,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Tooling (build, test, lint, CI)
 
-- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, three chapter bots, unattended counters, populated three-district saves/older slice migrations and incremental navigation equivalence and phone-sized touch HUD/font and audio waveform/settings/dispatch. Nonzero processes and engine errors fail. No HTML suite.
+- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, three chapter bots, unattended counters, populated three-district saves/older slice migrations and incremental navigation equivalence and phone-sized touch HUD/font and audio waveform/settings/dispatch. The fixed-seed 1,200s simulation snapshot regression pins the pre-S0 hash (only wall-clock save metadata is normalized in the test). Nonzero processes and engine errors fail. No HTML suite.
 - Optional rendered smoke test: `godot --path godot -s res://tests/test_windowed_chapter1.gd` (requires a display); runs the career through the main scene with 90s/240s/completion captures under `build/`, in isolated test storage.
 - Dairy rendered smoke: `godot --path godot -s res://tests/test_windowed_chapter2.gd`; real cheese production, menu and district travel in isolated storage.
 - Prototype: test hook `window.__moo`. Local run: the `prototype` config in `.claude/launch.json` (port 8090).

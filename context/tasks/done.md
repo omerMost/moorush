@@ -46,3 +46,5 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 - 2026-10-06 — Imported the game (v9) from the claude.ai artifact into `prototype/index.html`, plus the chat history (4 sessions) and the research (2 docs). Checked locally: the menu loads at Version 9 with no console errors.
 
 - 2026-10-07 — Tutorial designed with the user (cards T1–T10): `design/tutorial.md`, ADR 0016. Grandpa Bovine soft beats, commentary, Gary the practice zombie, `tut` save key and a headless test plan. Build items queued for Codex.
+
+- [x] **2026-10-07 — Split `godot/scripts/sim.gd` by system before porting night and zombies (S0).** Seven composed systems and stable MooSim facade (ADR 0019); fixed-seed snapshot hash and original career times preserved, full checks and rendered Chapter 1 pass. No gameplay/save/RNG change.

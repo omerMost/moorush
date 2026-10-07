@@ -6,7 +6,7 @@ Active, actionable work. One bullet = one chunk you could pick up and finish in 
 
 _(Mid-flight or top-priority. Usually 1–3 items.)_
 
-- [ ] **Night and zombies in chapters 1–3, with stakes (the user's card N1 "Night + zombies"; redesigned by cards F1–F11, ADR 0018).** The spec is `design/fun-systems.md` §3. Codex builds it and Claude reviews (ADR 0015). Split `sim.gd` by system **first**, keeping `check.sh` green. Build in this order, one verified commit each:
+- [ ] **Night and zombies in chapters 1–3, with stakes (the user's card N1 "Night + zombies"; redesigned by cards F1–F11, ADR 0018).** The spec is `design/fun-systems.md` §3. Codex builds it and Claude reviews (ADR 0015). S0 system split is complete (ADR 0019); keep `check.sh` green through the following ports. Build in this order, one verified commit each:
   1. **Clock + night:** the v9 clock (`updClock`/`onPhase`/`sunrise`) with a per-chapter night counter. Customers turn only at night (`customerLost`/`makeZombie`/`pickType`). Night zombies arrive in 3 beats (2/4/6, +1 per beat per night), with at most 10 alive. Zombies chase with `findPath`/`NAV`, a hard-won rule. Ch1 night 1 is Gary only (`tutorial.md` §7).
   2. **Hearts + checkpoints:** 5 hearts, −1 per bite, refill at sunrise. `dusk` and `chapter_start` checkpoints per slot. A normal-night loss → dusk; a boss-night loss → chapter start. Restores keep settings, wardrobe and `tut.*`.
   3. **Weapons:** Milk squirter (ch1, 100), Egg launcher (ch2), Pie launcher (ch3), plus 2 upgrade pads each. Ammo is the carried stack. Zombie HP per chapter (3/6/12). The joke types, including Zombie Granny.
@@ -40,7 +40,6 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
 _(Approved, ready to pick up, not started yet.)_
 
 - [ ] Port the rest in verified steps after the slice: chapters 4–9, the harbor, vehicles, robbers, night and zombies (`findPath`/`NAV`), weapons, turrets, collectors, the fun layer (fever, events, bosses, hats, debate, prestige). Also the solid world boundary plus the unstick safety net
-- [ ] **Split `godot/scripts/sim.gd` by system before porting night and zombies** (from Claude's review on 2026-10-07, *provisional*). It's 1,614 lines in one file and mirrors the HTML monolith. With 9 chapters, night, zombies and the fun layer it heads toward 5,000+. Proposed split: economy/pads, customers/counters, nav/collision, saves. Keep `check.sh` green across the split.
 - [ ] **Tier `check.sh`** (from the review). The full run takes about 4.5 minutes today, and the chapter-3 bot alone is 85–97 s of real time. Each new chapter bot adds more. Proposal: a fast tier under 60 s on every commit, and the full bots before landing on `main`.
 - [ ] **Make STATE.md terse again** (from the review). It's a 66-line wall of text, and "At a glance" still calls the HTML "the game". Godot is the game now; the HTML is the spec. Split the Android device evidence out into the playtest notes.
 - [ ] **Character pass 1: faces, player, helpers** (user cards D1/D2/D6, 2026-10-07; spec `design/characters.md` §0, §1, §4; images `docs/design/characters/player.png`, `helpers.png`, `support.png`).
