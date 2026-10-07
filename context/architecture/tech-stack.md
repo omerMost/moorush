@@ -20,6 +20,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 - Frozen prototype: Canvas 2D, procedural sprites/emoji, DOM HUD and Baloo 2 from Google Fonts.
 - Native lighting (ADR 0020): one canvas shader quad with 24 bounded radial lights; no per-frame mask texture baking or new dependency.
 - Native drawing cache (ADR 0006): nine procedural 4× item textures baked at runtime, bounded curve/text caches and batched grass; no external sprite art or added dependencies.
+- Shape meshes (ADR 0019): repeated rounded rects/ellipses/circles/hair/caps are cached `ArrayMesh`es drawn via `draw_mesh` (Godot 4 polygons cost ~14 µs each for buffer creation). check.sh adds `test_perf_drift.gd` (twelve suites).
 - Native: `Paint`/`world_view.gd` code drawing and `hud.gd` controls. Logical 540×960 canvas_items viewport, expand aspect, portrait; bundled Baloo 2 variable font at weight 800 (OFL), OS emoji fallback.
 
 ## Audio
@@ -53,7 +54,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
   5. **Debug keystore:** `keytool -genkeypair -keystore "~/Library/Application Support/Godot/keystores/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"`.
   6. **Editor settings** (`~/Library/Application Support/Godot/editor_settings-4.7.tres`): `export/android/java_sdk_path` = the JAVA_HOME above, `export/android/android_sdk_path = "/Users/omer/Library/Android/sdk"`, `export/android/debug_keystore` = the keystore above, `debug_keystore_pass = "android"`. Close the Godot editor before you edit this file, because an open editor can write its own copy back over it.
   7. **Build:** the preset is `Android` with `gradle_build/use_gradle_build=false` and `arm64-v8a` only. From the repo root run `mkdir -p build`, then `godot --headless --path godot --export-debug "Android" "$PWD/build/moorush-debug.apk"` (an absolute output avoids Godot resolving it inside `godot/`). Godot runs `apksigner` itself. Check the result with `~/Library/Android/sdk/build-tools/36.1.0/aapt dump badging <apk>`; it prints a harmless `android:required` attribute warning. Output: minSdk 24, targetSdk 36.
-  - The committed preset is `godot/export_presets.cfg`, package `com.omer.moorush`, version 0.3.5. `scripts/generate-icons.js` also generates the native placeholder icon. No Internet permission.
+  - The committed preset is `godot/export_presets.cfg`, package `com.omer.moorush`, version 0.3.6 (code 13). `scripts/generate-icons.js` also generates the native placeholder icon. No Internet permission.
   - Build outputs (`build/`, `*.apk`, `*.aab`, `*.idsig`, `.godot/`) are gitignored.
 
 ## What we deliberately did NOT pick

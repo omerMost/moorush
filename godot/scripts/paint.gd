@@ -11,6 +11,13 @@ static var round_points := {}
 static var ellipse_points := {}
 static var color_cache := {}
 static var text_sizes := {}
+static var shape_meshes := {}
+static var shape_used := {}
+static var shape_seen := {}
+static var frame := 0
+static var mesh_cache := true  # false = original per-call polygon path (A/B test only)
+static var polygon_calls := 0  # uncached polygon/circle commands issued (perf regression test)
+const SHAPE_KEEP_FRAMES := 300
 static var cheese_wheel: Array = []
 
 # Bake the existing procedural item drawings once, at 4x logical resolution.
@@ -88,7 +95,84 @@ static func rr_pts(x: float, y: float, w: float, h: float, r: float) -> PackedVe
 static func fill_rr(ci: CanvasItem, x: float, y: float, w: float, h: float, r: float, col: Color) -> void:
 	if w <= 0.5 or h <= 0.5:
 		return
-	ci.draw_colored_polygon(rr_pts(x, y, w, h, r), col)
+	r = minf(r, minf(w, h) / 2.0)
+	fill_shape(ci, Vector4(0, w, h, r), x, y, col)
+
+## Godot 4 builds and frees a GPU buffer for every polygon/circle command
+## (~14us CPU each). Shapes drawn more than once reuse one cached mesh with the
+## same local vertices, translated by draw_mesh (ADR 0019). Single-use shapes
+## (e.g. pulsing pads) keep the polygon path so the cache stays bounded.
+static func fill_shape(ci: CanvasItem, key: Vector4, x: float, y: float, col: Color) -> void:
+	var mesh = shape_meshes.get(key) if mesh_cache else null
+	if mesh != null:
+		shape_used[key] = frame
+		ci.draw_mesh(mesh, null, Transform2D(0.0, Vector2(x, y)), col)
+		return
+	if not mesh_cache or not shape_seen.has(key):
+		if mesh_cache:
+			if shape_seen.size() >= 4096: shape_seen.clear()
+			shape_seen[key] = true
+		polygon_calls += 1
+		if key.x == 2: ci.draw_circle(Vector2(x, y), key.y, col)
+		else: ci.draw_colored_polygon(Transform2D(0.0, Vector2(x, y)) * shape_points(key), col)
+		return
+	var pts := shape_points(key)
+	if shape_meshes.size() >= 1024: shape_meshes.clear()
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = pts
+	var idx := PackedInt32Array()
+	if key.x == 2:
+		# draw_circle layout: rim points then the centre as the last vertex.
+		for i in pts.size() - 2:
+			idx.append_array([pts.size() - 1, i, i + 1])
+	else:
+		for i in range(1, pts.size() - 1):
+			idx.append_array([0, i, i + 1])
+	arrays[Mesh.ARRAY_INDEX] = idx
+	mesh = ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	shape_meshes[key] = mesh
+	shape_used[key] = frame
+	ci.draw_mesh(mesh, null, Transform2D(0.0, Vector2(x, y)), col)
+
+## Called once per world frame: meshes for shapes not drawn in the last
+## SHAPE_KEEP_FRAMES frames (old progress-bar widths, etc.) are released.
+static func next_frame() -> void:
+	frame += 1
+	if frame % SHAPE_KEEP_FRAMES != 0:
+		return
+	for key in shape_used.keys():
+		if shape_used[key] < frame - SHAPE_KEEP_FRAMES:
+			shape_used.erase(key)
+			shape_meshes.erase(key)
+			shape_seen.erase(key)
+
+## Local (origin-relative) vertices for a shape key: x=0 rounded rect (w,h,r),
+## x=1 ellipse (rx,ry,segments), x=2 circle (r) in draw_circle's layout
+## (64 segments, closing rim point, centre last), x=3 person hair, x=4 person cap.
+static func shape_points(key: Vector4) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	match int(key.x):
+		0: return rr_pts(0.0, 0.0, key.y, key.z, key.w)
+		1: return ell_pts(0.0, 0.0, key.y, key.z, int(key.w))
+		3:  # person hair (drawPerson L1470), convex
+			for i in 9:
+				var a := PI * 1.05 + (PI * 0.9) * i / 8.0
+				pts.append(Vector2(cos(a) * 10.6, -47 + sin(a) * 10.6))
+			pts.append(Vector2(10, -48))
+			return pts
+		4:  # person cap, convex half disc
+			for i in 9:
+				var a := PI + PI * i / 8.0
+				pts.append(Vector2(cos(a) * 10, -50 + sin(a) * 10))
+			return pts
+	pts.resize(66)
+	for i in 65:
+		var a := i * (TAU / 64.0)
+		pts[i] = Vector2(cos(a) * key.y, sin(a) * key.y)
+	pts[65] = Vector2.ZERO
+	return pts
 
 static func stroke_rr(ci: CanvasItem, x: float, y: float, w: float, h: float, r: float, col: Color, width: float) -> void:
 	var p := rr_pts(x, y, w, h, r)
@@ -116,7 +200,7 @@ static func ell_pts(x: float, y: float, rx: float, ry: float, seg: int = 22) -> 
 static func ell(ci: CanvasItem, x: float, y: float, rx: float, ry: float, col: Color) -> void:
 	if rx <= 0 or ry <= 0:
 		return
-	ci.draw_colored_polygon(ell_pts(x, y, rx, ry), col)
+	fill_shape(ci, Vector4(1, rx, ry, 22), x, y, col)
 
 static func stroke_ell(ci: CanvasItem, x: float, y: float, rx: float, ry: float, col: Color, width: float) -> void:
 	var p := ell_pts(x, y, rx, ry)
@@ -124,9 +208,12 @@ static func stroke_ell(ci: CanvasItem, x: float, y: float, rx: float, ry: float,
 	ci.draw_polyline(p, col, width, true)
 
 static func circ(ci: CanvasItem, x: float, y: float, r: float, col: Color) -> void:
-	ci.draw_circle(Vector2(x, y), r, col)
+	if r <= 0:
+		return
+	fill_shape(ci, Vector4(2, r, 0, 0), x, y, col)
 
 static func poly(ci: CanvasItem, pts: Array, col: Color) -> void:
+	polygon_calls += 1
 	ci.draw_colored_polygon(PackedVector2Array(pts), col)
 
 ## text(): centered on (x, y) like ctx textAlign=center/textBaseline=middle, outline = size/4.
@@ -282,12 +369,7 @@ static func person(ci: CanvasItem, x: float, y: float, o: Dictionary) -> void:
 	circ(ci, x + 11, y - 22, 3.5, skin)
 	circ(ci, x, y - 46, 10, skin)
 	var hair := C(o.hair)
-	var hp := PackedVector2Array()
-	for i in 9:
-		var a := PI * 1.05 + (PI * 0.9) * i / 8.0
-		hp.append(Vector2(x + cos(a) * 10.6, y - 47 + sin(a) * 10.6))
-	hp.append(Vector2(x + 10, y - 48))
-	ci.draw_colored_polygon(hp, hair)
+	fill_shape(ci, Vector4(3, 0, 0, 0), x, y, hair)
 	if o.get("bun", false):
 		circ(ci, x - f * 8, y - 53, 5.5, hair)
 	circ(ci, x + f * 3 - 2.6, y - 45, 1.3, C("#2b1d14"))
@@ -297,11 +379,7 @@ static func person(ci: CanvasItem, x: float, y: float, o: Dictionary) -> void:
 		ell(ci, x, y - 56, 9, 6, C("#f2b84b"))
 		ci.draw_rect(Rect2(x - 9, y - 55, 18, 2.5), C("#d9534f"))
 	if o.get("cap"):
-		var cp := PackedVector2Array()
-		for i in 9:
-			var a := PI + PI * i / 8.0
-			cp.append(Vector2(x + cos(a) * 10, y - 50 + sin(a) * 10))
-		ci.draw_colored_polygon(cp, C(o.cap))
+		fill_shape(ci, Vector4(4, 0, 0, 0), x, y, C(o.cap))
 		ell(ci, x + f * 8, y - 50, 8, 3, C(o.cap))
 
 ## bubble (L1454)

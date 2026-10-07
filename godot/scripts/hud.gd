@@ -96,8 +96,8 @@ func _draw() -> void:
 	for i in 5:
 		var x := size.x - 172 + i * 23
 		var col := Paint.C("#ee6572") if i < s.S.hearts else Paint.C("#695256")
-		draw_circle(Vector2(x - 4, 26), 5, col)
-		draw_circle(Vector2(x + 4, 26), 5, col)
+		Paint.circ(self, x - 4, 26, 5, col)
+		Paint.circ(self, x + 4, 26, 5, col)
 		draw_colored_polygon(PackedVector2Array([Vector2(x-9,27),Vector2(x+9,27),Vector2(x,38)]), col)
 	# Clock sits below rank, leaving the money/hearts and menu areas free.
 	var clock := s.clock_label()
@@ -200,7 +200,7 @@ func show_menu() -> void:
 		menu_box.remove_child(c)
 		c.queue_free()
 	menu_box.add_child(lbl("Moo Rush", 40, "#e0702a"))
-	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–3 · v0.3.5", 15))
+	menu_box.add_child(lbl("Corn to Capitol · Chapters 1–3 · v0.3.6", 15))
 	var sound := CheckButton.new()
 	sound.name = "SoundToggle"
 	sound.text = "Sound effects: ON" if Moo.audio.enabled else "Sound effects: OFF"

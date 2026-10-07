@@ -13,6 +13,7 @@ var grass_lines := PackedVector2Array()
 var cam_snapped := false
 var draw_cpu_us := 0
 var night_view = preload("res://scripts/night_view.gd").new()
+var cull_people := true  # false only for the A/B look test
 
 func _ready() -> void:
 	sim = Moo.sim
@@ -427,6 +428,7 @@ func _draw() -> void:
 	if sim == null:
 		return
 	var draw_start := Time.get_ticks_usec()
+	Paint.next_frame()
 	var V := vis_rect
 	draw_rect(V, C(THEME0))
 	# grass tufts
@@ -488,12 +490,17 @@ func _draw() -> void:
 			ents.append([m.bench.y - 5, "lamp", m])
 			for c in m.q:
 				ents.append([c.y, "cust", c])
+	# People elsewhere on the map are skipped; the margin covers their tallest
+	# carried stack, speech and smile above the feet (ADR 0019).
+	var near := V.grow(140) if cull_people else Rect2(-1e9, -1e9, 2e9, 2e9)
 	for c in sim.leaving:
-		ents.append([c.y, "cust", c])
+		if near.has_point(Vector2(c.x, c.y)):
+			ents.append([c.y, "cust", c])
 	for z in sim.zombies:
 		if vis({"x":z.x-60,"y":z.y-140,"w":160,"h":150}): ents.append([z.y,"zombie",z])
 	for h in sim.helpers:
-		ents.append([h.y, "helper", h])
+		if near.has_point(Vector2(h.x, h.y)):
+			ents.append([h.y, "helper", h])
 	ents.append([sim.player.y, "player", sim.player])
 	ents.sort_custom(func(a, b): return a[0] < b[0])
 	for e in ents:
