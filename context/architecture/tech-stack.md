@@ -18,6 +18,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 ## UI / presentation layer
 
 - Frozen prototype: Canvas 2D, procedural sprites/emoji, DOM HUD and Baloo 2 from Google Fonts.
+- Native lighting (ADR 0020): one canvas shader quad with 24 bounded radial lights; no per-frame mask texture baking or new dependency.
 - Native drawing cache (ADR 0006): nine procedural 4× item textures baked at runtime, bounded curve/text caches and batched grass; no external sprite art or added dependencies.
 - Native: `Paint`/`world_view.gd` code drawing and `hud.gd` controls. Logical 540×960 canvas_items viewport, expand aspect, portrait; bundled Baloo 2 variable font at weight 800 (OFL), OS emoji fallback.
 
@@ -27,11 +28,11 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Data layer
 
-- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid, daytime Farmer and Baker data live in `godot/scripts/data.gd`; `MooSim` owns simulation state and the tick sequence; seven composed RefCounted systems in `scripts/sim/` implement the logic with typed weak owner references (ADR 0019).
+- Prototype content is JS object literals in the file: `STAGES`, `HARBOR`, `VEHICLES`, `GUNS`, and the `PM`/`TUNE` economy multipliers. There is no backend. Native Farm Kid, daytime Farmer and Baker data live in `godot/scripts/data.gd`; `MooSim` owns simulation state and the tick sequence; eight composed RefCounted systems in `scripts/sim/` implement the logic with typed weak owner references (ADRs 0019–0020).
 
 ## Auth / storage / persistence
 
-- Native saves: 3 JSON files under `user://`, with snapshot/apply_state implemented in `scripts/sim/saves.gd` behind the unchanged `MooSim` API (ADR 0019). Current-version keyed saves preserve partial payments; full legacy HTML import remains pending.
+- Native saves: 3 JSON files under `user://`, with snapshot/apply_state implemented in `scripts/sim/saves.gd` behind the unchanged `MooSim` API (ADR 0019). Day/phase/night counters persist as optional `day`/`time`/`cn` fields with old-save defaults (ADR 0020). Current-version keyed saves preserve partial payments; full legacy HTML import remains pending.
 - Prototype saves: localStorage, with 3 slots, settings, and migration from v1 and older versions. Cloud: `window.claude` db/user, inside claude.ai only.
 
 ## External integrations
@@ -40,7 +41,7 @@ One section per layer. For each choice: what we picked + one-line rationale. Res
 
 ## Tooling (build, test, lint, CI)
 
-- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, three chapter bots, unattended counters, populated three-district saves/older slice migrations and incremental navigation equivalence and phone-sized touch HUD/font and audio waveform/settings/dispatch. The fixed-seed 1,200s simulation snapshot regression pins the pre-S0 hash (only wall-clock save metadata is normalized in the test). Nonzero processes and engine errors fail. No HTML suite.
+- Tests: **headless Godot bots** behind `check.sh` (ADR 0005, G4). Implemented: import/boot, three chapter bots, unattended counters, populated three-district saves/older slice migrations and incremental navigation equivalence and phone-sized touch HUD/font and audio waveform/settings/dispatch. Clock transition/persistence tests and the fixed-seed 1,200s snapshot regression pin the current save hash plus the pre-S0 economy hash (wall-clock metadata normalized; clock fields projected out only for the economy comparison). Nonzero processes and engine errors fail. No HTML suite.
 - Optional rendered smoke test: `godot --path godot -s res://tests/test_windowed_chapter1.gd` (requires a display); runs the career through the main scene with 90s/240s/completion captures under `build/`, in isolated test storage.
 - Dairy rendered smoke: `godot --path godot -s res://tests/test_windowed_chapter2.gd`; real cheese production, menu and district travel in isolated storage.
 - Prototype: test hook `window.__moo`. Local run: the `prototype` config in `.claude/launch.json` (port 8090).

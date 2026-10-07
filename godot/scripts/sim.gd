@@ -69,7 +69,8 @@ var autosave := true
 var g_cache = null
 var g_mode = null
 
-# System seams: future clock/zombies/combat/hearts/bosses/robbers follow this pattern.
+# System seams: future zombies/combat/hearts/bosses/robbers follow this pattern.
+var _clock = preload("res://scripts/sim/clock.gd").new(self)
 var _world = preload("res://scripts/sim/world.gd").new(self)
 var _items = preload("res://scripts/sim/items.gd").new(self)
 var _customers = preload("res://scripts/sim/customers.gd").new(self)
@@ -140,6 +141,7 @@ static func P(x: float, y: float, w: float = 90.0, h: float = 70.0) -> Dictionar
 
 func update(dt: float) -> void:
 	T += dt
+	upd_clock(dt)
 	warn_t -= dt
 	var p = player
 	var dir := Vector2.ZERO
@@ -353,3 +355,15 @@ func say(e, text: String, dur: float = 1.8) -> void: _feedback.say(e, text, dur)
 static func icon(t: String) -> String: return preload("res://scripts/sim/feedback.gd").icon(t)
 func upd_ground(dt: float) -> void: _feedback.upd_ground(dt)
 func upd_speech(dt: float) -> void: _feedback.upd_speech(dt)
+
+# Clock transitions dispatch through the facade for later checkpoint/threat hooks.
+func reset_clock() -> void: _clock.reset_clock()
+func restore_clock(d: Dictionary) -> void: _clock.restore_clock(d)
+func phase_idx() -> int: return _clock.phase_idx()
+func is_night() -> bool: return _clock.is_night()
+func is_boss_night() -> bool: return _clock.is_boss_night()
+func darkness() -> float: return _clock.darkness()
+func clock_label() -> String: return _clock.clock_label()
+func upd_clock(dt: float) -> void: _clock.upd_clock(dt)
+func on_phase(phase: int) -> void: _clock.on_phase(phase)
+func sunrise() -> void: _clock.sunrise()

@@ -34,6 +34,7 @@ func snapshot() -> Dictionary:
 			rep[m.key] = round(m.rep * 10) / 10.0
 	var st = sim.player.stack
 	return {"v": 1, "ver": 9, "engine": "godot", "t": int(Time.get_unix_time_from_system() * 1000), "ch": sim.S.ch, "money": sim.S.money,
+		"day": sim.S.day, "time": sim.S.time, "cn": sim.S.cn,
 		"votes": 0, "cap": sim.S.cap, "won": false, "done": sim.S.done,
 		"paid": sim.pads.map(func(p): return p.paid), "pk": pk, "bx": bx, "bl": bl,
 		"px": int(round(sim.player.x)), "py": int(round(sim.player.y)), "rep": rep,
@@ -42,6 +43,7 @@ func snapshot() -> Dictionary:
 func fresh_state() -> void:
 	sim.stage = MooData.stage0()
 	sim.S = {"ch": 0, "money": 0, "votes": 0, "cap": 8, "won": false, "done": false}
+	sim.reset_clock()
 	sim.build_world()
 	sim.T = 0.0; sim.act_t = 0.0; sim.save_t = 0.0; sim.warn_t = 0.0; sim.g_cache = null; sim.g_mode = null
 	sim.toasts = []; sim.events = []; sim.cam_focus = null
@@ -88,6 +90,7 @@ func apply_state(d: Dictionary) -> void:
 			sim.apply_pad(p, true)
 	sim.S.done = sim.S.ch == MooData.STAGE_COUNT - 1 and (bool(d.get("done", false)) and saved_chapter == MooData.STAGE_COUNT - 1 or sim.pads.any(func(p): return p.d == MooData.STAGE_COUNT - 1 and p.fx == "gate" and p.paid >= p.cost))
 	sim.stage = MooData.stage_at(sim.S.ch)
+	sim.restore_clock(d)
 	var bx = d.get("bx", {})
 	for m in sim.mods:
 		var o = bx.get(m.key)
@@ -156,7 +159,8 @@ func write_slot(i: int, d: Dictionary) -> void:
 	DirAccess.make_dir_recursive_absolute(sim.save_dir)
 	var f := FileAccess.open(sim.slot_path(i), FileAccess.WRITE)
 	if f:
-		f.store_string(JSON.stringify(d))
+		# Preserve fractional clock values exactly across disk round-trips.
+		f.store_string(JSON.stringify(d, "", true, true))
 		f.close()
 
 func delete_slot(i: int) -> void:

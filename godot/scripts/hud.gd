@@ -70,6 +70,12 @@ func _draw() -> void:
 	Paint.circ(self, 30, 30, 13, Paint.C("#f5b921"))
 	Paint.circ(self, 30, 28, 11, Paint.C("#ffe58a"))
 	Paint.text(self, txt, 46 + (w - 54) / 2, 30, 21, Color.WHITE)
+	# Clock sits below rank, leaving the money/hearts and menu areas free.
+	var clock := s.clock_label()
+	var cw := Paint.text_width(clock, 13) + 24
+	var clock_ink := Paint.C("#641c35", 0.85) if s.is_boss_night() else ink
+	Paint.fill_rr(self, size.x / 2 - cw / 2, 90, cw, 24, 12, clock_ink)
+	Paint.text(self, clock, size.x / 2, 102, 13, Color.WHITE)
 	# rank pill
 	var chapter := clampi(int(s.S.ch), 0, MooData.STAGE_COUNT - 1)
 	var rk := "Chapter %d · %s" % [chapter + 1, MooData.TITLES[chapter]]

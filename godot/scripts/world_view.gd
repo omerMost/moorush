@@ -11,6 +11,7 @@ var tufts: Array = []
 var grass_lines := PackedVector2Array()
 var cam_snapped := false
 var draw_cpu_us := 0
+var night_view = preload("res://scripts/night_view.gd").new()
 
 func _ready() -> void:
 	sim = Moo.sim
@@ -22,6 +23,7 @@ func _ready() -> void:
 		tufts.append(Vector2(a * 600, s / 2147483647.0 * 600))
 	for t in tufts:
 		grass_lines.append_array(PackedVector2Array([Vector2(t.x - 3, t.y - 4), t, t, Vector2(t.x + 3, t.y - 5)]))
+	add_child(night_view)
 	Paint.prime_items(self)
 	Moo.slot_started.connect(func(_i): cam_snapped = false)
 
@@ -61,6 +63,7 @@ func _process(delta: float) -> void:
 		sh = Vector2(randf_range(-sim.shake_amt, sim.shake_amt), randf_range(-sim.shake_amt, sim.shake_amt))
 	transform = Transform2D(0.0, Vector2(zoom, zoom), 0.0, -(cam + sh) * zoom)
 	vis_rect = Rect2(cam.x - 60, cam.y - 60, vs.x / zoom + 120, vs.y / zoom + 120)
+	night_view.refresh(sim, vis_rect)
 	queue_redraw()
 
 func vis(r) -> bool:

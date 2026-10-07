@@ -223,7 +223,9 @@ func apply_pad(p, from_load: bool) -> void:
 			sim.helpers.append(sim.mk_helper(sim.mod_by(p.f, p.d), sim.mod_by(p.t, p.d), sim.helpers.size(), null))
 		"gate":
 			if p.d < MooData.STAGE_COUNT - 1:
+				var entered: bool = p.d + 1 > sim.S.ch
 				sim.S.ch = maxi(sim.S.ch, p.d + 1)
+				if entered and not from_load: sim.reset_clock()
 				sim.stage = MooData.stage_at(sim.S.ch)
 				sim.S.done = false
 				if not from_load:

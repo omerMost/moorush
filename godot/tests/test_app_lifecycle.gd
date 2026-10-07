@@ -70,6 +70,7 @@ func run() -> void:
 	sim.events.append({"kind":"drop"})
 	var sounds_before: int = moo.audio.played_count
 	var time_before: float = sim.T
+	var clock_before: float = sim.S.time
 	notify_app(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	expect(sim.events.is_empty(), "Home discards queued gameplay cues before stopping")
 	expect(moo.get("suspended") == true and not moo.paused, "Home suspension is separate from open-menu pause")
@@ -89,6 +90,7 @@ func run() -> void:
 	hud._process(0.0)
 	for i in range(10): world._process(0.05)
 	expect(hud.joy == null and sim.move_in == Vector2.ZERO and sim.T == time_before, "background ignores touch and does not advance simulation")
+	expect(sim.S.time == clock_before, "background leaves the chapter clock frozen")
 	notify_app(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
 	world._process(0.05)
 	expect(moo.get("suspended") == true and sim.T == time_before, "focus returning alone does not resume an application still paused")
@@ -106,6 +108,10 @@ func run() -> void:
 	world._process(0.03)
 	expect(moo.audio.played_count == sounds_before, "resume does not replay discarded pre-background sound effects")
 	expect(is_equal_approx(sim.T,time_before + 0.03), "world advances normally after both lifecycle flags clear")
+	expect(is_equal_approx(sim.S.time, clock_before + 0.03 / 300.0), "resume advances the chapter clock by the real gameplay tick")
+	# S1 persists clock time; retain every original inventory/wallet/payment expectation.
+	expected.time = sim.S.time
+	expected = stable(expected)
 	# Reverse Android callback order: resumed arrives before focus-in.
 	notify_app(Node.NOTIFICATION_APPLICATION_PAUSED)
 	notify_app(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
