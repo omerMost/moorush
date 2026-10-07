@@ -22,6 +22,11 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
 - [ ] **Card after the night port: ch1 boss pacing** (`fun-systems.md` §3.9). The pre-weapons gate was affordable at about 7.4 min; S3 economy bots buy it at about 7.9–9.1 min depending on seed, while the first boss night is at about 13.1 min. Measure with the career bot, then ask the user: wait, a longer ch1, or an earlier ch1 boss.
 - [ ] **Playtest question after the night port:** does a boss loss sending you back to the chapter start (up to about 35 min in ch2–3) feel fair? (ADR 0018 consequence.)
 - [ ] Replace the placeholder icon mark in `scripts/generate-icons.js` when the brand exists, re-run it
+- [ ] **S3 follow-ups from Claude's S0–S3 review (2026-10-07), briefed to Codex with S4:**
+  - `test_windowed_weapons` is flaky: 1 of 5 runs FAIL ("Gary shot in 20.0s: false"); the driver never reloads its ammo.
+  - Rendered tests fail to save their PNGs on a fresh checkout (no `build/` directory); they should create it.
+  - Dusk and sunrise each take one 10–25 ms tick on an M1 Mac (beat-0 spawns run up to 16 A* searches each, plus sunrise departure routes and the checkpoint write). Likely a 75–125 ms hitch on the POCO. Spread the work across frames.
+  - The fight bot took **0 hits in 30 first nights**. Measure later nights (5, 8) and report the hearts lost, as input for a difficulty card. No tuning before the card.
 
 ## Next
 - [ ] **No repeated farm in later chapters** (the user, 2026-10-07: "i want you to add to tasks to change things so there will not be another corn field and cow barn or farm because its making the field to complex to track"). Not started; it needs a design card before Codex builds it.
@@ -54,7 +59,7 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
 _(Approved, ready to pick up, not started yet.)_
 
 - [ ] Port the rest in verified steps after the slice: chapters 4–9, the harbor, vehicles, robbers, night and zombies (`findPath`/`NAV`), weapons, turrets, collectors, the fun layer (fever, events, bosses, hats, debate, prestige). Also the solid world boundary plus the unstick safety net
-- [ ] **Tier `check.sh`** (from the review). The full run takes about 4.5 minutes today, and the chapter-3 bot alone is 85–97 s of real time. Each new chapter bot adds more. Proposal: a fast tier under 60 s on every commit, and the full bots before landing on `main`.
+- [ ] **Tier `check.sh`** (from the review). The full run took about 4.5 minutes at bed5f84; at d60d3cf (S3) it takes **16.7 min** wall on a clean export, and the chapter-3 bot alone is **391 s** (Claude's S0–S3 review). Each new chapter bot adds more. Briefed to Codex with S4. Proposal: a fast tier under 60 s on every commit, and the full bots before landing on `main`.
 - [ ] **Make STATE.md terse again** (from the review). It's a 66-line wall of text, and "At a glance" still calls the HTML "the game". Godot is the game now; the HTML is the spec. Split the Android device evidence out into the playtest notes.
 - [ ] **Character pass 1: faces, player, helpers** (user cards D1/D2/D6, 2026-10-07; spec `design/characters.md` §0, §1, §4; images `docs/design/characters/player.png`, `helpers.png`, `support.png`).
   - In `paint.gd`: a parameterised person drawer (`bodyW`/`bodyH`/`legH`/`headR`/`neck`/`lean`) whose defaults match today's body, plus face style C (brows + blush, brow moods, blink).
