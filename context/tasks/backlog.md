@@ -24,6 +24,19 @@ _(Mid-flight or top-priority. Usually 1–3 items.)_
 - [ ] Replace the placeholder icon mark in `scripts/generate-icons.js` when the brand exists, re-run it
 
 ## Next
+- [ ] **No repeated farm in later chapters** (the user, 2026-10-07: "i want you to add to tasks to change things so there will not be another corn field and cow barn or farm because its making the field to complex to track"). Not started; it needs a design card before Codex builds it.
+  - **What repeats today:**
+    - Chapter 2 (Farmer) has its own Corn field, Dairy barn, Big coop and Egg stand, copies of chapter 1's corn field, cow barn, chicken coop and egg stand. That's both in `godot/scripts/data.gd` `stage1()` and in prototype L129–135.
+    - Later chapters repeat the same way: Paper delivery, Print shop and TV studio appear in several of chapters 6–9 (prototype L223–285).
+  - **The rule:** each chapter has *new* production only. One corn field and one cow barn exist in the whole game.
+  - **Open card (N2), for when this is picked up. How does chapter 2 get its milk for the Cheese press?**
+    - A: the ch1 barn feeds it, through a belt or helpers carrying across the district gap;
+    - B: a milk delivery truck (the `supply` type);
+    - C: chapter 2 is redesigned around a new product chain.
+  - **Constraints:**
+    - Old saves with ch2 pads bought must keep their progress (the price-rescale rule).
+    - The tutorial's ch1 beats and the fun-systems ch2 weapon (Egg launcher) depend on ch2 content, so check `design/tutorial.md` and `design/fun-systems.md`.
+  - **Done check:** no two chapters share a production module name or type+item. The career bot and `check.sh` stay green.
 - [ ] **Tutorial: Grandpa's soft opening, chapter 1 B0–B6 (ADR 0016, `design/tutorial.md` §2–§6, §8).** Codex builds, Claude reviews.
   - `tutorial.gd`, the sim's `ev_*` events, the HUD bubble with the portrait placeholder, the moo-babble, and the `tut` save key with old-save migration.
   - Remove the intro toast.
