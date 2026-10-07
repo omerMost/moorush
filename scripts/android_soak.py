@@ -53,6 +53,7 @@ def main():
     samples = previous.get("samples", [])
     checkpoints = previous.get("checkpoints", [])
     errors = previous.get("errors", [])
+    app_pauses = previous.get("app_pauses", [])
     reconnects = previous.get("reconnects", []) + reconnects
     log_path = args.output / "app.log"
     log_lines = log_path.read_text().splitlines() if previous and log_path.exists() else []
@@ -70,6 +71,10 @@ def main():
                     continue
                 seen.add(line)
                 log_lines.append(line)
+                if "MOO_LIFECYCLE suspended=true" in line and line not in app_pauses:
+                    stamp_match = re.match(r"^\s*(\d+\.\d+)", line)
+                    if stamp_match and float(stamp_match[1]) >= started:
+                        app_pauses.append(line)
                 match = PERF.search(line)
                 if match:
                     stamp, fps, p95, draw = map(float, match.groups())
@@ -100,8 +105,8 @@ def main():
     finally:
         def mean_window(rows):
             return {key: round(statistics.mean(row[key] for row in rows), 2) for key in ["fps", "frame_p95_ms", "draw_cpu_ms"]} if rows else None
-        valid_gameplay = completed and not recovered_clock and len(samples) >= args.seconds / 5 * 0.85 and all(row["game_focused"] for row in checkpoints)
-        summary = dict(started_epoch=started, recovered_clock=recovered_clock, reconnects=reconnects, completed=completed, valid_gameplay=valid_gameplay, requested_s=args.seconds, elapsed_s=round(time.monotonic() - began, 1), pid=pid, sample_count=len(samples), overall=mean_window(samples), first_minute=mean_window([row for row in samples if row["elapsed_s"] <= 60]), last_minute=mean_window([row for row in samples if row["elapsed_s"] >= args.seconds - 60]), errors=errors, failure=failure, checkpoints=checkpoints, samples=samples)
+        valid_gameplay = completed and not recovered_clock and not app_pauses and len(samples) >= args.seconds / 5 * 0.85 and all(row["game_focused"] for row in checkpoints)
+        summary = dict(started_epoch=started, recovered_clock=recovered_clock, reconnects=reconnects, app_pauses=app_pauses, completed=completed, valid_gameplay=valid_gameplay, requested_s=args.seconds, elapsed_s=round(time.monotonic() - began, 1), pid=pid, sample_count=len(samples), overall=mean_window(samples), first_minute=mean_window([row for row in samples if row["elapsed_s"] <= 60]), last_minute=mean_window([row for row in samples if row["elapsed_s"] >= args.seconds - 60]), errors=errors, failure=failure, checkpoints=checkpoints, samples=samples)
         (args.output / "summary.json").write_text(json.dumps(summary, indent=2))
     if failure or not valid_gameplay or errors:
         raise SystemExit("Gameplay collection incomplete, interrupted or app errors; inspect summary.json")

@@ -6,6 +6,8 @@ When you complete a backlog item, move its bullet from `backlog.md` to here in t
 
 ---
 
+- 2026-10-07 — Soak collector validity: OS pause markers reject brief interruptions between foreground checkpoints; functional CLI checks cover stable samples, hidden suspension, transient USB recovery and changed process. Interrupted phone runs recorded without claiming sustained acceptance.
+
 - 2026-10-07 — Explicit app suspension and local lifecycle regression: idempotent save, frozen background simulation, cleared movement/touch/audio, both resume orders and preserved menu. Read-only bounded Android soak collector added; 22 lifecycle assertions and eleven suites pass. POCO Home/cold-reopen/app-switch checks preserve progress; lock/wake and uninterrupted soak remain in backlog.
 
 - 2026-10-07 — Spatial pickup and Toss: nearest ripe/exposed goods, stable tray holes and compatible saved slot positions; incoming-safe carried transfers, eased bin-mouth Toss. Android 0.3.4 and regression coverage.
