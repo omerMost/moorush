@@ -1,6 +1,6 @@
 # ADR 0015 — Codex builds, Claude reviews
 
-**Status:** Accepted
+**Status:** Superseded by [ADR 0025](0025-claude-builds-in-goal-mode-with-tester.md)
 **Date:** 2026-10-07
 **Supersedes:** _(none)_. It narrows the Claude Root Orchestrator's role in AGENTS.md while Codex is the active builder.
 
