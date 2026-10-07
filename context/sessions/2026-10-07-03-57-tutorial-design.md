@@ -49,3 +49,13 @@
 ## Next
 - Codex: the backlog Next tutorial items (beats first, then commentary, Gary with the night port).
 - The character session: Grandpa art and voice into `design/characters.md`. Reconcile the line voice if it differs.
+
+## Follow-up: reconciled with characters.md (3ad89b7, e3025fb)
+- The character session confirmed Grandpa Bovine (D3 "A Cow farmer") and the voice. No line rewrites needed.
+- `tutorial.md` now points at `characters.md`:
+  - §2: the 56 px portrait spec, mustache wiggle at 8 Hz, ±3° wobble;
+  - §6: Gary's look.
+- Gary bursts into straw, not 6 pickable corn. I dropped my *provisional* corn drop, and the Grandpa line is now "He's straw".
+- Added a Chad Cornwell pointer for future boss lines.
+- The review session accepted 2dd648b with no changes.
+- Flagged to the character session: its Gary hook "Practice zombie. He's corn." conflicts with the straw burst. That's their file, so I didn't edit it.

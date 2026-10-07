@@ -2,7 +2,7 @@
 
 **Status:** Design accepted 2026-10-07 (cards T1–T10, ADR 0016). Not built yet. **Codex builds it, Claude reviews it** (ADR 0015).
 **Engine:** Godot (`godot/`). The HTML prototype is the frozen spec for mechanics, not for this feature.
-**Narrator:** Grandpa Bovine. His look, voice and backstory belong to `context/design/characters.md`, owned by the character session. This doc owns only **when he talks and what he says while teaching**. If `characters.md` changes his voice, rewrite the lines here and keep the triggers.
+**Narrator:** Grandpa Bovine, a cow farmer (card D3). His look, voice and backstory belong to `context/design/characters.md` §2, owned by the character session. This doc owns only **when he talks and what he says while teaching**. If `characters.md` changes his voice, rewrite the lines here and keep the triggers.
 
 ## 1. Decisions (the user's words, verbatim)
 
@@ -58,9 +58,9 @@ The player moves 94% of the time (418 s of 445 s), and the longest stand-still i
 
 ## 3. Grandpa's bubble (presentation)
 
-- **Placement:** top-left, under the money pill. A round portrait (Grandpa, art from `characters.md`; a placeholder of 👴🐮 until then) plus a white bubble with dark text, Baloo 2 800. It must not cover the joystick zone, the money pill or the gate progress.
+- **Placement:** top-left, under the money pill. The 56 px round HUD portrait from `characters.md` §2 (white ring, 3 px `#6b4423` stroke, `#bfe3a8` background) plus a white bubble with dark text, Baloo 2 800. It must not cover the joystick zone, the money pill or the gate progress.
 - **Voice:** a "moo-babble" blip, a few synthesized syllables (Animal Crossing style). It's precomputed like the other chapter-1 sounds (ADR 0007), plays once per bubble, and respects the sound setting.
-- **Animation:** the portrait bounces in (0.2 s) and wobbles on each blip. The bubble fades out.
+- **Animation:** the portrait bounces in (0.2 s) and wobbles ±3° on each blip, and the mustache wiggles at 8 Hz while he talks (`characters.md`). The bubble fades out.
 - **The arrow is unchanged** (T4): `guide_raw()` keeps choosing the target. The beats are designed so that the arrow already points at the thing each line is about. The tutorial never overrides the arrow, except for the T9 armory hook (§5).
 
 ## 4. The first 60 seconds: soft beats B0–B6 (T2, T5)
@@ -161,7 +161,7 @@ Slot JSON gets one new key, and nothing else changes:
 
 **Trigger:** the first dusk in this slot (the evening phase, `onPhase` → 2), in district 0. It happens once per slot (`tut.gary`).
 
-1. **Dusk.** Grandpa: "Getting dark. Things get weird here at night." Gary (a scarecrow in a cheap zombie costume, 🎃🧟 placeholder; the look is in `characters.md`) walks out to the edge of the corn field and waits, waving.
+1. **Dusk.** Grandpa: "Getting dark. Things get weird here at night." Gary (a scarecrow in a too-small green zombie mask; the look is in `characters.md` §6) walks out to the edge of the corn field and waits, waving.
 2. **No gun (`S.gun == 0`, T9 C):**
    - Grandpa: "That's Gary. Practice zombie. You need a squirter. Armory!"
    - **Armory hook:** while `tut.gary == 1` and `S.gun == 0`, `guide_raw()` returns the Milk squirter pad first, when the wallet ≥ its remaining cost. Otherwise the arrow keeps its normal loop, and one extra line plays: "Save up 100 for the squirter. Gary will wait. He's patient."
@@ -172,8 +172,8 @@ Slot JSON gets one new key, and nothing else changes:
    - This replaces the 25-word gun-aim toast. On desktop the line ends "(mouse + click)", within the 12-word budget: "Aim with the mouse. Click to squirt. Squirt Gary."
    - Gary waddles toward the player at **40%** of zombie speed. He has 1 HP, he **can't bite** (he bonks off and says "boo?"), and he uses `findPath`/`NAV` like real zombies (a hard-won fix; no straight lines).
 4. **Hit:**
-   - Gary bursts into 6 corn (pickable) and his hat.
-   - Grandpa: "Gary's fine. He's corn. Real ones don't pop like that."
+   - Gary bursts into straw (`characters.md` §6). There's no drop and no reward.
+   - Grandpa: "Gary's fine. He's straw. Real ones don't pop like that."
    - `tut.gary = 2`, and the night's own first-time lines take over.
 5. **Gary never got hit:** if 60 s pass after the gun is owned, Gary trips over his costume and falls apart by himself. Grandpa: "Gary tripped. Close enough. Good luck tonight."
    - This is a timeout so the night is never blocked, not a stuck nag. T4 holds.
@@ -213,7 +213,7 @@ Put the first four in the fast tier (target total < 15 s wall), per the backlog 
 
 ## 10. Open for later (not decided, not built)
 
-- Grandpa art and voice: `characters.md` (the character session).
+- Chad Cornwell (the rival inside every boss suit, `characters.md` §7): Grandpa's boss lines get written with the boss port.
 - Replay tutorial: not offered (T3). A new card if wanted.
 - Lines for chapters 4–9 and their mechanics (harbor, vehicles, robbers, debate): written when each is ported, same rules.
 - Localization: the 12-word rule is for English. Revisit if translating.
